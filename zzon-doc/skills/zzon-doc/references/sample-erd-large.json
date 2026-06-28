@@ -1,0 +1,64 @@
+{
+  "specVersion": 1,
+  "title": "링크 서비스 ERD (다수 테이블·FK)",
+  "kind": "erd",
+  "description": "사용자·링크·태그·컬렉션·댓글이 FK로 얽힌 큰 스키마 예시.",
+  "layout": { "direction": "RIGHT" },
+  "nodes": [
+    { "id": "users", "label": "users", "category": "table", "table": { "columns": [
+      { "name": "id", "type": "bigint", "pk": true },
+      { "name": "email", "type": "varchar(320)", "unique": true },
+      { "name": "name", "type": "varchar(80)" },
+      { "name": "created_at", "type": "timestamptz" }
+    ] } },
+    { "id": "profiles", "label": "profiles", "category": "table", "table": { "columns": [
+      { "name": "id", "type": "bigint", "pk": true },
+      { "name": "user_id", "type": "bigint", "fk": { "table": "users", "column": "id" }, "unique": true },
+      { "name": "bio", "type": "text", "nullable": true },
+      { "name": "avatar_url", "type": "varchar(512)", "nullable": true }
+    ] } },
+    { "id": "links", "label": "links", "category": "table", "table": { "columns": [
+      { "name": "id", "type": "bigint", "pk": true },
+      { "name": "user_id", "type": "bigint", "fk": { "table": "users", "column": "id" } },
+      { "name": "url", "type": "varchar(2048)" },
+      { "name": "title", "type": "varchar(200)", "nullable": true },
+      { "name": "created_at", "type": "timestamptz" }
+    ] } },
+    { "id": "tags", "label": "tags", "category": "table", "table": { "columns": [
+      { "name": "id", "type": "bigint", "pk": true },
+      { "name": "name", "type": "varchar(40)", "unique": true }
+    ] } },
+    { "id": "link_tags", "label": "link_tags", "category": "table", "table": { "columns": [
+      { "name": "link_id", "type": "bigint", "pk": true, "fk": { "table": "links", "column": "id" } },
+      { "name": "tag_id", "type": "bigint", "pk": true, "fk": { "table": "tags", "column": "id" } }
+    ] } },
+    { "id": "collections", "label": "collections", "category": "table", "table": { "columns": [
+      { "name": "id", "type": "bigint", "pk": true },
+      { "name": "user_id", "type": "bigint", "fk": { "table": "users", "column": "id" } },
+      { "name": "name", "type": "varchar(120)" }
+    ] } },
+    { "id": "collection_links", "label": "collection_links", "category": "table", "table": { "columns": [
+      { "name": "collection_id", "type": "bigint", "pk": true, "fk": { "table": "collections", "column": "id" } },
+      { "name": "link_id", "type": "bigint", "pk": true, "fk": { "table": "links", "column": "id" } },
+      { "name": "added_at", "type": "timestamptz" }
+    ] } },
+    { "id": "comments", "label": "comments", "category": "table", "table": { "columns": [
+      { "name": "id", "type": "bigint", "pk": true },
+      { "name": "link_id", "type": "bigint", "fk": { "table": "links", "column": "id" } },
+      { "name": "user_id", "type": "bigint", "fk": { "table": "users", "column": "id" } },
+      { "name": "body", "type": "text" },
+      { "name": "created_at", "type": "timestamptz" }
+    ] } }
+  ],
+  "edges": [
+    { "id": "fk-profiles-users", "source": "profiles", "target": "users", "kind": "reference", "sourceColumn": "user_id", "targetColumn": "id" },
+    { "id": "fk-links-users", "source": "links", "target": "users", "kind": "reference", "sourceColumn": "user_id", "targetColumn": "id" },
+    { "id": "fk-linktags-links", "source": "link_tags", "target": "links", "kind": "reference", "sourceColumn": "link_id", "targetColumn": "id" },
+    { "id": "fk-linktags-tags", "source": "link_tags", "target": "tags", "kind": "reference", "sourceColumn": "tag_id", "targetColumn": "id" },
+    { "id": "fk-collections-users", "source": "collections", "target": "users", "kind": "reference", "sourceColumn": "user_id", "targetColumn": "id" },
+    { "id": "fk-colllinks-collections", "source": "collection_links", "target": "collections", "kind": "reference", "sourceColumn": "collection_id", "targetColumn": "id" },
+    { "id": "fk-colllinks-links", "source": "collection_links", "target": "links", "kind": "reference", "sourceColumn": "link_id", "targetColumn": "id" },
+    { "id": "fk-comments-links", "source": "comments", "target": "links", "kind": "reference", "sourceColumn": "link_id", "targetColumn": "id" },
+    { "id": "fk-comments-users", "source": "comments", "target": "users", "kind": "reference", "sourceColumn": "user_id", "targetColumn": "id" }
+  ]
+}

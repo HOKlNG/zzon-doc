@@ -1,0 +1,67 @@
+{
+  "specVersion": 1,
+  "title": "데모숍 MSA 인프라 (멀티 경계)",
+  "kind": "infra",
+  "description": "API 게이트웨이 뒤 여러 마이크로서비스 + 비동기 정산까지. 그룹을 단일 레인 밴드로 고정해 박스가 겹치지 않게 했다.",
+  "layout": { "direction": "RIGHT" },
+  "groups": [
+    { "id": "aws", "label": "AWS (ap-northeast-2)", "kind": "boundary" },
+    { "id": "public", "label": "Public Subnet", "kind": "subnet", "parentId": "aws" },
+    { "id": "private", "label": "Private Subnet", "kind": "subnet", "parentId": "aws" },
+    { "id": "data", "label": "Data Layer", "kind": "zone", "parentId": "aws" }
+  ],
+  "nodes": [
+    { "id": "user", "label": "사용자", "category": "user", "lane": 0 },
+    { "id": "cdn", "label": "CDN", "category": "cdn", "tech": "CloudFront", "lane": 1 },
+    { "id": "gw", "label": "API 게이트웨이", "category": "gateway", "tech": "API Gateway", "parentId": "public", "lane": 2, "order": 0, "description": "모든 외부 요청의 단일 진입점." },
+    { "id": "auth", "label": "인증", "category": "auth", "tech": "Cognito", "parentId": "public", "lane": 2, "order": 1 },
+    { "id": "order", "label": "주문 서비스", "category": "service", "tech": "NestJS", "parentId": "private", "lane": 3, "order": 0, "description": "주문 생성·조회를 담당한다." },
+    { "id": "catalog", "label": "상품 서비스", "category": "service", "tech": "NestJS", "parentId": "private", "lane": 3, "order": 1 },
+    { "id": "payment", "label": "결제 서비스", "category": "service", "tech": "Go", "parentId": "private", "lane": 3, "order": 2, "description": "PG 연동과 결제 승인을 처리한다." },
+    { "id": "settle", "label": "정산 워커", "category": "worker", "tech": "Go", "parentId": "private", "lane": 3, "order": 3 },
+    { "id": "cache", "label": "캐시", "category": "cache", "tech": "Redis", "parentId": "data", "lane": 4, "order": 0 },
+    { "id": "db_catalog", "label": "상품 DB", "category": "db", "tech": "Aurora", "parentId": "data", "lane": 4, "order": 1 },
+    { "id": "queue", "label": "이벤트 큐", "category": "queue", "tech": "SQS", "parentId": "data", "lane": 4, "order": 2 },
+    { "id": "db_order", "label": "주문 DB", "category": "db", "tech": "Aurora", "parentId": "data", "lane": 4, "order": 3 },
+    { "id": "pg", "label": "PG사", "category": "external", "tech": "외부 결제대행", "lane": 5 }
+  ],
+  "edges": [
+    { "id": "e-user-cdn", "source": "user", "target": "cdn", "kind": "http" },
+    { "id": "e-cdn-gw", "source": "cdn", "target": "gw", "kind": "http" },
+    { "id": "e-gw-auth", "source": "gw", "target": "auth", "kind": "http", "label": "토큰 검증" },
+    { "id": "e-gw-order", "source": "gw", "target": "order", "kind": "http" },
+    { "id": "e-gw-catalog", "source": "gw", "target": "catalog", "kind": "http" },
+    { "id": "e-order-cache", "source": "order", "target": "cache", "kind": "read" },
+    { "id": "e-order-db", "source": "order", "target": "db_order", "kind": "write", "label": "주문 저장" },
+    { "id": "e-catalog-db", "source": "catalog", "target": "db_catalog", "kind": "write" },
+    { "id": "e-order-payment", "source": "order", "target": "payment", "kind": "http", "label": "결제 요청" },
+    { "id": "e-payment-pg", "source": "payment", "target": "pg", "kind": "http", "label": "승인 요청" },
+    { "id": "e-payment-queue", "source": "payment", "target": "queue", "kind": "event", "label": "결제완료 이벤트" },
+    { "id": "e-queue-settle", "source": "queue", "target": "settle", "kind": "event" },
+    { "id": "e-settle-db", "source": "settle", "target": "db_order", "kind": "write", "label": "정산 반영" }
+  ],
+  "flows": [
+    {
+      "id": "checkout",
+      "label": "주문 결제 흐름",
+      "description": "장바구니 주문이 PG 승인까지 닿는 동기 경로",
+      "steps": [
+        { "edge": "e-user-cdn", "text": "사용자가 주문을 전송한다." },
+        { "edge": "e-cdn-gw", "text": "CDN을 거쳐 게이트웨이로 들어온다." },
+        { "edge": "e-gw-order", "text": "게이트웨이가 주문 서비스로 라우팅한다." },
+        { "edge": "e-order-payment", "text": "주문 서비스가 결제 서비스를 호출한다." },
+        { "edge": "e-payment-pg", "text": "결제 서비스가 PG에 승인을 요청한다." }
+      ]
+    },
+    {
+      "id": "settlement",
+      "label": "비동기 정산 흐름",
+      "description": "결제 완료 이벤트가 정산까지 이어지는 비동기 경로",
+      "steps": [
+        { "edge": "e-payment-queue", "text": "결제 완료 이벤트를 큐에 싣는다." },
+        { "edge": "e-queue-settle", "text": "정산 워커가 이벤트를 구독한다." },
+        { "edge": "e-settle-db", "text": "정산 결과를 주문 DB에 반영한다." }
+      ]
+    }
+  ]
+}

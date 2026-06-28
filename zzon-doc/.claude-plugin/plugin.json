@@ -5,11 +5,18 @@
   "author": {
     "name": "zzon"
   },
+  "license": "MIT",
   "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "claude-code-skill",
+    "claude",
+    "anthropic",
     "diagram",
     "architecture",
     "erd",
     "infra",
-    "visualization"
+    "visualization",
+    "documentation"
   ]
 }

@@ -1,0 +1,76 @@
+{
+  "specVersion": 1,
+  "title": "커머스 플랫폼 인프라 (대규모·균형 그리드)",
+  "kind": "infra",
+  "section": "인프라",
+  "description": "클라이언트 → 엣지 → 서비스 → 데이터로 흐르는 14노드 대규모 구성. 5열 그리드 + 4개 세로 밴드 그룹으로 lane을 고정해 박스가 겹치지 않고 공간을 고르게 쓴다.",
+  "layout": { "direction": "RIGHT" },
+  "groups": [
+    { "id": "clients", "label": "Clients", "kind": "zone" },
+    { "id": "edge", "label": "Edge", "kind": "boundary" },
+    { "id": "svc", "label": "Services (Private)", "kind": "subnet" },
+    { "id": "data", "label": "Data", "kind": "zone" }
+  ],
+  "nodes": [
+    { "id": "web", "label": "웹", "category": "frontend", "tech": "Next.js", "parentId": "clients", "lane": 0, "order": 0 },
+    { "id": "mobile", "label": "모바일", "category": "mobile", "tech": "RN", "parentId": "clients", "lane": 0, "order": 1 },
+
+    { "id": "cdn", "label": "CDN", "category": "cdn", "tech": "CloudFront", "parentId": "edge", "lane": 1, "order": 0 },
+    { "id": "gw", "label": "게이트웨이", "category": "gateway", "tech": "ALB+APIGW", "parentId": "edge", "lane": 1, "order": 1, "description": "라우팅·레이트리밋·TLS 종단." },
+    { "id": "auth", "label": "인증", "category": "auth", "tech": "Cognito", "parentId": "edge", "lane": 1, "order": 2 },
+
+    { "id": "bff", "label": "BFF", "category": "backend", "tech": "NestJS", "parentId": "svc", "lane": 2, "order": 0, "description": "프런트 전용 집계 API." },
+    { "id": "order", "label": "주문 서비스", "category": "service", "tech": "NestJS", "parentId": "svc", "lane": 2, "order": 1 },
+    { "id": "catalog", "label": "상품 서비스", "category": "service", "tech": "Go", "parentId": "svc", "lane": 2, "order": 2 },
+    { "id": "payment", "label": "결제 서비스", "category": "service", "tech": "Go", "parentId": "svc", "lane": 2, "order": 3 },
+
+    { "id": "order_db", "label": "주문 DB", "category": "db", "tech": "Aurora", "parentId": "data", "lane": 3, "order": 0 },
+    { "id": "catalog_db", "label": "상품 DB", "category": "db", "tech": "Aurora", "parentId": "data", "lane": 3, "order": 1 },
+    { "id": "cache", "label": "캐시", "category": "cache", "tech": "Redis", "parentId": "data", "lane": 3, "order": 2 },
+    { "id": "object", "label": "오브젝트 스토리지", "category": "storage", "tech": "S3", "parentId": "data", "lane": 3, "order": 3 },
+
+    { "id": "pg", "label": "PG사", "category": "external", "tech": "외부 결제대행", "lane": 4 }
+  ],
+  "edges": [
+    { "id": "e-web-cdn", "source": "web", "target": "cdn", "kind": "http" },
+    { "id": "e-mobile-cdn", "source": "mobile", "target": "cdn", "kind": "http" },
+    { "id": "e-cdn-gw", "source": "cdn", "target": "gw", "kind": "http" },
+    { "id": "e-gw-auth", "source": "gw", "target": "auth", "kind": "http", "label": "토큰 검증" },
+    { "id": "e-gw-bff", "source": "gw", "target": "bff", "kind": "http" },
+    { "id": "e-bff-order", "source": "bff", "target": "order", "kind": "http" },
+    { "id": "e-bff-catalog", "source": "bff", "target": "catalog", "kind": "http" },
+    { "id": "e-order-payment", "source": "order", "target": "payment", "kind": "http", "label": "결제 요청" },
+    { "id": "e-order-db", "source": "order", "target": "order_db", "kind": "write" },
+    { "id": "e-order-cache", "source": "order", "target": "cache", "kind": "read" },
+    { "id": "e-catalog-db", "source": "catalog", "target": "catalog_db", "kind": "write" },
+    { "id": "e-catalog-cache", "source": "catalog", "target": "cache", "kind": "read" },
+    { "id": "e-catalog-object", "source": "catalog", "target": "object", "kind": "write", "label": "이미지 저장" },
+    { "id": "e-payment-pg", "source": "payment", "target": "pg", "kind": "http", "label": "승인 요청" }
+  ],
+  "flows": [
+    {
+      "id": "browse",
+      "label": "상품 탐색",
+      "description": "클라이언트가 상품을 조회하는 경로",
+      "steps": [
+        { "edge": "e-web-cdn", "text": "웹이 CDN에 요청한다." },
+        { "edge": "e-cdn-gw", "text": "게이트웨이로 전달된다." },
+        { "edge": "e-gw-bff", "text": "BFF가 요청을 받는다." },
+        { "edge": "e-bff-catalog", "text": "BFF가 상품 서비스를 호출한다." },
+        { "edge": "e-catalog-cache", "text": "상품 서비스가 캐시를 조회한다." }
+      ]
+    },
+    {
+      "id": "checkout",
+      "label": "주문 결제",
+      "description": "주문 생성에서 PG 승인까지",
+      "steps": [
+        { "edge": "e-gw-bff", "text": "게이트웨이가 BFF로 라우팅한다." },
+        { "edge": "e-bff-order", "text": "BFF가 주문 서비스를 호출한다." },
+        { "edge": "e-order-db", "text": "주문을 DB에 저장한다." },
+        { "edge": "e-order-payment", "text": "결제 서비스에 결제를 요청한다." },
+        { "edge": "e-payment-pg", "text": "PG에 승인을 요청한다." }
+      ]
+    }
+  ]
+}

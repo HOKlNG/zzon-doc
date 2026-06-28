@@ -11,7 +11,9 @@
     {
       "name": "zzon-doc",
       "source": "./zzon-doc",
-      "description": "코드베이스를 분석해 DiagramSpec JSON을 저작하고, 의존성 0짜리 인터랙티브 .html로 렌더링한다."
+      "description": "코드베이스를 분석해 DiagramSpec JSON을 저작하고, 의존성 0짜리 인터랙티브 .html로 렌더링한다.",
+      "license": "MIT",
+      "keywords": ["claude-code", "claude-code-plugin", "claude-code-skill", "claude", "anthropic", "diagram", "architecture", "erd", "visualization"]
     }
   ]
 }

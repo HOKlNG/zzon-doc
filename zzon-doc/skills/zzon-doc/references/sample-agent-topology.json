@@ -1,0 +1,42 @@
+{
+  "specVersion": 1,
+  "title": "zzon-doc 플러그인 구조 (에이전트 토폴로지)",
+  "kind": "agent-topology",
+  "description": "마켓플레이스 → 플러그인 → 스킬 → Claude 저작 → 렌더/빌드 스크립트로 이어지는 이 플러그인 자체의 구조.",
+  "layout": { "direction": "RIGHT" },
+  "groups": [
+    { "id": "skillpkg", "label": "zzon-doc 스킬 패키지", "kind": "boundary" }
+  ],
+  "nodes": [
+    { "id": "marketplace", "label": "zzon 마켓플레이스", "category": "other", "tech": "marketplace.json" },
+    { "id": "plugin", "label": "zzon-doc 플러그인", "category": "other", "tech": "plugin.json" },
+    { "id": "skill", "label": "zzon-doc 스킬", "category": "skill", "tech": "SKILL.md", "parentId": "skillpkg", "description": "코드 분석 → 스펙 저작 → 렌더 절차를 안내한다." },
+    { "id": "claude", "label": "Claude (저작자)", "category": "agent", "parentId": "skillpkg", "description": "소스를 읽고 DiagramSpec JSON을 만든다." },
+    { "id": "specmd", "label": "diagram-spec.md", "category": "doc", "parentId": "skillpkg" },
+    { "id": "samples", "label": "샘플 스펙들", "category": "doc", "parentId": "skillpkg" },
+    { "id": "render", "label": "render.mjs (엔진)", "category": "other", "tech": "Node", "parentId": "skillpkg", "description": "스펙 1개 → 단일 .html." },
+    { "id": "build", "label": "build-docs.mjs", "category": "other", "tech": "Node", "parentId": "skillpkg", "description": "여러 스펙 → 통합 문서 index.html." }
+  ],
+  "edges": [
+    { "id": "e-mp-plugin", "source": "marketplace", "target": "plugin", "kind": "depends", "label": "수록" },
+    { "id": "e-plugin-skill", "source": "plugin", "target": "skill", "kind": "depends", "label": "제공" },
+    { "id": "e-skill-claude", "source": "skill", "target": "claude", "kind": "depends", "label": "절차 안내" },
+    { "id": "e-claude-specmd", "source": "claude", "target": "specmd", "kind": "reference", "label": "스펙 규칙 읽음" },
+    { "id": "e-claude-samples", "source": "claude", "target": "samples", "kind": "reference", "label": "모범답안 참고" },
+    { "id": "e-claude-render", "source": "claude", "target": "render", "kind": "depends", "label": "JSON → html" },
+    { "id": "e-claude-build", "source": "claude", "target": "build", "kind": "depends", "label": "여러 장 묶기" },
+    { "id": "e-build-render", "source": "build", "target": "render", "kind": "depends", "label": "각 스펙 렌더" }
+  ],
+  "flows": [
+    {
+      "id": "make-one",
+      "label": "다이어그램 1장 만들기",
+      "description": "요청부터 .html 산출까지의 기본 경로",
+      "steps": [
+        { "edge": "e-skill-claude", "text": "스킬이 Claude에게 절차를 안내한다." },
+        { "edge": "e-claude-specmd", "text": "Claude가 스펙 규칙을 읽는다." },
+        { "edge": "e-claude-render", "text": "Claude가 render.mjs로 .html을 뽑는다." }
+      ]
+    }
+  ]
+}

@@ -403,7 +403,16 @@ body {
 .dg-steps li:last-child { margin-bottom:0; }
 .dg-stepnum { flex-shrink:0; width:20px; height:20px; border-radius:9999px; display:flex;
   align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff;
-  background:var(--diagram-flow); }
+  background:var(--diagram-flow); transition:box-shadow 120ms; }
+.dg-steps li { cursor:pointer; border-radius:7px; padding:3px 6px; margin:0 -6px 8px; transition:background 120ms; }
+.dg-steps li:hover { background:var(--muted); }
+.dg-steps li.active { background:color-mix(in oklab, var(--diagram-flow) 16%, transparent); }
+.dg-steps li.active .dg-stepnum { box-shadow:0 0 0 3px color-mix(in oklab, var(--diagram-flow) 30%, transparent); }
+#dg-tip { position:fixed; z-index:1000; left:0; top:0; pointer-events:none; opacity:0;
+  max-width:260px; padding:6px 9px; border-radius:7px; font-size:11.5px; font-weight:500; line-height:1.45;
+  white-space:pre-line; background:var(--foreground); color:var(--background);
+  box-shadow:0 4px 16px rgba(0,0,0,.22); transition:opacity 120ms; }
+#dg-tip.show { opacity:1; }
 .dg-href { border-top:1px solid var(--color-border); padding:8px; }
 .dg-href a { display:flex; align-items:center; justify-content:space-between; width:100%;
   height:28px; padding:0 8px; border-radius:6px; font-size:12px; color:var(--foreground);
@@ -718,7 +727,7 @@ const ENGINE_JS = String.raw`
 
   let transform = { x:0, y:0, k:1 };
   let nodeRects = new Map(), colRects = new Map(), contentSize = { w:0, h:0 };
-  let selected = null, flowId = null, hovered = null, hoveredEdge = null;
+  let selected = null, flowId = null, hovered = null, hoveredEdge = null, activeStep = null;
   let firstFit = false;
 
   const MIN_K = 0.2, MAX_K = 2.5;
@@ -961,14 +970,26 @@ const ENGINE_JS = String.raw`
 
       if (steps) {
         const badge = svgEl("g", { class:"dg-badge-pop" });
+        badge.setAttribute("data-diagram-ui", "");
+        badge.style.cursor = "pointer";
+        badge.style.pointerEvents = "auto";
         badge.style.setProperty("--step-index", (steps[0] || 1) - 1);
         const label = steps.join("·");
-        const circle = svgEl("circle", { cx:geo.mid.x, cy:geo.mid.y, r: label.length > 1 ? 11.5 : 9.5,
-          fill:"var(--diagram-flow)", stroke:"var(--color-background)", "stroke-width":"2.5" });
+        const on = steps.indexOf(activeStep) !== -1;
+        const circle = svgEl("circle", { cx:geo.mid.x, cy:geo.mid.y, r: (label.length > 1 ? 11.5 : 9.5) + (on ? 2 : 0),
+          fill:"var(--diagram-flow)", stroke:"var(--color-background)", "stroke-width": on ? "3.5" : "2.5" });
         const txt = svgEl("text", { x:geo.mid.x, y:geo.mid.y, "text-anchor":"middle",
           "dominant-baseline":"central", class:"dg-badge-text" });
         txt.textContent = label;
         badge.appendChild(circle); badge.appendChild(txt);
+        const flow = SPEC.flows.find(f => f.id === flowId);
+        if (flow) attachTip(badge, steps.map(n => n + ". " + (flow.steps[n - 1] ? flow.steps[n - 1].text : "")).join("\n"));
+        badge.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          const i = steps.indexOf(activeStep);
+          activeStep = i === -1 ? steps[0] : (i + 1 < steps.length ? steps[i + 1] : null);
+          hideTip(); renderEdges(); updateStepHighlight();
+        });
         g.appendChild(badge);
       } else if (edge.label && (showLabels || st.isHover || st.active)) {
         const fo = svgEl("foreignObject", { x:geo.mid.x, y:geo.mid.y, width:1, height:1 });
@@ -1054,6 +1075,7 @@ const ENGINE_JS = String.raw`
   function setFlow(id) {
     selected = null;
     flowId = id;
+    activeStep = null; hideTip();
     updateFlowButtons(); renderDetailPanel(); renderStepsPanel(); applyHighlight();
   }
 
@@ -1116,6 +1138,40 @@ const ENGINE_JS = String.raw`
   /* ========================================================================
    * UI 패널/툴바
    * ======================================================================== */
+  /* ---- 호버 툴팁 (버튼·배지 설명) ---- */
+  let tipEl = null;
+  function tipNode() {
+    if (!tipEl) { tipEl = el("div"); tipEl.id = "dg-tip"; tipEl.setAttribute("data-diagram-ui", ""); document.body.appendChild(tipEl); }
+    return tipEl;
+  }
+  function placeTip(e) {
+    const t = tipNode(), r = t.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 16;
+    if (x + r.width > window.innerWidth - 8) x = e.clientX - 14 - r.width;
+    if (y + r.height > window.innerHeight - 8) y = e.clientY - 12 - r.height;
+    t.style.left = Math.max(8, x) + "px"; t.style.top = Math.max(8, y) + "px";
+  }
+  function attachTip(target, text) {
+    if (!text) return target;
+    target.addEventListener("mouseenter", (e) => { const t = tipNode(); t.textContent = text; t.classList.add("show"); placeTip(e); });
+    target.addEventListener("mousemove", placeTip);
+    target.addEventListener("mouseleave", () => { if (tipEl) tipEl.classList.remove("show"); });
+    return target;
+  }
+  function hideTip() { if (tipEl) tipEl.classList.remove("show"); }
+
+  /* ---- 단계 강조 (배지 클릭 ↔ 단계 패널) ---- */
+  function setActiveStep(n) { activeStep = (activeStep === n ? null : n); renderEdges(); updateStepHighlight(); }
+  function updateStepHighlight() {
+    if (!stepsEl) return;
+    let target = null;
+    stepsEl.querySelectorAll("[data-step]").forEach((li) => {
+      const on = Number(li.getAttribute("data-step")) === activeStep;
+      li.classList.toggle("active", on); if (on) target = li;
+    });
+    if (target) target.scrollIntoView({ block: "nearest" });
+  }
+
   function uiIcon(name, size) { return iconSpan(name, size || 14).outerHTML; }
 
   /* ---- 플로우 셀렉터 ---- */
@@ -1128,6 +1184,7 @@ const ENGINE_JS = String.raw`
     SPEC.flows.forEach(f => {
       const b = el("button", "dg-btn", f.label);
       b.setAttribute("data-flow-id", f.id);
+      attachTip(b, f.description || f.label);
       b.addEventListener("click", () => setFlow(flowId === f.id ? null : f.id));
       flowSelEl.appendChild(b);
     });
@@ -1144,7 +1201,7 @@ const ENGINE_JS = String.raw`
     const bar = el("div", "dg-ui dg-toolbar");
     bar.setAttribute("data-diagram-ui", "");
     const mk = (icon, title, fn) => {
-      const b = el("button", "dg-btn icon"); b.title = title; b.innerHTML = uiIcon(icon, 14);
+      const b = el("button", "dg-btn icon"); b.setAttribute("aria-label", title); attachTip(b, title); b.innerHTML = uiIcon(icon, 14);
       b.addEventListener("click", fn); return b;
     };
     bar.appendChild(mk("Plus", "확대", () => { const r = viewport.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1.25); renderEdges(); }));
@@ -1267,9 +1324,11 @@ const ENGINE_JS = String.raw`
     if (flow.description) panel.appendChild(el("div", "dg-panel-body", flow.description));
     const ol = el("ol");
     flow.steps.forEach((s, i) => {
-      const li = el("li");
+      const li = el("li"); li.setAttribute("data-step", String(i + 1));
+      if (activeStep === i + 1) li.classList.add("active");
       li.appendChild(el("span", "dg-stepnum", String(i + 1)));
       li.appendChild(el("span", null, s.text));
+      li.addEventListener("click", () => setActiveStep(i + 1));
       ol.appendChild(li);
     });
     panel.appendChild(ol);

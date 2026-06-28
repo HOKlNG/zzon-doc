@@ -1,3 +1,6 @@
 .DS_Store
 node_modules/
 *.log
+
+# 결과물 테스트용 개인 작업 공간 (플러그인에 영향 없음)
+playground/
