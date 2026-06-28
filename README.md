@@ -10,9 +10,9 @@
 
 **한국어** · [English](./README.en.md)
 
-> **Claude Code 플러그인(스킬)** — Anthropic Claude Code에서 코드베이스를 인터랙티브 아키텍처 다이어그램으로 그린다.
+> **Claude Code 플러그인(스킬)** — Anthropic Claude Code에서 코드베이스를 인터랙티브 아키텍처 다이어그램으로 그려주는 스킬
 
-코드를 분석해 **인터랙티브 아키텍처 다이어그램**을 그리는 Claude Code 플러그인 모음.
+코드를 분석해 **인터랙티브 아키텍처 다이어그램**을 그리는 Claude Code 플러그인
 이 레포는 그 자체로 plugin marketplace다. 출력은 **의존성 0짜리 단일 `.html`** — 서버·라이브러리·CDN 없이 브라우저로 그냥 연다.
 
 ## 미리보기
@@ -29,7 +29,7 @@
 
 | 플러그인 | 설명 |
 |---|---|
-| [`zzon-doc`](./zzon-doc) | 코드베이스를 분석해 DiagramSpec JSON을 저작하고, 의존성 0짜리 인터랙티브 단일 `.html`로 렌더링한다. infra / data-flow / erd / agent-topology 지원. |
+| [`zzon-doc`](./zzon-doc) | 코드베이스를 분석해 DiagramSpec JSON을 작성하고, 의존성 0짜리 인터랙티브 단일 `.html`로 렌더링한다. infra / data-flow / erd / agent-topology 지원. |
 
 ## 설치
 
@@ -84,7 +84,7 @@ Node 20+ 내장 모듈만 쓴다. 설치할 의존성 없음.
 - Claude Code (플러그인/스킬 지원 버전)
 - Node.js 20+ (`render.mjs` 실행용)
 
-## 이름에 대하여
+## [기타] 이름에 대하여
 
 `zzon-doc`은 내가 좋아하는 고양이 **쫀떡(zzon-ddeok)**이의 이름에서 나왔다. 유튜브 채널 [김쫀떡](https://www.youtube.com/@김쫀떡)의 바로 그 쫀떡이다. 문서·다이어그램(**doc**)을 다루는 도구라, `zzon-ddeok`을 언어유희로 비틀어 **`zzon-doc`**으로 지었다. 🐱
 
