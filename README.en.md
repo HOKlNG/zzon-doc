@@ -10,19 +10,41 @@
 
 [한국어](./README.md) · **English**
 
-> A **Claude Code plugin (skill)** for Anthropic Claude Code that turns a codebase into interactive architecture diagrams.
+> A **Claude Code plugin (skill)** that analyzes your codebase and draws interactive architecture diagrams. It produces an `.html` file — you just open it in a browser to view.
 
-A Claude Code plugin suite that reads your code and draws **interactive architecture diagrams**.
-This repo is itself a plugin marketplace. Output is a **single, dependency-free `.html`** — open it in any browser, no server, library, or CDN required.
+## Features
+
+- **4 diagram kinds** — infra · data-flow · ERD · agent (`.claude`) topology
+- **Zero dependencies** — no libraries or CDN; a self-contained single `.html`
+- **Interactive** — click nodes · highlight flows · step badges · hover tooltips · pan/zoom · dark mode
+- **Unified docs** — bundle many diagrams into a left menu + overview
+- **Scope-aware** — for big projects it surveys the structure and proposes how many docs first
+- **Local-only** — your code is analyzed locally; no network, no telemetry
 
 ## Install
-
-Add this repo as a marketplace in Claude Code, then install the plugin.
 
 ```
 /plugin marketplace add HOKlNG/zzon-doc
 /plugin install zzon-doc@zzon
 ```
+
+## Usage
+
+Call it with `/zzon-doc:zzon-doc <request>`, or just ask in natural language. (Plugin skills are namespaced, so the command is `/zzon-doc:zzon-doc`; natural language works too.)
+
+**① Whole-project architecture** — it surveys the structure first, **proposes what to draw and how many docs**, and once you agree, produces several diagrams bundled into a unified view (left menu + overview).
+
+```
+/zzon-doc:zzon-doc draw the architecture of this project
+```
+
+**② One specific part** — just that part, as a single diagram.
+
+```
+/zzon-doc:zzon-doc draw the cloud architecture of this repo
+```
+
+The generated `.html` is interactive: **click nodes · highlight flows · click step badges · hover tooltips · pan/zoom · dark mode.**
 
 ## Preview
 
@@ -32,37 +54,7 @@ Add this repo as a marketplace in Claude Code, then install the plugin.
 
 ![Large ERD](assets/diagram-erd.png)
 
-> The images above are rendered from the bundled samples. Every diagram is interactive HTML — click, hover, pan/zoom. (Diagram labels follow the language you author them in; the samples are in Korean.)
-
-## Plugins
-
-| Plugin | Description |
-|---|---|
-| [`zzon-doc`](./zzon-doc) | Reads a codebase, authors a DiagramSpec JSON, and renders it to a dependency-free interactive `.html`. Supports infra / data-flow / erd / agent-topology. |
-
-## Usage
-
-Invoke explicitly with `/zzon-doc:zzon-doc <target>`, or just ask in natural language — the `zzon-doc` skill activates either way.
-(Plugin skills are namespaced as `plugin:skill`, so the command is `/zzon-doc:zzon-doc`, not `/zzon-doc`.)
-
-```
-/zzon-doc:zzon-doc the infrastructure of this repo
-/zzon-doc:zzon-doc an ERD from the prisma schema
-visualize the .claude agent structure
-```
-
-Claude (1) reads the code and authors a DiagramSpec JSON, then (2) runs `render.mjs` to emit a single `.html`.
-
-> For broad requests (e.g. "draw this whole project") it won't dump one giant diagram — it surveys the structure first and agrees with you on **what, at what level, and how many diagrams** before drawing.
-
-### What the .html does
-
-Click a node to highlight neighbors + detail panel · flow path highlight + step panel · **clickable step badges/steps** · **hover tooltips** · pan/zoom · legend · dark/light toggle.
-
-### Many diagrams, one document
-
-Draw several architectures and they accumulate into a **unified document**. Under the default output folder `zzon-doc/` you get specs (`specs/`), per-diagram HTML (`diagrams/`), and a unified `index.html`.
-Open that one `index.html` to browse everything via a **left menu + overview home + viewer**.
+> Rendered from the bundled samples (sample labels are in Korean).
 
 ## Direct rendering (optional)
 
