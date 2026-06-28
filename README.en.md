@@ -36,7 +36,7 @@ This repo is itself a plugin marketplace. Output is a **single, dependency-free 
 Add this repo as a marketplace in Claude Code, then install the plugin.
 
 ```
-/plugin marketplace add <owner>/<repo>     # or a local path
+/plugin marketplace add HOKlNG/zzon-doc
 /plugin install zzon-doc@zzon
 ```
 

@@ -36,7 +36,7 @@
 Claude Code에서 이 레포를 마켓플레이스로 추가한 뒤 플러그인을 설치한다.
 
 ```
-/plugin marketplace add <owner>/<repo>     # 또는 로컬 경로
+/plugin marketplace add HOKlNG/zzon-doc
 /plugin install zzon-doc@zzon
 ```
 
