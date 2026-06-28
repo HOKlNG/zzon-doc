@@ -15,6 +15,15 @@
 A Claude Code plugin suite that reads your code and draws **interactive architecture diagrams**.
 This repo is itself a plugin marketplace. Output is a **single, dependency-free `.html`** — open it in any browser, no server, library, or CDN required.
 
+## Install
+
+Add this repo as a marketplace in Claude Code, then install the plugin.
+
+```
+/plugin marketplace add HOKlNG/zzon-doc
+/plugin install zzon-doc@zzon
+```
+
 ## Preview
 
 | Unified docs (menu + overview) | Flow highlight (step badges + panel) |
@@ -30,15 +39,6 @@ This repo is itself a plugin marketplace. Output is a **single, dependency-free 
 | Plugin | Description |
 |---|---|
 | [`zzon-doc`](./zzon-doc) | Reads a codebase, authors a DiagramSpec JSON, and renders it to a dependency-free interactive `.html`. Supports infra / data-flow / erd / agent-topology. |
-
-## Install
-
-Add this repo as a marketplace in Claude Code, then install the plugin.
-
-```
-/plugin marketplace add HOKlNG/zzon-doc
-/plugin install zzon-doc@zzon
-```
 
 ## Usage
 

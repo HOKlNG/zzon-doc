@@ -15,6 +15,15 @@
 코드를 분석해 **인터랙티브 아키텍처 다이어그램**을 그리는 Claude Code 플러그인
 이 레포는 그 자체로 plugin marketplace다. 출력은 **의존성 0짜리 단일 `.html`** — 서버·라이브러리·CDN 없이 브라우저로 그냥 연다.
 
+## 설치
+
+Claude Code에서 이 레포를 마켓플레이스로 추가한 뒤 플러그인을 설치한다.
+
+```
+/plugin marketplace add HOKlNG/zzon-doc
+/plugin install zzon-doc@zzon
+```
+
 ## 미리보기
 
 | 통합 문서 (메뉴 + 전체보기) | 플로우 강조 (순번 배지 + 단계 패널) |
@@ -30,15 +39,6 @@
 | 플러그인 | 설명 |
 |---|---|
 | [`zzon-doc`](./zzon-doc) | 코드베이스를 분석해 DiagramSpec JSON을 작성하고, 의존성 0짜리 인터랙티브 단일 `.html`로 렌더링한다. infra / data-flow / erd / agent-topology 지원. |
-
-## 설치
-
-Claude Code에서 이 레포를 마켓플레이스로 추가한 뒤 플러그인을 설치한다.
-
-```
-/plugin marketplace add HOKlNG/zzon-doc
-/plugin install zzon-doc@zzon
-```
 
 ## 사용
 
