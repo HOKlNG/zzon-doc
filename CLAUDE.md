@@ -42,13 +42,15 @@ plugins-zzon-doc/
 ## 핵심 계약 (깨지 말 것)
 
 1. **의존성 0.** `render.mjs`·`build-docs.mjs` 모두 Node 20+ 내장 모듈만 쓴다. 출력 .html(개별 ~60KB, 통합 index ~13KB)도 외부 `<script>`/`<link>`/CDN 없이 self-contained. 레포에 node_modules/lockfile 두지 마라.
-2. **render.mjs 안의 렌더 엔진은 검증된 포팅본이다 — 함부로 수정 금지.** 레인 레이아웃, 라운드 직교 엣지(관통 회피), 그룹 언더레이, 플로우 순번/애니메이션, 팬·줌이 다 들어있다. 엔진 로직을 바꿔야 하면 아래 "원본"에서 다시 포팅하고 반드시 재검증할 것.
+2. **render.mjs는 이 프로젝트의 독자 엔진이다(info-hub와 무관).** 레인 레이아웃, 라운드 직교 엣지(관통 회피), 분산 앵커(fan-out/fan-in 겹침 방지), 그룹 언더레이, 플로우 순번/애니메이션, 팬·줌이 들어있다. **수정해도 되지만 반드시 브라우저 렌더로 재검증**한다(노드/엣지 수 일치, 선 겹침, pageerror 0). 원복은 git으로 가능.
 3. **build-docs.mjs는 엔진을 건드리지 않는다.** render.mjs를 자식 프로세스로 호출해 개별 .html을 만든 뒤, 출력 폴더를 스캔해 통합 셸(`index.html`)만 생성한다. 통합 뷰는 각 다이어그램을 iframe으로 끼워 보여줄 뿐 — 다이어그램 자체는 독립 .html 그대로다.
 4. **DiagramSpec 스키마가 계약.** 노드/그룹/엣지/플로우 평탄 배열 + slug id, 픽셀 좌표 없음(lane/order 힌트만). 통합 문서 메뉴용 선택 필드 `section`/`order`만 추가됨. 스펙 형태는 `references/diagram-spec.md` 참고.
 
-## 원본 (엔진 출처 — 이식해 온 곳)
+## 최초 이식 출처 (역사적 참고 — 이제 독립)
 
-`render.mjs`는 info-hub의 자체 다이어그램 엔진을 바닐라 JS/CSS/SVG로 포팅한 것이다. 엔진 수정·동작 확인이 필요하면 원본을 본다:
+> 엔진은 이제 이 프로젝트 독자 코드다. info-hub에 의존하지 않고, 거기서 다시 포팅하지도 않는다. 아래는 최초에 이식해 온 출처일 뿐(역사 기록).
+
+`render.mjs`는 처음에 info-hub의 다이어그램 엔진을 바닐라 JS/CSS/SVG로 포팅한 것이다. 참고만:
 - 레이아웃: `~/Documents/src/info-hub/packages/schema/src/layout.ts` (buildLayout/adjacency/flowHighlight)
 - 엣지 기하: `~/Documents/src/info-hub/apps/web/src/components/diagram/geometry.ts`
 - 스키마·토큰: `~/Documents/src/info-hub/packages/schema/src/{diagram,categories}.ts`

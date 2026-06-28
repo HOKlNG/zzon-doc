@@ -859,6 +859,40 @@ const ENGINE_JS = String.raw`
     for (const e of SPEC.edges) { const k = gutterKey(e); if (!byGutter.has(k)) byGutter.set(k, []); byGutter.get(k).push(e); }
     const offsetOf = new Map();
     for (const list of byGutter.values()) list.forEach((e, i) => offsetOf.set(e.id, (i - (list.length - 1) / 2) * GUTTER_STEP));
+
+    // 분산 앵커: 한 노드의 같은 변(邊)에 여러 엣지가 붙으면 변을 따라 펼쳐 fan-out/fan-in 겹침을 막는다.
+    const RIGHT_DIR = layout.direction !== "DOWN";
+    const sideMap = new Map();
+    const pushSide = (nodeId, side, edge, role, sortVal) => {
+      const k = nodeId + "|" + side;
+      if (!sideMap.has(k)) sideMap.set(k, []);
+      sideMap.get(k).push({ edge, role, sortVal });
+    };
+    for (const e of SPEC.edges) {
+      const s = nodeRects.get(e.source), t = nodeRects.get(e.target);
+      if (!s || !t) continue;
+      const sl = laneOf.get(e.source) || 0, tl = laneOf.get(e.target) || 0;
+      if (sl === tl) continue; // 같은 레인은 측면 라우팅 — 분산 제외
+      const fwd = tl > sl;
+      const sSide = RIGHT_DIR ? (fwd ? "R" : "L") : (fwd ? "B" : "T");
+      const tSide = RIGHT_DIR ? (fwd ? "L" : "R") : (fwd ? "T" : "B");
+      pushSide(e.source, sSide, e, "S", RIGHT_DIR ? t.y + t.h / 2 : t.x + t.w / 2);
+      pushSide(e.target, tSide, e, "T", RIGHT_DIR ? s.y + s.h / 2 : s.x + s.w / 2);
+    }
+    const anchorOf = new Map();
+    for (const [k, list] of sideMap) {
+      if (list.length <= 1) continue; // 엣지 1개면 중앙 유지
+      const nodeId = k.slice(0, k.lastIndexOf("|"));
+      const r = nodeRects.get(nodeId); if (!r) continue;
+      list.sort((a, b) => a.sortVal - b.sortVal); // 상대 노드 위치순 → 교차 최소화
+      const span = RIGHT_DIR ? r.h : r.w, start = RIGHT_DIR ? r.y : r.x;
+      const pad = Math.min(span * 0.2, 16), usable = Math.max(1, span - 2 * pad);
+      list.forEach((item, idx) => {
+        const frac = idx / (list.length - 1);
+        anchorOf.set(item.edge.id + "|" + item.role, start + pad + usable * frac);
+      });
+    }
+
     const rectsByLane = new Map();
     for (const [id, rect] of nodeRects) {
       const lane = laneOf.get(id); if (lane === undefined) continue;
@@ -878,8 +912,8 @@ const ENGINE_JS = String.raw`
       const g = edgeGeometry({
         source, target, sourceLane:sl, targetLane:tl, direction:layout.direction, obstacles,
         gutterOffset: offsetOf.get(e.id) || 0,
-        sourceAnchor: sourceCol ? (layout.direction === "RIGHT" ? sourceCol.y + sourceCol.h / 2 : sourceCol.x + sourceCol.w / 2) : undefined,
-        targetAnchor: targetCol ? (layout.direction === "RIGHT" ? targetCol.y + targetCol.h / 2 : targetCol.x + targetCol.w / 2) : undefined,
+        sourceAnchor: sourceCol ? (layout.direction === "RIGHT" ? sourceCol.y + sourceCol.h / 2 : sourceCol.x + sourceCol.w / 2) : anchorOf.get(e.id + "|S"),
+        targetAnchor: targetCol ? (layout.direction === "RIGHT" ? targetCol.y + targetCol.h / 2 : targetCol.x + targetCol.w / 2) : anchorOf.get(e.id + "|T"),
       });
       edgeGeos.push({ edge:e, geo:g });
     }

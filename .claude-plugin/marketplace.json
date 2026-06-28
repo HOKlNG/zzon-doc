@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "코드를 분석해 인터랙티브 아키텍처 다이어그램(단일 self-contained .html)을 그리는 Claude Code 플러그인 모음.",
-    "version": "0.2.0"
+    "version": "0.2.1"
   },
   "plugins": [
     {
