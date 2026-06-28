@@ -1,0 +1,74 @@
+{
+  "specVersion": 1,
+  "title": "데모숍 ERD",
+  "kind": "erd",
+  "description": "주문 도메인의 핵심 테이블. FK 엣지는 컬럼 높이에 앵커된다.",
+  "layout": { "direction": "RIGHT" },
+  "groups": [],
+  "nodes": [
+    {
+      "id": "order_items",
+      "label": "order_items",
+      "category": "table",
+      "description": "주문 상품 라인. 주문 시점 가격을 스냅샷으로 보관한다.",
+      "table": {
+        "columns": [
+          { "name": "id", "type": "bigint", "pk": true },
+          { "name": "order_id", "type": "bigint", "fk": { "table": "orders", "column": "id" } },
+          { "name": "product_id", "type": "bigint", "fk": { "table": "products", "column": "id" } },
+          { "name": "qty", "type": "int" },
+          { "name": "unit_price", "type": "numeric(12,2)" }
+        ]
+      }
+    },
+    {
+      "id": "orders",
+      "label": "orders",
+      "category": "table",
+      "description": "주문 헤더. 상태 머신: pending → paid → shipped → done",
+      "table": {
+        "columns": [
+          { "name": "id", "type": "bigint", "pk": true },
+          { "name": "user_id", "type": "bigint", "fk": { "table": "users", "column": "id" } },
+          { "name": "status", "type": "varchar(20)" },
+          { "name": "total", "type": "numeric(12,2)" },
+          { "name": "created_at", "type": "timestamptz" }
+        ]
+      }
+    },
+    {
+      "id": "products",
+      "label": "products",
+      "category": "table",
+      "description": "판매 상품 카탈로그",
+      "table": {
+        "columns": [
+          { "name": "id", "type": "bigint", "pk": true },
+          { "name": "name", "type": "varchar(200)" },
+          { "name": "price", "type": "numeric(12,2)" },
+          { "name": "stock", "type": "int" }
+        ]
+      }
+    },
+    {
+      "id": "users",
+      "label": "users",
+      "category": "table",
+      "description": "회원. 소프트 삭제(deleted_at) 사용",
+      "table": {
+        "columns": [
+          { "name": "id", "type": "bigint", "pk": true },
+          { "name": "email", "type": "varchar(320)", "unique": true },
+          { "name": "name", "type": "varchar(100)" },
+          { "name": "deleted_at", "type": "timestamptz", "nullable": true }
+        ]
+      }
+    }
+  ],
+  "edges": [
+    { "id": "fk-items-orders", "source": "order_items", "target": "orders", "kind": "reference", "sourceColumn": "order_id", "targetColumn": "id" },
+    { "id": "fk-items-products", "source": "order_items", "target": "products", "kind": "reference", "sourceColumn": "product_id", "targetColumn": "id" },
+    { "id": "fk-orders-users", "source": "orders", "target": "users", "kind": "reference", "sourceColumn": "user_id", "targetColumn": "id" }
+  ],
+  "flows": []
+}

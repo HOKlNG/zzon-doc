@@ -1,0 +1,17 @@
+{
+  "name": "zzon",
+  "owner": {
+    "name": "zzon"
+  },
+  "metadata": {
+    "description": "코드를 분석해 인터랙티브 아키텍처 다이어그램(단일 self-contained .html)을 그리는 Claude Code 플러그인 모음.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "zzon-doc",
+      "source": "./zzon-doc",
+      "description": "코드베이스를 분석해 DiagramSpec JSON을 저작하고, 의존성 0짜리 인터랙티브 .html로 렌더링한다."
+    }
+  ]
+}

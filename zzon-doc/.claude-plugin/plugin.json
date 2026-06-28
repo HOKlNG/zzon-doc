@@ -1,0 +1,15 @@
+{
+  "name": "zzon-doc",
+  "version": "0.1.0",
+  "description": "코드를 분석해 아키텍처/인프라/ERD/에이전트 다이어그램을 DiagramSpec JSON으로 저작하고, 서버·라이브러리 없이 브라우저에서 인터랙티브하게 동작하는 단일 .html로 렌더링한다.",
+  "author": {
+    "name": "zzon"
+  },
+  "keywords": [
+    "diagram",
+    "architecture",
+    "erd",
+    "infra",
+    "visualization"
+  ]
+}
