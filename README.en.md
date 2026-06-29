@@ -12,6 +12,16 @@
 
 > A **Claude Code plugin (skill)** that analyzes your codebase and draws interactive architecture diagrams. It produces an `.html` file — you just open it in a browser to view.
 
+## Preview
+
+| Unified docs (menu + overview) | Flow highlight (step badges + panel) |
+|---|---|
+| ![Unified docs](assets/integrated-doc.png) | ![Flow highlight](assets/diagram-flow.png) |
+
+![Large ERD](assets/diagram-erd.png)
+
+> Rendered from the bundled samples (sample labels are in Korean).
+
 ## Features
 
 - **4 diagram kinds** — infra · data-flow · ERD · agent (`.claude`) topology
@@ -45,16 +55,6 @@ Call it with `/zzon-doc:zzon-doc <request>`, or just ask in natural language. (P
 ```
 
 The generated `.html` is interactive: **click nodes · highlight flows · click step badges · hover tooltips · pan/zoom · dark mode.**
-
-## Preview
-
-| Unified docs (menu + overview) | Flow highlight (step badges + panel) |
-|---|---|
-| ![Unified docs](assets/integrated-doc.png) | ![Flow highlight](assets/diagram-flow.png) |
-
-![Large ERD](assets/diagram-erd.png)
-
-> Rendered from the bundled samples (sample labels are in Korean).
 
 ## Direct rendering (optional)
 
