@@ -14,11 +14,13 @@
 
 ## Preview
 
-| Unified docs (menu + overview) | Flow highlight (step badges + panel) |
+| Unified docs (menu + overview) | Large ERD (FK column anchors) |
 |---|---|
-| ![Unified docs](assets/integrated-doc.png) | ![Flow highlight](assets/diagram-flow.png) |
+| ![Unified docs](assets/integrated-doc.png) | ![Large ERD](assets/diagram-erd.png) |
 
-![Large ERD](assets/diagram-erd.png)
+**Flow highlight** — click a flow button and the path lights up with **step badges (①②③)** and a **step panel**.
+
+![Flow highlight](assets/diagram-flow.png)
 
 > Rendered from the bundled samples (sample labels are in Korean).
 

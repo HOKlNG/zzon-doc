@@ -14,11 +14,13 @@
 
 ## 미리보기
 
-| 통합 문서 (메뉴 + 전체보기) | 플로우 강조 (순번 배지 + 단계 패널) |
+| 통합 문서 (메뉴 + 전체보기) | 대형 ERD (FK 컬럼 앵커) |
 |---|---|
-| ![통합 문서](assets/integrated-doc.png) | ![플로우 강조](assets/diagram-flow.png) |
+| ![통합 문서](assets/integrated-doc.png) | ![대형 ERD](assets/diagram-erd.png) |
 
-![대형 ERD](assets/diagram-erd.png)
+**플로우 강조** — 플로우 버튼을 누르면 경로가 **순번 배지(①②③)**·**단계 패널**과 함께 강조된다.
+
+![플로우 강조](assets/diagram-flow.png)
 
 > 번들 샘플로 만든 결과물.
 
