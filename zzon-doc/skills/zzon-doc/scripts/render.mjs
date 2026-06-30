@@ -278,7 +278,7 @@ body {
 .dg-content { position:absolute; left:0; top:0; transform-origin:top left; }
 
 /* ---- 레인 흐름 ---- */
-.dg-lanes { position:relative; z-index:10; display:flex; align-items:flex-start;
+.dg-lanes { position:relative; z-index:10; display:flex; align-items:center;
   width:max-content; gap:88px; padding:72px; }
 .dg-lanes.dir-RIGHT { flex-direction:row; }
 .dg-lanes.dir-DOWN { flex-direction:column; }
@@ -728,6 +728,7 @@ const ENGINE_JS = String.raw`
   let transform = { x:0, y:0, k:1 };
   let nodeRects = new Map(), colRects = new Map(), contentSize = { w:0, h:0 };
   let selected = null, flowId = null, hovered = null, hoveredEdge = null, activeStep = null;
+  let flowAnimate = false; // 플로우를 막 켰을 때만 1회 진입 애니메이션. 이후 재렌더(호버·팬·줌)는 정적.
   let firstFit = false;
 
   const MIN_K = 0.2, MAX_K = 2.5;
@@ -899,15 +900,43 @@ const ENGINE_JS = String.raw`
       if (!rectsByLane.has(lane)) rectsByLane.set(lane, []);
       rectsByLane.get(lane).push(rect);
     }
+
+    // 관통 금지: 그룹 박스를 (시각 박스와 동일한 패딩으로) 미리 계산해 둔다.
+    // 엣지의 소스/타깃이 그 그룹 안에 없고(=조상 아님) 그룹이 두 노드 사이 레인에 걸치면 장애물로 쓴다.
+    const groupHeight = new Map();
+    for (const g of layout.groups.slice().sort((a, b) => b.depth - a.depth)) {
+      const kids = layout.groups.filter(c => c.group.parentId === g.group.id);
+      groupHeight.set(g.group.id, kids.length === 0 ? 0
+        : Math.max.apply(null, kids.map(c => groupHeight.get(c.group.id) || 0)) + 1);
+    }
+    const groupBoxes = [];
+    for (const g of layout.groups) {
+      const rects = g.memberNodeIds.map(id => nodeRects.get(id)).filter(Boolean);
+      if (!rects.length) continue;
+      const box = unionRect(rects, 16 + (groupHeight.get(g.group.id) || 0) * 16);
+      if (!box) continue;
+      const lanes = new Set();
+      for (const id of g.memberNodeIds) { const L = laneOf.get(id); if (L !== undefined) lanes.add(L); }
+      groupBoxes.push({ box, members: new Set(g.memberNodeIds), lanes });
+    }
+
     for (const e of SPEC.edges) {
       const source = nodeRects.get(e.source), target = nodeRects.get(e.target);
       if (!source || !target) continue;
       const sourceCol = e.sourceColumn ? colRects.get(e.source + "::" + e.sourceColumn) : undefined;
       const targetCol = e.targetColumn ? colRects.get(e.target + "::" + e.targetColumn) : undefined;
       const sl = laneOf.get(e.source) || 0, tl = laneOf.get(e.target) || 0;
+      const loLane = Math.min(sl, tl), hiLane = Math.max(sl, tl);
       const obstacles = [];
-      for (let lane = Math.min(sl, tl) + 1; lane <= Math.max(sl, tl) - 1; lane++) {
+      for (let lane = loLane + 1; lane <= hiLane - 1; lane++) {
         const arr = rectsByLane.get(lane); if (arr) for (const r of arr) obstacles.push(r);
+      }
+      // 소스/타깃이 속하지 않은 그룹 박스가 사이 레인에 걸치면 관통 금지 장애물로 추가
+      for (const gb of groupBoxes) {
+        if (gb.members.has(e.source) || gb.members.has(e.target)) continue;
+        let between = false;
+        for (let lane = loLane + 1; lane <= hiLane - 1; lane++) if (gb.lanes.has(lane)) { between = true; break; }
+        if (between) obstacles.push(gb.box);
       }
       const g = edgeGeometry({
         source, target, sourceLane:sl, targetLane:tl, direction:layout.direction, obstacles,
@@ -936,6 +965,7 @@ const ENGINE_JS = String.raw`
     const flowSteps = hl && hl.steps ? hl.steps : null;
     const mode = hl ? hl.mode : null;
     const showLabels = transform.k >= 0.55;
+    const animateEntrance = flowAnimate; flowAnimate = false; // 첫 렌더에만 진입 연출, 이후 정적
 
     const stateOf = (id) => {
       const active = activeEdges ? activeEdges.has(id) : false;
@@ -961,10 +991,11 @@ const ENGINE_JS = String.raw`
 
       let path;
       if (isFlow) {
-        path = svgEl("path", { d:geo.d, fill:"none", pathLength:"1", class:"dg-edge-draw",
+        path = svgEl("path", { d:geo.d, fill:"none", pathLength:"1",
+          class: animateEntrance ? "dg-edge-draw" : null,
           stroke:"var(--diagram-flow)", "stroke-width": style.width + 0.75,
           "marker-end":"url(#dg-chevron)", "stroke-linecap":"round" });
-        path.style.setProperty("--step-index", stepIndex - 1);
+        if (animateEntrance) path.style.setProperty("--step-index", stepIndex - 1);
       } else {
         path = svgEl("path", { d:geo.d, fill:"none", stroke,
           "stroke-width": st.active || st.isHover ? style.width + 0.75 : style.width,
@@ -978,13 +1009,6 @@ const ENGINE_JS = String.raw`
       const dot = svgEl("circle", { cx:geo.start.x, cy:geo.start.y, r:"3.2",
         fill:"var(--color-background)", stroke: isFlow || st.active ? "var(--diagram-flow)" : stroke, "stroke-width":"1.5" });
       g.appendChild(dot);
-
-      if (isFlow) {
-        const moving = svgEl("circle", { r:"3", fill:"var(--diagram-flow)", opacity:"0.9" });
-        const anim = svgEl("animateMotion", { dur:"1.8s", repeatCount:"indefinite", path:geo.d,
-          begin:((stepIndex - 1) * 0.32 + 0.5) + "s" });
-        moving.appendChild(anim); g.appendChild(moving);
-      }
 
       const hit = svgEl("path", { d:geo.d, fill:"none", stroke:"transparent", "stroke-width":"14", class:"dg-edge-hit" });
       hit.addEventListener("mouseenter", () => { hoveredEdge = edge.id; renderEdges(); });
@@ -1003,11 +1027,11 @@ const ENGINE_JS = String.raw`
       g.style.transition = "opacity 150ms";
 
       if (steps) {
-        const badge = svgEl("g", { class:"dg-badge-pop" });
+        const badge = svgEl("g", animateEntrance ? { class:"dg-badge-pop" } : null);
         badge.setAttribute("data-diagram-ui", "");
         badge.style.cursor = "pointer";
         badge.style.pointerEvents = "auto";
-        badge.style.setProperty("--step-index", (steps[0] || 1) - 1);
+        if (animateEntrance) badge.style.setProperty("--step-index", (steps[0] || 1) - 1);
         const label = steps.join("·");
         const on = steps.indexOf(activeStep) !== -1;
         const circle = svgEl("circle", { cx:geo.mid.x, cy:geo.mid.y, r: (label.length > 1 ? 11.5 : 9.5) + (on ? 2 : 0),
@@ -1109,6 +1133,7 @@ const ENGINE_JS = String.raw`
   function setFlow(id) {
     selected = null;
     flowId = id;
+    flowAnimate = !!id; // 켤 때만 진입 애니메이션 1회
     activeStep = null; hideTip();
     updateFlowButtons(); renderDetailPanel(); renderStepsPanel(); applyHighlight();
   }

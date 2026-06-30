@@ -1,48 +1,45 @@
 {
   "specVersion": 1,
-  "title": "주문 이벤트 흐름 (동기+비동기)",
+  "title": "주문 이벤트 흐름 (pub/sub 팬아웃)",
   "kind": "data-flow",
-  "description": "주문 생성이 이벤트 버스를 통해 결제·재고·배송·알림으로 퍼지는 이벤트드리븐 경로.",
+  "description": "주문 생성이 이벤트 버스를 통해 결제·재고·배송·알림 구독자로 팬아웃되는 이벤트드리븐 경로. 발행은 왼쪽, 구독자는 order로 펼쳐 부채꼴(되먹임 없는 DAG).",
   "layout": { "direction": "RIGHT" },
   "nodes": [
-    { "id": "client", "label": "웹 클라이언트", "category": "frontend", "tech": "React" },
-    { "id": "api", "label": "주문 API", "category": "backend", "tech": "NestJS", "description": "주문을 받아 저장하고 이벤트를 발행한다." },
-    { "id": "db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL" },
-    { "id": "bus", "label": "이벤트 버스", "category": "queue", "tech": "EventBridge", "description": "도메인 이벤트를 구독자에게 팬아웃한다." },
-    { "id": "pay", "label": "결제 서비스", "category": "service" },
-    { "id": "inv", "label": "재고 서비스", "category": "service" },
-    { "id": "ship", "label": "배송 워커", "category": "worker" },
-    { "id": "notify", "label": "알림 함수", "category": "lambda", "tech": "Lambda" }
+    { "id": "client", "label": "웹 클라이언트", "category": "frontend", "tech": "React", "lane": 0 },
+    { "id": "api", "label": "주문 API", "category": "backend", "tech": "NestJS", "description": "주문을 받아 저장하고 이벤트를 발행한다.", "lane": 1 },
+    { "id": "db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL", "lane": 2, "order": 0 },
+    { "id": "bus", "label": "이벤트 버스", "category": "queue", "tech": "EventBridge", "description": "OrderCreated를 구독자에게 팬아웃한다.", "lane": 2, "order": 1 },
+    { "id": "pay", "label": "결제 서비스", "category": "service", "lane": 3, "order": 0 },
+    { "id": "inv", "label": "재고 서비스", "category": "service", "lane": 3, "order": 1 },
+    { "id": "ship", "label": "배송 워커", "category": "worker", "lane": 3, "order": 2 },
+    { "id": "notify", "label": "알림 함수", "category": "lambda", "tech": "Lambda", "lane": 3, "order": 3 }
   ],
   "edges": [
     { "id": "e-client-api", "source": "client", "target": "api", "kind": "http", "label": "주문 요청" },
-    { "id": "e-api-db", "source": "api", "target": "db", "kind": "write" },
+    { "id": "e-api-db", "source": "api", "target": "db", "kind": "write", "label": "주문 저장" },
     { "id": "e-api-bus", "source": "api", "target": "bus", "kind": "event", "label": "OrderCreated" },
-    { "id": "e-bus-pay", "source": "bus", "target": "pay", "kind": "event" },
-    { "id": "e-bus-inv", "source": "bus", "target": "inv", "kind": "event" },
-    { "id": "e-pay-bus", "source": "pay", "target": "bus", "kind": "event", "label": "PaymentApproved" },
-    { "id": "e-bus-ship", "source": "bus", "target": "ship", "kind": "event" },
-    { "id": "e-bus-notify", "source": "bus", "target": "notify", "kind": "event" }
+    { "id": "e-bus-pay", "source": "bus", "target": "pay", "kind": "event", "label": "결제" },
+    { "id": "e-bus-inv", "source": "bus", "target": "inv", "kind": "event", "label": "재고 차감" },
+    { "id": "e-bus-ship", "source": "bus", "target": "ship", "kind": "event", "label": "배송 준비" },
+    { "id": "e-bus-notify", "source": "bus", "target": "notify", "kind": "event", "label": "알림" }
   ],
   "flows": [
     {
-      "id": "create",
-      "label": "주문 생성 → 결제",
-      "description": "주문이 저장되고 결제 승인까지 이어지는 경로",
+      "id": "publish",
+      "label": "주문 생성 → 발행",
+      "description": "주문이 저장되고 OrderCreated가 발행되는 경로",
       "steps": [
         { "edge": "e-client-api", "text": "클라이언트가 주문을 요청한다." },
         { "edge": "e-api-db", "text": "주문을 DB에 저장한다." },
-        { "edge": "e-api-bus", "text": "OrderCreated 이벤트를 발행한다." },
-        { "edge": "e-bus-pay", "text": "결제 서비스가 이벤트를 구독해 결제한다." },
-        { "edge": "e-pay-bus", "text": "결제 완료 후 PaymentApproved를 발행한다." }
+        { "edge": "e-api-bus", "text": "OrderCreated 이벤트를 발행한다." }
       ]
     },
     {
       "id": "fanout",
-      "label": "결제완료 팬아웃",
-      "description": "결제 완료가 재고·배송·알림으로 퍼지는 경로",
+      "label": "구독자 팬아웃",
+      "description": "OrderCreated가 결제·재고·배송·알림으로 동시에 퍼지는 경로",
       "steps": [
-        { "edge": "e-pay-bus", "text": "PaymentApproved 이벤트가 버스로 들어온다." },
+        { "edge": "e-bus-pay", "text": "결제 서비스가 결제를 처리한다." },
         { "edge": "e-bus-inv", "text": "재고 서비스가 재고를 차감한다." },
         { "edge": "e-bus-ship", "text": "배송 워커가 배송을 준비한다." },
         { "edge": "e-bus-notify", "text": "알림 함수가 사용자에게 통지한다." }

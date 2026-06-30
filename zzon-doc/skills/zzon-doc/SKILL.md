@@ -20,7 +20,7 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 - **포괄적 요청** — "이 프로젝트 그려줘" / "전체 구조" → **개요 한 장으로 때우지 말 것.**
   **순서를 반드시 지킨다: ① 구조 파악 → ② "이 정도 분량으로 작성할까요?" 제안·승인 → ③ 작성.** (제안·승인 없이 바로 그리지 마라.)
   1. **먼저 구조와 깊이를 개수로 파악한다.** 서비스·모듈 수, 핵심 기능·유스케이스, 도메인/바운디드 컨텍스트, 테이블 수, 외부 연동·비동기. ("기능 N개, 테이블 M개" 수준까지 — 단순 나열 금지.)
-  2. **파악한 실제 구조를 근거로** 규모에 맞는 문서 세트를 짠다 — 개요 1장이 기본값이 아니다:
+  2. **파악한 실제 구조를 근거로** 적용할 **문서 유형들**(`references/document-types.md`)을 골라 규모에 맞는 세트를 짠다 — 개요 1장이 기본값이 아니다:
      - 전체 인프라 / 시스템 컨텍스트 — 1장
      - **실제로 찾은 기능·도메인별 data-flow 각 1장** (결제·검색·인증… 실제 이름으로). 기능이 많으면 문서도 많아진다.
      - 데이터 ERD — 1장(테이블 많으면 도메인별 분할)
@@ -30,22 +30,24 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 
 > 큰 프로젝트일수록 개요 한 장으로 끝내지 말고 **기능·도메인별로 빠짐없이 쪼개** 깊이 있게 그린다. 단, 한 장은 13노드 이내(레이아웃 가이드).
 
-## 2. kind
+## 2. 유형 판별 → kind
 
-| kind | 용도 | 메모 |
-|---|---|---|
-| `infra` | 시스템 인프라 구성 | 그룹(VPC/경계/계층) + 플로우 |
-| `data-flow` | 기능·프로세스 경로 | 플로우 중심. 시퀀스/플로차트 대체 |
-| `erd` | DB 테이블 관계 | **모든 노드에 `table` 필수**, FK 컬럼 앵커 |
-| `agent-topology` | `.claude` 에이전트/스킬/훅 | category: agent/skill/hook |
+**먼저 "이건 무슨 아키텍처 문서인가"를 판별한다.** 코드 단서로 유형을 고르고(`references/document-types.md`), 큰 요청은 여러 유형을 섞어 세트로 낸다. 유형이 방향·중첩·배치를 정한다 — kind는 그 다음의 렌더 종류일 뿐이다.
+
+| 유형(예) | → kind |
+|---|---|
+| 클라우드 인프라 · 멀티AZ/리전 · MSA · 계층 · C4 컨테이너 · 네트워크 · 보안존 | `infra` |
+| 데이터 흐름 · 이벤트 pub/sub · CI/CD · C4 컴포넌트 | `data-flow` |
+| DB 스키마 | `erd` (**모든 노드 `table` 필수**, FK 컬럼 앵커) |
+| `.claude` 구성 | `agent-topology` (category: agent/skill/hook) |
 
 분석 단서: `docker-compose.yml`·`*.tf`/CDK·`package.json`·라우터/컨트롤러·env / `schema.prisma`·`*.sql`·ORM / `.claude/{agents,skills,hooks}`.
-추측하지 말고 **읽은 것**만 옮긴다. 모르면 묻는다.
+**유형별 단서·권장 배치·모범 샘플은 `references/document-types.md` 표를 본다.** 추측하지 말고 **읽은 것**만 옮긴다. 모르면 묻는다.
 
 ## 3. 스펙 작성 — 계약 (틀리기 쉬움)
 
-- **작성 전 `references/diagram-spec.md`를 읽고, 해당 kind의 샘플을 먼저 본다.** (references/에 7종: infra · msa-infra · platform-infra(대규모) · event-flow · erd · erd-large · agent-topology)
-- **레이아웃**: 픽셀 좌표 금지. `lane`/`order`로 √N 그리드처럼 분산해 가로·세로 쏠림을 막고, **그룹은 같은 레인 밴드로 모아 박스 겹침을 피한다.** 노드 13↑/되먹임이면 쪼갠다. (가이드는 diagram-spec.md의 "레이아웃 설계 가이드".)
+- **작성 전 세 가지를 읽는다: `references/document-types.md`(유형 판별·권장 배치) → `references/diagram-spec.md`(스펙 계약 + 레이아웃 가이드 + 자가질문) → 해당 kind의 샘플.** (references/ 샘플 7종: infra · msa-infra · platform-infra(대규모) · event-flow · erd · erd-large · agent-topology)
+- **레이아웃**: 픽셀 좌표 금지. `lane`/`order`로 2D 격자처럼 분산해 가로·세로 쏠림을 막고, **공통·횡단은 전용 띠로, 그룹은 같은 레인 밴드로** 모은다. 노드 13↑/되먹임이면 쪼갠다. **그리기 전·후 diagram-spec.md의 "자가질문 8개"에 스스로 답한다**(유형 맞나·공통 띄웠나·일자 아닌가·병렬 펼쳤나…).
 - 평탄 배열 + slug id(`^[a-z0-9][a-z0-9_-]*$`). 그룹 중첩도 `parentId` 문자열.
 - 라벨 한국어, 기술명 `tech`, 설명 `description`(한 문장). 대표 플로우 1~3개를 `flows`로.
 - 통합 문서 메뉴용 선택 필드: `section`(그룹명), `order`(정렬).
