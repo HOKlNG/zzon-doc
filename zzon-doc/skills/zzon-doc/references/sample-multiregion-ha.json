@@ -1,0 +1,125 @@
+{
+  "specVersion": 1,
+  "title": "멀티리전 HA 구성",
+  "kind": "infra",
+  "description": "AWS/Azure 관례의 미러 스탬프 패턴. 상단 글로벌 층(DNS)이 좌우 대칭 리전으로 트래픽을 나누고, 리전 간에는 복제 엣지만 가로지른다. AZ 복제는 배지(×2)로 표기한다.",
+  "layout": { "direction": "DOWN" },
+  "groups": [
+    { "id": "region-a", "label": "리전 A (ap-northeast-2)", "kind": "region" },
+    { "id": "region-b", "label": "리전 B (ap-northeast-1)", "kind": "region" }
+  ],
+  "nodes": [
+    {
+      "id": "enduser",
+      "label": "사용자",
+      "category": "user",
+      "description": "지연 시간 기반 라우팅으로 가까운 리전에 접속한다"
+    },
+    {
+      "id": "dns",
+      "label": "글로벌 DNS",
+      "category": "dns",
+      "tech": "Route 53",
+      "description": "헬스체크 기반 페일오버 라우팅. 리전 장애 시 트래픽을 다른 리전으로 돌린다"
+    },
+    {
+      "id": "lb-a",
+      "label": "로드밸런서 A",
+      "category": "lb",
+      "tech": "ALB",
+      "parentId": "region-a",
+      "lane": 2,
+      "order": 0,
+      "description": "리전 A 진입점. AZ 2곳에 분산한다"
+    },
+    {
+      "id": "lb-b",
+      "label": "로드밸런서 B",
+      "category": "lb",
+      "tech": "ALB",
+      "parentId": "region-b",
+      "lane": 2,
+      "order": 1,
+      "description": "리전 B 진입점"
+    },
+    {
+      "id": "app-a",
+      "label": "앱 서버 A",
+      "category": "backend",
+      "tech": "ECS",
+      "parentId": "region-a",
+      "lane": 3,
+      "order": 0,
+      "badge": "AZ ×2",
+      "description": "액티브. 두 AZ에 복제 배치된 앱 계층"
+    },
+    {
+      "id": "app-b",
+      "label": "앱 서버 B",
+      "category": "backend",
+      "tech": "ECS",
+      "parentId": "region-b",
+      "lane": 3,
+      "order": 1,
+      "badge": "AZ ×2",
+      "description": "스탠바이. 평시 최소 용량으로 대기한다"
+    },
+    {
+      "id": "db-a",
+      "label": "주 DB",
+      "category": "db",
+      "tech": "Aurora",
+      "parentId": "region-a",
+      "lane": 4,
+      "order": 0,
+      "badge": "Primary",
+      "description": "쓰기 마스터. 리전 B로 비동기 복제한다"
+    },
+    {
+      "id": "db-b",
+      "label": "복제 DB",
+      "category": "db",
+      "tech": "Aurora Global",
+      "parentId": "region-b",
+      "lane": 4,
+      "order": 1,
+      "badge": "Replica",
+      "description": "읽기 전용 복제본. 페일오버 시 승격된다"
+    }
+  ],
+  "edges": [
+    { "id": "e-enduser-dns", "source": "enduser", "target": "dns", "kind": "http" },
+    { "id": "e-dns-lb-a", "source": "dns", "target": "lb-a", "kind": "http", "label": "액티브" },
+    { "id": "e-dns-lb-b", "source": "dns", "target": "lb-b", "kind": "http", "label": "페일오버" },
+    { "id": "e-lb-a-app-a", "source": "lb-a", "target": "app-a", "kind": "http" },
+    { "id": "e-lb-b-app-b", "source": "lb-b", "target": "app-b", "kind": "http" },
+    { "id": "e-app-a-db-a", "source": "app-a", "target": "db-a", "kind": "write" },
+    { "id": "e-app-b-db-b", "source": "app-b", "target": "db-b", "kind": "read" },
+    { "id": "e-db-a-db-b", "source": "db-a", "target": "db-b", "kind": "event", "label": "비동기 복제" }
+  ],
+  "flows": [
+    {
+      "id": "normal",
+      "label": "평시 경로",
+      "description": "리전 A가 액티브로 전 트래픽을 처리한다",
+      "steps": [
+        { "edge": "e-enduser-dns", "text": "사용자가 도메인으로 접속한다" },
+        { "edge": "e-dns-lb-a", "text": "DNS가 액티브 리전 A로 라우팅한다" },
+        { "edge": "e-lb-a-app-a", "text": "로드밸런서가 두 AZ의 앱 서버로 분산한다" },
+        { "edge": "e-app-a-db-a", "text": "주 DB에 읽기·쓰기한다" },
+        { "edge": "e-db-a-db-b", "text": "변경분이 리전 B로 비동기 복제된다" }
+      ]
+    },
+    {
+      "id": "failover",
+      "label": "페일오버 경로",
+      "description": "리전 A 장애 시 DNS 헬스체크가 리전 B로 전환한다",
+      "steps": [
+        { "edge": "e-enduser-dns", "text": "사용자 요청이 DNS에 도착한다" },
+        { "edge": "e-dns-lb-b", "text": "헬스체크 실패로 리전 B에 라우팅한다" },
+        { "edge": "e-lb-b-app-b", "text": "스탠바이 앱이 트래픽을 받는다" },
+        { "edge": "e-app-b-db-b", "text": "승격된 복제 DB에서 서비스를 지속한다" }
+      ]
+    }
+  ]
+}

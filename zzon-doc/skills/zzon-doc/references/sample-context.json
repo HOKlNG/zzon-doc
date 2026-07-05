@@ -1,0 +1,62 @@
+{
+  "specVersion": 1,
+  "title": "데모숍 시스템 컨텍스트",
+  "kind": "infra",
+  "description": "C4 L1 컨텍스트 다이어그램. 중앙 시스템 1개 + 사람·외부 시스템만 두고, 노드 안에 설명을 표시한다(nodeDescriptions). 시스템 노드를 더블클릭하면 상세(인프라)로 드릴다운된다.",
+  "section": "개요",
+  "order": 1,
+  "layout": { "direction": "RIGHT", "nodeDescriptions": true },
+  "groups": [],
+  "nodes": [
+    {
+      "id": "shopper",
+      "label": "구매자",
+      "category": "user",
+      "description": "상품을 탐색하고 주문·결제하는 일반 사용자"
+    },
+    {
+      "id": "admin",
+      "label": "운영자",
+      "category": "user",
+      "order": 1,
+      "description": "상품·재고·주문을 관리하는 내부 직원"
+    },
+    {
+      "id": "demoshop",
+      "label": "데모숍",
+      "category": "service",
+      "tech": "커머스 플랫폼",
+      "href": "sample-infra",
+      "description": "상품 전시부터 주문·결제·알림까지 담당하는 중심 시스템"
+    },
+    {
+      "id": "pg",
+      "label": "토스페이먼츠",
+      "category": "external",
+      "description": "결제 승인·취소를 처리하는 외부 PG"
+    },
+    {
+      "id": "mailer",
+      "label": "메일 서비스",
+      "category": "external",
+      "tech": "SES",
+      "order": 1,
+      "description": "주문 확인·알림 메일을 발송한다"
+    },
+    {
+      "id": "logistics",
+      "label": "물류 시스템",
+      "category": "external",
+      "order": 2,
+      "description": "출고·배송 추적을 담당하는 외부 시스템"
+    }
+  ],
+  "edges": [
+    { "id": "e-shopper-demoshop", "source": "shopper", "target": "demoshop", "kind": "http", "label": "상품 탐색·주문" },
+    { "id": "e-admin-demoshop", "source": "admin", "target": "demoshop", "kind": "http", "label": "상품·주문 관리" },
+    { "id": "e-demoshop-pg", "source": "demoshop", "target": "pg", "kind": "http", "label": "결제 승인 요청" },
+    { "id": "e-demoshop-mailer", "source": "demoshop", "target": "mailer", "kind": "http", "label": "메일 발송 요청" },
+    { "id": "e-demoshop-logistics", "source": "demoshop", "target": "logistics", "kind": "event", "label": "출고 지시 이벤트" }
+  ],
+  "flows": []
+}

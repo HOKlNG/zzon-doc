@@ -344,6 +344,14 @@ function render(){
 }
 addEventListener("hashchange",render);render();
 
+// 다이어그램 iframe 안에서 노드 드릴다운(href) → 해당 다이어그램으로 이동
+addEventListener("message",function(e){
+  var d=e.data;
+  if(d&&d.type==="zzon:navigate"&&typeof d.slug==="string"&&bySlug[d.slug]){
+    location.hash="#"+encodeURIComponent(d.slug);
+  }
+});
+
 // 사이드바 접기 / 전체화면 / 테마
 document.getElementById("sidetoggle").onclick=function(){document.body.classList.toggle("side-collapsed");};
 document.getElementById("fs").onclick=function(){

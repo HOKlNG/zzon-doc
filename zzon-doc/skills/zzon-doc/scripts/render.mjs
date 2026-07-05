@@ -58,9 +58,15 @@ const NODE_CATEGORIES = [
   "user", "frontend", "mobile", "backend", "service", "worker", "lambda",
   "db", "table", "cache", "queue", "storage", "cdn", "gateway", "auth",
   "scheduler", "external", "agent", "skill", "hook", "doc", "other",
+  "lb", "dns", "firewall", "monitor", "secret", "ml", "analytics",
+  "topic", "pipeline", "device",
 ];
 const EDGE_KINDS = ["http", "event", "read", "write", "depends", "reference"];
-const GROUP_KINDS = ["layer", "vpc", "boundary", "zone", "subnet"];
+const EDGE_CARDINALITIES = ["1", "0..1", "N", "0..N", "1..N"];
+const GROUP_KINDS = [
+  "layer", "vpc", "boundary", "zone", "subnet",
+  "region", "az", "account", "security", "onprem", "stage", "cluster",
+];
 const DIAGRAM_KINDS = ["infra", "data-flow", "erd", "agent-topology"];
 
 function validate(spec) {
@@ -86,6 +92,10 @@ function validate(spec) {
   if (spec.layout.direction !== "RIGHT" && spec.layout.direction !== "DOWN") {
     spec.layout.direction = "RIGHT";
   }
+  if (spec.layout.align !== "start" && spec.layout.align !== "center") {
+    spec.layout.align = "center";
+  }
+  spec.layout.nodeDescriptions = spec.layout.nodeDescriptions === true;
 
   const groupIds = new Set();
   const nodeIds = new Set();
@@ -129,6 +139,11 @@ function validate(spec) {
     edgeIds.add(e.id);
     if (e.kind && !EDGE_KINDS.includes(e.kind)) {
       E(`edges[${i}].kind`, `유효하지 않은 edge kind '${e.kind}'. 허용: ${EDGE_KINDS.join(", ")}`);
+    }
+    for (const cardSide of ["sourceCardinality", "targetCardinality"]) {
+      if (e[cardSide] !== undefined && !EDGE_CARDINALITIES.includes(e[cardSide])) {
+        E(`edges[${i}].${cardSide}`, `유효하지 않은 카디널리티 '${e[cardSide]}'. 허용: ${EDGE_CARDINALITIES.join(", ")}`);
+      }
     }
     for (const side of ["source", "target"]) {
       if (!nodeIds.has(e[side])) {
@@ -223,6 +238,18 @@ const ICONS = {
   GripVertical: '<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>',
   Sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
   Moon: '<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  Shuffle: '<path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/>',
+  BrickWall: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 9v6"/><path d="M16 15v6"/><path d="M16 3v6"/><path d="M3 15h18"/><path d="M3 9h18"/><path d="M8 15v6"/><path d="M8 3v6"/>',
+  Activity: '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
+  Sparkles: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
+  ChartColumn: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  Rss: '<path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/>',
+  Workflow: '<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>',
+  Cpu: '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>',
+  Landmark: '<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
+  Building2: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+  Columns3: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/>',
+  ZoomIn: '<circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/>',
 };
 
 const ICONS_JSON = JSON.stringify(ICONS);
@@ -309,6 +336,16 @@ body {
   background:var(--muted); padding:1px 6px; font-size:10px; font-weight:500; line-height:1.2;
   color:var(--muted-foreground); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dg-meta { margin-top:2px; font-size:10px; line-height:1.2; color:var(--muted-foreground); }
+.dg-node-card.with-desc { width:220px; }
+.dg-desc { padding:0 12px 9px 14px; font-size:10.5px; line-height:1.45; color:var(--muted-foreground);
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.dg-node-badge { position:absolute; top:5px; right:6px; z-index:1; border-radius:9999px;
+  border:1px solid var(--color-border); background:var(--muted); padding:0 6px;
+  font-size:9px; font-weight:600; line-height:14px; color:var(--muted-foreground); }
+.dg-node-card .dg-node-badge + .dg-row .dg-node-label { padding-right:26px; }
+.dg-drill { flex-shrink:0; margin-left:auto; padding-left:4px; display:inline-flex;
+  color:color-mix(in oklab, var(--muted-foreground) 70%, transparent); }
+.dg-thead .dg-drill { margin-left:2px; }
 
 /* ---- ERD 노드 ---- */
 .dg-node-table { width:240px; }
@@ -366,11 +403,20 @@ body {
 .dg-btn.active { border-color:transparent; color:#fff; background:var(--diagram-flow); }
 .dg-btn.active:hover { background:var(--diagram-flow); filter:brightness(1.05); }
 
-.dg-flowsel { left:12px; top:12px; display:flex; flex-wrap:wrap; align-items:center; gap:6px;
+.dg-titlebar { left:12px; top:12px; display:flex; align-items:center; gap:8px; max-width:64%;
+  border-radius:8px; border:1px solid var(--color-border);
+  background:color-mix(in oklab,var(--card) 95%,transparent); padding:5px 10px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05); backdrop-filter:blur(6px); }
+.dg-kind-chip { display:inline-flex; align-items:center; gap:4px; flex-shrink:0;
+  border-radius:6px; border:1px solid var(--color-border); background:var(--muted);
+  padding:1px 7px; font-size:10px; font-weight:600; color:var(--muted-foreground); }
+.dg-title-text { font-size:12.5px; font-weight:600; letter-spacing:-.01em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dg-flowsel { left:12px; top:52px; display:flex; flex-wrap:wrap; align-items:center; gap:6px;
   max-width:60%; }
 .dg-flowsel .dg-route { color:var(--muted-foreground); }
 .dg-toolbar { right:12px; top:12px; display:flex; flex-direction:column; gap:4px; }
-.dg-warn { left:12px; top:50px; }
+.dg-warn { left:12px; top:90px; }
 .dg-warn .chip { display:inline-block; border:1px solid color-mix(in oklab,#f59e0b 50%,transparent);
   background:color-mix(in oklab,#f59e0b 10%,transparent); color:#b45309;
   border-radius:6px; padding:2px 8px; font-size:11px; }
@@ -472,6 +518,16 @@ const ENGINE_JS = String.raw`
     hook:{labelKo:"훅",icon:"Webhook",colorGroup:"claude"},
     doc:{labelKo:"문서",icon:"FileText",colorGroup:"neutral"},
     other:{labelKo:"기타",icon:"Box",colorGroup:"neutral"},
+    lb:{labelKo:"로드밸런서",icon:"Shuffle",colorGroup:"edge"},
+    dns:{labelKo:"DNS",icon:"Globe",colorGroup:"edge"},
+    firewall:{labelKo:"방화벽",icon:"BrickWall",colorGroup:"edge"},
+    monitor:{labelKo:"관측",icon:"Activity",colorGroup:"neutral"},
+    secret:{labelKo:"시크릿",icon:"KeyRound",colorGroup:"edge"},
+    ml:{labelKo:"ML/AI",icon:"Sparkles",colorGroup:"compute"},
+    analytics:{labelKo:"분석",icon:"ChartColumn",colorGroup:"data"},
+    topic:{labelKo:"토픽",icon:"Rss",colorGroup:"data-aux"},
+    pipeline:{labelKo:"파이프라인",icon:"Workflow",colorGroup:"compute"},
+    device:{labelKo:"디바이스",icon:"Cpu",colorGroup:"frontend"},
   };
   const meta = (cat) => CATEGORY_META[cat] || CATEGORY_META.other;
   const catColor = (cat) => "var(--cat-" + meta(cat).colorGroup + ")";
@@ -490,6 +546,19 @@ const ENGINE_JS = String.raw`
     zone:{color:"var(--cat-data-aux)",dash:"5 5",icon:"Hexagon",fillAlpha:3},
     subnet:{color:"var(--cat-data)",icon:"Grid2x2",fillAlpha:5},
     layer:{color:"var(--cat-neutral)",icon:"Layers",fillAlpha:4},
+    // AWS/Azure/GCP 관례: 논리 경계(region/az)는 점선·파선, 물리/소유(account/security 등)는 실선
+    region:{color:"var(--cat-data-aux)",dash:"2 4",borderStyle:"dotted",icon:"Globe",fillAlpha:2},
+    az:{color:"var(--cat-data-aux)",dash:"8 5",icon:"Layers",fillAlpha:2},
+    account:{color:"var(--cat-edge)",icon:"Landmark",fillAlpha:3},
+    security:{color:"var(--cat-edge)",dash:"4 4",icon:"ShieldCheck",fillAlpha:3},
+    onprem:{color:"var(--cat-neutral)",icon:"Building2",fillAlpha:5},
+    stage:{color:"var(--cat-neutral)",icon:"Columns3",fillAlpha:5,borderAlpha:22},
+    cluster:{color:"var(--cat-compute)",icon:"Boxes",fillAlpha:3},
+  };
+  const GROUP_KIND_LABEL = {
+    layer:"레이어", vpc:"VPC", boundary:"경계", zone:"존", subnet:"서브넷",
+    region:"리전", az:"가용영역", account:"계정", security:"보안 경계",
+    onprem:"온프레미스", stage:"단계 밴드", cluster:"클러스터",
   };
 
   /* ===== util ===== */
@@ -743,6 +812,7 @@ const ENGINE_JS = String.raw`
   const groupLayer = el("div"); groupLayer.style.position = "absolute"; groupLayer.style.inset = "0";
   content.appendChild(groupLayer);
   const lanesEl = el("div", "dg-lanes dir-" + layout.direction);
+  if (SPEC.layout.align === "start") lanesEl.style.alignItems = "flex-start";
   content.appendChild(lanesEl);
   const svg = svgEl("svg", { class:"dg-edges" });
   content.appendChild(svg);
@@ -763,16 +833,32 @@ const ENGINE_JS = String.raw`
       lanesEl.appendChild(laneEl);
     }
   }
+  /* ===== 드릴다운 (href → 통합 문서 내 다른 다이어그램 or 외부 URL) ===== */
+  function navigateHref(href) {
+    if (!href) return;
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(href)) { window.open(href, "_blank", "noopener"); return; }
+    const slug = String(href).replace(/\.html$/i, "");
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: "zzon:navigate", slug }, "*");
+    } else {
+      window.location.href = slug + ".html";
+    }
+  }
+
   function nodeCommon(btn, node) {
     btn.type = "button";
     btn.setAttribute("data-node-id", node.id);
     btn.addEventListener("click", (e) => { e.stopPropagation(); onSelectNode(node.id); });
     btn.addEventListener("mouseenter", () => { hovered = node.id; applyHighlight(); });
     btn.addEventListener("mouseleave", () => { hovered = null; applyHighlight(); });
+    if (node.href) {
+      btn.addEventListener("dblclick", (e) => { e.stopPropagation(); navigateHref(node.href); });
+    }
   }
   function renderCardNode(node) {
     const color = catColor(node.category), m = meta(node.category);
-    const btn = el("button", "dg-node dg-node-card");
+    const showDesc = SPEC.layout.nodeDescriptions && node.description;
+    const btn = el("button", "dg-node dg-node-card" + (showDesc ? " with-desc" : ""));
     nodeCommon(btn, node);
     btn.style.borderColor = m.dashed
       ? "color-mix(in oklab, " + color + " 50%, transparent)"
@@ -782,6 +868,7 @@ const ENGINE_JS = String.raw`
 
     const accent = el("span", "dg-accent"); accent.style.backgroundColor = color;
     btn.appendChild(accent);
+    if (node.badge) btn.appendChild(el("span", "dg-node-badge", node.badge));
     const row = el("div", "dg-row");
     const tile = el("div", "dg-tile");
     tile.style.backgroundColor = "color-mix(in oklab, " + color + " 13%, transparent)";
@@ -790,7 +877,15 @@ const ENGINE_JS = String.raw`
     body.appendChild(el("div", "dg-node-label", node.label));
     if (node.tech) body.appendChild(el("div", "dg-tech", node.tech));
     else body.appendChild(el("div", "dg-meta", m.labelKo));
-    row.appendChild(tile); row.appendChild(body); btn.appendChild(row);
+    row.appendChild(tile); row.appendChild(body);
+    if (node.href) {
+      const drill = el("span", "dg-drill");
+      drill.appendChild(iconSpan("ZoomIn", 12));
+      attachTip(drill, "더블클릭: 상세 보기 (" + node.href + ")");
+      row.appendChild(drill);
+    }
+    btn.appendChild(row);
+    if (showDesc) btn.appendChild(el("div", "dg-desc", node.description));
     return btn;
   }
   function renderTableNode(node) {
@@ -804,7 +899,14 @@ const ENGINE_JS = String.raw`
     head.style.backgroundColor = "color-mix(in oklab, " + color + " 9%, transparent)";
     head.appendChild(iconSpan("Table2", 16, color));
     head.appendChild(el("span", "dg-tname", node.label));
+    if (node.badge) head.appendChild(el("span", "dg-tag", node.badge));
     head.appendChild(el("span", "dg-tcount", cols.length + " cols"));
+    if (node.href) {
+      const drill = el("span", "dg-drill");
+      drill.appendChild(iconSpan("ZoomIn", 12));
+      attachTip(drill, "더블클릭: 상세 보기 (" + node.href + ")");
+      head.appendChild(drill);
+    }
     btn.appendChild(head);
     const ul = el("ul", "dg-cols");
     cols.forEach((c, i) => {
@@ -949,6 +1051,24 @@ const ENGINE_JS = String.raw`
   }
 
   /* ===== 엣지 SVG 렌더 ===== */
+  // ERD 카디널리티(까마귀발) 마커. refX=13 → 기호 끝이 노드 경계에 닿는다.
+  // orient=auto-start-reverse 하나로 marker-start(소스쪽)·marker-end(타깃쪽) 둘 다 노드를 향한다.
+  const CARD_ID = { "1":"c1", "0..1":"c01", "N":"cn", "0..N":"c0n", "1..N":"c1n" };
+  function cardMarker(token) {
+    const m = svgEl("marker", { id:"dg-card-" + CARD_ID[token], viewBox:"0 0 14 12",
+      refX:"13", refY:"6", markerWidth:"14", markerHeight:"12",
+      markerUnits:"userSpaceOnUse", orient:"auto-start-reverse" });
+    const line = (d) => m.appendChild(svgEl("path", { d, fill:"none", stroke:"context-stroke",
+      "stroke-width":"1.3", "stroke-linecap":"round" }));
+    const ring = (cx) => m.appendChild(svgEl("circle", { cx, cy:"6", r:"2.3",
+      fill:"var(--color-background)", stroke:"context-stroke", "stroke-width":"1.3" }));
+    if (token === "1") { line("M 8 1.5 L 8 10.5"); }
+    else if (token === "0..1") { line("M 9.5 1.5 L 9.5 10.5"); ring(4); }
+    else if (token === "N") { line("M 4 6 L 13 1.5 M 4 6 L 13 6 M 4 6 L 13 10.5"); }
+    else if (token === "0..N") { line("M 5.5 6 L 13 1.5 M 5.5 6 L 13 6 M 5.5 6 L 13 10.5"); ring(2.8); }
+    else if (token === "1..N") { line("M 3 1.5 L 3 10.5"); line("M 4.5 6 L 13 1.5 M 4.5 6 L 13 6 M 4.5 6 L 13 10.5"); }
+    return m;
+  }
   function renderEdges() {
     svg.innerHTML = "";
     svg.setAttribute("width", contentSize.w);
@@ -958,7 +1078,9 @@ const ENGINE_JS = String.raw`
       markerWidth:"9", markerHeight:"9", orient:"auto-start-reverse" });
     marker.appendChild(svgEl("path", { d:"M 2 1.5 L 7.5 5 L 2 8.5", fill:"none", stroke:"context-stroke",
       "stroke-width":"1.6", "stroke-linecap":"round", "stroke-linejoin":"round" }));
-    defs.appendChild(marker); svg.appendChild(defs);
+    defs.appendChild(marker);
+    for (const token in CARD_ID) defs.appendChild(cardMarker(token));
+    svg.appendChild(defs);
 
     const hl = computeHighlight();
     const activeEdges = hl ? hl.edges : null;
@@ -989,26 +1111,33 @@ const ENGINE_JS = String.raw`
         : st.isHover ? "color-mix(in oklab, var(--color-foreground) 65%, transparent)"
         : "color-mix(in oklab, var(--color-muted-foreground) 45%, transparent)";
 
+      const markerEnd = edge.targetCardinality
+        ? "url(#dg-card-" + CARD_ID[edge.targetCardinality] + ")" : "url(#dg-chevron)";
+      const markerStart = edge.sourceCardinality
+        ? "url(#dg-card-" + CARD_ID[edge.sourceCardinality] + ")" : null;
+
       let path;
       if (isFlow) {
         path = svgEl("path", { d:geo.d, fill:"none", pathLength:"1",
           class: animateEntrance ? "dg-edge-draw" : null,
           stroke:"var(--diagram-flow)", "stroke-width": style.width + 0.75,
-          "marker-end":"url(#dg-chevron)", "stroke-linecap":"round" });
+          "marker-end":markerEnd, "marker-start":markerStart, "stroke-linecap":"round" });
         if (animateEntrance) path.style.setProperty("--step-index", stepIndex - 1);
       } else {
         path = svgEl("path", { d:geo.d, fill:"none", stroke,
           "stroke-width": st.active || st.isHover ? style.width + 0.75 : style.width,
-          "stroke-dasharray": style.dash || null, "marker-end":"url(#dg-chevron)",
+          "stroke-dasharray": style.dash || null, "marker-end":markerEnd, "marker-start":markerStart,
           "stroke-linecap":"round" });
         if (style.animated && !st.dimmed) path.setAttribute("class", "dg-edge-animated");
         path.style.transition = "stroke 120ms, stroke-width 120ms";
       }
       g.appendChild(path);
 
-      const dot = svgEl("circle", { cx:geo.start.x, cy:geo.start.y, r:"3.2",
-        fill:"var(--color-background)", stroke: isFlow || st.active ? "var(--diagram-flow)" : stroke, "stroke-width":"1.5" });
-      g.appendChild(dot);
+      if (!markerStart) {
+        const dot = svgEl("circle", { cx:geo.start.x, cy:geo.start.y, r:"3.2",
+          fill:"var(--color-background)", stroke: isFlow || st.active ? "var(--diagram-flow)" : stroke, "stroke-width":"1.5" });
+        g.appendChild(dot);
+      }
 
       const hit = svgEl("path", { d:geo.d, fill:"none", stroke:"transparent", "stroke-width":"14", class:"dg-edge-hit" });
       hit.addEventListener("mouseenter", () => { hoveredEdge = edge.id; renderEdges(); });
@@ -1084,8 +1213,8 @@ const ENGINE_JS = String.raw`
       const div = el("div", "dg-group");
       div.style.left = box.x + "px"; div.style.top = box.y + "px";
       div.style.width = box.w + "px"; div.style.height = box.h + "px";
-      div.style.border = "1.5px " + (style.dash ? "dashed" : "solid") +
-        " color-mix(in oklab, " + style.color + " 45%, transparent)";
+      div.style.border = "1.5px " + (style.borderStyle || (style.dash ? "dashed" : "solid")) +
+        " color-mix(in oklab, " + style.color + " " + (style.borderAlpha || 45) + "%, transparent)";
       div.style.backgroundColor = "color-mix(in oklab, " + style.color + " " + style.fillAlpha + "%, transparent)";
       if (allDimmed) div.style.opacity = "0.25";
       const tab = el("span", "dg-group-tab");
@@ -1233,6 +1362,26 @@ const ENGINE_JS = String.raw`
 
   function uiIcon(name, size) { return iconSpan(name, size || 14).outerHTML; }
 
+  /* ---- 타이틀바 (제목 + kind 배지 — "모든 다이어그램에 유형+범위 제목" 관례) ---- */
+  function renderTitleBar() {
+    const KIND_META = {
+      "infra":{label:"인프라",icon:"Server"},
+      "data-flow":{label:"데이터 흐름",icon:"Webhook"},
+      "erd":{label:"ERD",icon:"Database"},
+      "agent-topology":{label:"에이전트 구조",icon:"Bot"},
+    };
+    const km = KIND_META[SPEC.kind] || KIND_META.infra;
+    const bar = el("div", "dg-ui dg-titlebar");
+    bar.setAttribute("data-diagram-ui", "");
+    const chip = el("span", "dg-kind-chip");
+    chip.appendChild(iconSpan(km.icon, 11));
+    chip.appendChild(document.createTextNode(km.label));
+    bar.appendChild(chip);
+    bar.appendChild(el("span", "dg-title-text", SPEC.title));
+    if (SPEC.description) attachTip(bar, SPEC.description);
+    root.appendChild(bar);
+  }
+
   /* ---- 플로우 셀렉터 ---- */
   let flowSelEl = null;
   function renderFlowSelector() {
@@ -1278,6 +1427,7 @@ const ENGINE_JS = String.raw`
   function renderWarning() {
     if (!layout.warnings.length) return;
     const w = el("div", "dg-ui dg-warn"); w.setAttribute("data-diagram-ui", "");
+    if (!SPEC.flows.length) w.style.top = "52px";
     w.appendChild(el("span", "chip", layout.warnings[0]));
     root.appendChild(w);
   }
@@ -1286,6 +1436,7 @@ const ENGINE_JS = String.raw`
   function renderLegend() {
     const cats = [...new Set(SPEC.nodes.map(n => n.category))];
     const kinds = [...new Set(SPEC.edges.map(e => e.kind))];
+    const gkinds = [...new Set(SPEC.groups.map(g => g.kind))];
     const lg = el("div", "dg-ui dg-legend"); lg.setAttribute("data-diagram-ui", "");
     cats.forEach(c => {
       const it = el("span", "item");
@@ -1301,6 +1452,20 @@ const ENGINE_JS = String.raw`
         "stroke-width": k === "write" ? 2.25 : 1.5, "stroke-dasharray": EDGE_KIND_DASH[k] || null }));
       it.appendChild(s);
       it.appendChild(document.createTextNode(EDGE_KIND_LABEL[k] || k));
+      lg.appendChild(it);
+    });
+    if (gkinds.length) lg.appendChild(el("span", "sep"));
+    gkinds.forEach(k => {
+      const style = GROUP_KIND_STYLE[k] || GROUP_KIND_STYLE.layer;
+      const it = el("span", "item");
+      const s = svgEl("svg", { width:16, height:10 });
+      const r = svgEl("rect", { x:1, y:1, width:14, height:8, rx:2, "stroke-width":1.2,
+        "stroke-dasharray": style.dash ? "3 2" : null });
+      r.style.stroke = style.color;
+      r.style.fill = "color-mix(in oklab, " + style.color + " " + style.fillAlpha + "%, transparent)";
+      s.appendChild(r);
+      it.appendChild(s);
+      it.appendChild(document.createTextNode(GROUP_KIND_LABEL[k] || k));
       lg.appendChild(it);
     });
     root.appendChild(lg);
@@ -1355,9 +1520,9 @@ const ENGINE_JS = String.raw`
     if (node.href) {
       const wrap = el("div", "dg-href");
       const a = el("a"); a.href = "#"; a.title = node.href;
-      a.appendChild(document.createTextNode("관련 문서: " + node.href));
-      a.appendChild(iconSpan("ArrowRight", 14));
-      a.addEventListener("click", (e) => e.preventDefault());
+      a.appendChild(document.createTextNode("상세 보기: " + node.href));
+      a.appendChild(iconSpan("ZoomIn", 14));
+      a.addEventListener("click", (e) => { e.preventDefault(); navigateHref(node.href); });
       wrap.appendChild(a); panel.appendChild(wrap);
     }
     root.appendChild(panel);
@@ -1404,11 +1569,16 @@ const ENGINE_JS = String.raw`
   }
 
   renderNodes();
+  renderTitleBar();
   renderFlowSelector();
   renderToolbar();
   renderWarning();
   renderLegend();
   applyTransform();
+  root.setAttribute("role", "img");
+  root.setAttribute("aria-label", SPEC.title + " — 노드 " + SPEC.nodes.length + "개, 엣지 " +
+    SPEC.edges.length + "개" + (SPEC.groups.length ? ", 그룹 " + SPEC.groups.length + "개" : "") +
+    (SPEC.flows.length ? ", 플로우 " + SPEC.flows.length + "개" : ""));
 
   // 레이아웃 안정화 후 측정 → 엣지/그룹 → fit (useDiagramMeasure 패턴)
   requestAnimationFrame(() => {

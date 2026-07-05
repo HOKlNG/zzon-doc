@@ -28,9 +28,11 @@
 | 필드 | 필수 | 설명 |
 |---|---|---|
 | `specVersion` | ✔ | 항상 `1` |
-| `title` | ✔ | 다이어그램 제목 (브라우저 탭 제목으로도 쓰임) |
+| `title` | ✔ | 다이어그램 제목 — **좌상단 타이틀바에 kind 배지와 함께 표시**된다("유형+범위 제목" 관례). `description`은 타이틀바 호버 툴팁 |
 | `kind` | ✔ | `infra` \| `data-flow` \| `erd` \| `agent-topology` |
 | `layout.direction` | | `RIGHT`(좌→우 열, 기본) \| `DOWN`(상→하 행) |
+| `layout.align` | | 교차축 정렬 `center`(기본) \| `start`. **스테이지 밴드·레인 밴드형은 `start`**가 맞다 |
+| `layout.nodeDescriptions` | | `true`면 노드 카드 안에 `description`을 표시(C4 표기: 이름+기술+설명). **컨텍스트/랜드스케이프 유형에서 켠다** |
 | `nodes` | ✔ | 최소 1개 |
 | `groups` `edges` `flows` | | 생략 시 빈 배열 |
 | `section` | | 통합 문서(build-docs)에서 이 다이어그램이 들어갈 메뉴 그룹명. 생략 시 `kind`로 묶임 |
@@ -47,8 +49,9 @@
 ```
 
 - `category` (필수): 아래 목록 중 하나 — 색상·아이콘이 자동 결정된다.
-- `description`: 클릭 시 상세 패널에 표시. 한 문장 한다체.
-- `href`: 관련 문서 경로 등 임의 문자열. 상세 패널에 표시된다.
+- `description`: 클릭 시 상세 패널에 표시. 한 문장 한다체. (`layout.nodeDescriptions: true`면 노드 안에도 표시)
+- `href`: **드릴다운 링크.** 통합 문서 내 다른 다이어그램의 slug(specs 파일명)를 넣으면 노드에 ⊕ 표시가 붙고 **더블클릭(또는 상세 패널 링크)으로 그 다이어그램으로 이동**한다. `https://…`면 새 탭. 추상화 사다리(상위 장 → 하위 장)를 이걸로 연결한다.
+- `badge`: 노드 우상단 주석 배지(짧게). 복제 수·AZ 스팬 등 — 예: `"×3"`, `"AZ ×2"`, `"Primary"`. (Azure의 "AZ는 박스가 아니라 주석" 관례)
 - `lane`: 자동 배치(엣지 위상 깊이)를 덮어쓰는 열 번호(0부터). **꼭 필요할 때만.**
 - `order`: 같은 레인 안 정렬 순서.
 - `table`: ERD 전용 (아래 참조).
@@ -57,12 +60,12 @@
 
 | category | 색상 그룹 | category | 색상 그룹 |
 |---|---|---|---|
-| `user` | user (slate) | `cdn` | edge (rose) |
-| `frontend` `mobile` | frontend (sky) | `gateway` `auth` | edge (rose) |
+| `user` | user (slate) | `cdn` `gateway` `auth` | edge (rose) |
+| `frontend` `mobile` `device` | frontend (sky) | `lb` `dns` `firewall` `secret` | edge (rose) |
 | `backend` `service` `worker` | backend (violet) | `external` | external (zinc, 점선) |
-| `lambda` `scheduler` | compute (amber) | `agent` `skill` `hook` | claude (purple) |
-| `db` `table` | data (emerald) | `doc` `other` | neutral (gray) |
-| `cache` `queue` `storage` | data-aux (teal) | | |
+| `lambda` `scheduler` `ml` `pipeline` | compute (amber) | `agent` `skill` `hook` | claude (purple) |
+| `db` `table` `analytics` | data (emerald) | `doc` `other` `monitor` | neutral (gray) |
+| `cache` `queue` `storage` `topic` | data-aux (teal) | | |
 
 ## 엣지
 
@@ -80,7 +83,9 @@
 
 - `source`/`target`은 **노드 id만** 가능 (그룹 불가).
 - id 컨벤션: `e-<source>-<target>`, ERD는 `fk-<source>-<target>`.
-- `label`은 선택. 줌이 작아지면 자동으로 숨는다.
+- `label`은 선택. 줌이 작아지면 자동으로 숨는다. **모든 선에 라벨이 원칙**(C4) — 의도가 자명한 짧은 체인만 생략.
+- **엣지는 단방향으로만.** 왕복(요청/응답)은 플로우 2단계로 표현하고 양방향 화살표를 흉내내지 마라(Azure 공식 규칙).
+- `sourceCardinality` / `targetCardinality` (ERD 권장): `"1"` `"0..1"` `"N"` `"0..N"` `"1..N"` — 까마귀발(crow's foot) 마커가 선 끝에 그려진다. FK의 다(多)쪽이 source: 보통 `sourceCardinality: "0..N"`, `targetCardinality: "1"`.
 
 ## 그룹 (경계 박스)
 
@@ -91,8 +96,20 @@
 ]
 ```
 
-- `kind`: `layer` `vpc` `boundary` `zone` `subnet` (생략 시 `layer`).
-  실선 = 물리/소유 경계(vpc, subnet), 점선 = 논리 경계(boundary, zone).
+- `kind` (생략 시 `layer`) — **실선 = 물리/소유 경계, 점선·파선 = 논리 경계** (AWS 공식 관례와 동일):
+
+  | kind | 용도 | 스타일 |
+  |---|---|---|
+  | `layer` | 일반 레이어·횡단 띠 | 회색 실선 |
+  | `boundary` | 클라우드/시스템 경계 | slate 파선 |
+  | `region` / `az` | 리전 / 가용영역 | teal 점선 / 파선 |
+  | `vpc` / `subnet` | 네트워크 소유 경계 | 보라 / 초록 실선 |
+  | `zone` | 논리 존 | teal 파선 |
+  | `account` | 계정·구독·조직 단위 | rose 실선 |
+  | `security` | 보안·신뢰 경계 | rose 파선 |
+  | `onprem` | 온프레미스·외부 DC | 회색 실선 |
+  | `stage` | **데이터 파이프라인 단계 밴드**(수집/처리/적재/서빙) | 옅은 테두리+틴트 |
+  | `cluster` | K8s 클러스터·풀 | amber 실선 |
 - 그룹은 DOM 컨테이너가 아니라 **멤버 노드 영역 위에 그려지는 언더레이**다.
   → **같은 그룹의 노드는 레인이 연속되게** 구성하라. 흩어지면 박스가 무관한 노드를 삼킨다.
 - 두 그룹이 같은 레인을 공유하면 박스가 겹칠 수 있다 → `lane` 오버라이드로 분리하거나 그룹을 빼라.
@@ -128,9 +145,10 @@
 
 - `kind: "erd"`면 **모든 노드에 `table` 필수**.
 - 컬럼 플래그: `pk` `unique` `nullable` (각각 PK 열쇠 아이콘 / UQ / N 배지).
-- FK 엣지는 컬럼 높이에 앵커된다:
-  `{ "id": "fk-orders-users", "source": "orders", "target": "users", "kind": "reference", "sourceColumn": "user_id", "targetColumn": "id" }`
+- FK 엣지는 컬럼 높이에 앵커되고, **카디널리티(까마귀발)를 함께 명시**한다:
+  `{ "id": "fk-orders-users", "source": "orders", "target": "users", "kind": "reference", "sourceColumn": "user_id", "targetColumn": "id", "sourceCardinality": "0..N", "targetCardinality": "1" }`
 - `fk.table`/`fk.column`과 `sourceColumn`/`targetColumn`은 실제 존재하는 테이블 노드 id·컬럼명이어야 한다.
+- 테이블이 많으면 **도메인(주제 영역)별로 장을 분할**하고 통합 문서로 묶는 게 업계 정답이다.
 
 ## 레이아웃 설계 가이드 (그리기 전에 먼저 정한다)
 
@@ -214,5 +232,13 @@ render.mjs는 실행 전 스펙을 검증하고, 실패 시 `path: 메시지` �
 
 ## 모범 답안
 
-같은 디렉터리의 `sample-infra.json`(그룹+플로우), `sample-erd.json`(FK 앵커)이 완성 예시다.
-새 다이어그램을 만들기 전에 해당 kind의 샘플을 먼저 읽어라.
+같은 디렉터리의 샘플 10종이 완성 예시다. **새 다이어그램을 만들기 전에 해당 유형의 샘플을 먼저 읽어라** (유형→샘플 매핑은 `document-types.md`).
+
+- `sample-context` — C4 컨텍스트: nodeDescriptions + 드릴다운 href
+- `sample-infra` — 그룹(경계/VPC)+플로우 기본형
+- `sample-msa-infra` / `sample-platform-infra` — 도메인 레인 밴드 / 대규모 균형 그리드
+- `sample-multiregion-ha` — 리전 미러 스탬프 + badge + 페일오버 플로우
+- `sample-event-flow` — 이벤트드리븐 fan-out
+- `sample-data-pipeline` — stage 밴드 + 횡단 거버넌스 띠 + 데드레터 곁가지
+- `sample-erd` / `sample-erd-large` — FK 컬럼 앵커 + 카디널리티
+- `sample-agent-topology` — 에이전트 토폴로지

@@ -24,19 +24,25 @@ plugins-zzon-doc/
     ├── .claude-plugin/plugin.json      # name: zzon-doc
     ├── README.md
     └── skills/zzon-doc/
-        ├── SKILL.md                    # 코드분석 → DiagramSpec 저작 → render 실행
+        ├── SKILL.md                    # 코드분석 → 유형 판별 → DiagramSpec 저작 → render 실행
         ├── references/
-        │   ├── diagram-spec.md         # DiagramSpec 스펙 + good/bad 예시 (저작 가이드)
+        │   ├── document-types.md       # 유형 카탈로그 4계열(개요/구조·인프라/흐름/데이터) + 추상화 사다리 (리서치 40+ 근거)
+        │   ├── diagram-spec.md         # DiagramSpec 스펙 + 레이아웃 가이드 + 자가질문 (저작 가이드)
+        │   ├── sample-context.json     # 모범 답안 (C4 컨텍스트: nodeDescriptions+드릴다운 href)
+        │   ├── sample-full-landscape.json # 모범 답안 (풀뎁스 원장 27노드: 경계·도메인 밴드·데이터·운영 띠+드릴다운)
         │   ├── sample-infra.json       # 모범 답안 (그룹+플로우)
         │   ├── sample-msa-infra.json   # 모범 답안 (멀티 경계 MSA, 레인 밴드)
         │   ├── sample-platform-infra.json # 모범 답안 (대규모·균형 그리드 14노드)
+        │   ├── sample-multiregion-ha.json # 모범 답안 (리전 미러 스탬프+badge+페일오버)
         │   ├── sample-event-flow.json  # 모범 답안 (이벤트드리븐 data-flow)
-        │   ├── sample-erd.json         # 모범 답안 (FK 앵커)
+        │   ├── sample-data-pipeline.json # 모범 답안 (stage 밴드+횡단 거버넌스+데드레터)
+        │   ├── sample-erd.json         # 모범 답안 (FK 앵커+카디널리티)
         │   ├── sample-erd-large.json   # 모범 답안 (다수 테이블·FK)
         │   └── sample-agent-topology.json # 모범 답안 (에이전트 토폴로지)
         └── scripts/
             ├── render.mjs              # DiagramSpec JSON → 단일 .html (엔진)
-            └── build-docs.mjs          # 여러 스펙 → 통합 문서 index.html (메뉴+전체보기+iframe 뷰어)
+            ├── build-docs.mjs          # 여러 스펙 → 통합 문서 index.html (메뉴+전체보기+iframe 뷰어)
+            └── layout-lint.mjs         # 스펙 저작 후 배치 검사 (그룹 겹침·비멤버 삼킴 검출, 렌더 전 실행)
 ```
 
 ## 핵심 계약 (깨지 말 것)
@@ -65,6 +71,8 @@ plugins-zzon-doc/
 - 복잡 시나리오 모범답안 5종 추가(MSA 인프라 / 대규모 플랫폼 / 이벤트 data-flow / 대형 ERD / agent-topology).
 - **레이아웃 설계 가이드** 추가(diagram-spec.md): 방향 선택, √N 그리드 균형, lane/order 분산, 그룹=세로 밴드(박스 겹침 방지), 엣지 비관통, 쪼개기 기준. MSA/플랫폼 예제는 이 가이드대로 lane 고정.
 - **통합 문서 디자인 v2**: shadcn 풍(중립 팔레트·접이식 그룹·lucide 아이콘만·제목 아이콘 제거·무료 폰트·사이드바 접기·전체화면). 라이브러리 0 유지.
+- **v0.3.0 — 유형 체계 + 엔진 고도화** (2026-07, 리서치 기반): C4/DFD/arc42 + AWS·Azure·GCP 레퍼런스 40+ 조사 → `document-types.md` 전면 개정(4계열 카탈로그 + 추상화 사다리 + 요소 수 예산). 엔진 신기능: **드릴다운**(`node.href` → 통합 문서에서 더블클릭 이동, postMessage), **nodeDescriptions**(C4 노드 내 설명), **그룹 kind 7종 추가**(region/az/account/security/onprem/stage/cluster — 논리=점선·물리=실선), **카테고리 10종 추가**(lb/dns/firewall/monitor/secret/ml/analytics/topic/pipeline/device), **ERD 카디널리티**(sourceCardinality/targetCardinality → 까마귀발 마커), **노드 badge**(AZ ×2 등 주석), **타이틀바**(제목+kind 배지), **범례에 그룹 kind**, `layout.align:"start"`(밴드형). 샘플 11종. 하위호환 유지(전부 선택 필드). 검증: 헤드리스 DOM 심 스모크(scratchpad, 11/11 예외 0) + **layout-lint.mjs**(엔진 배치 수식 재현 — 그룹 겹침·삼킴 검출, 11/11 통과) + strict validate 통과.
+- **뎁스 3택 제안 규칙**(SKILL.md §1): 개괄 / 사다리 세트(드릴다운) / **풀뎁스 원장**(큰 그림 유지+전 레이어 한 장, 20~40노드, sample-full-landscape가 증명) — 사용자에게 반드시 뎁스를 묻고 그린다.
 - 소유자 표준은 **메모리**에 기록됨(무의존/문서 디자인/레이아웃 품질) — 로컬, 레포 밖.
 - git: 첫 커밋(main) 존재. **GitHub push는 소유자가 직접 함.** 이후 변경분(통합 문서 등)은 아직 커밋 안 됨 — 소유자 검토 후 커밋.
 

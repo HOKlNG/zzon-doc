@@ -1,0 +1,116 @@
+{
+  "specVersion": 1,
+  "title": "데모숍 전체 아키텍처 원장 (풀뎁스)",
+  "kind": "infra",
+  "description": "큰 그림 틀(경계·도메인 밴드)을 유지하면서 하위 레이어(도메인별 서비스·DB, 비동기, 데이터 플랫폼, 운영 띠)까지 한 장에 담은 포스터형 원장. 줌으로 보고, 핵심 노드는 상세 장으로 드릴다운된다.",
+  "section": "개요",
+  "order": 2,
+  "layout": { "direction": "RIGHT" },
+  "groups": [
+    { "id": "aws", "label": "AWS (ap-northeast-2)", "kind": "boundary" },
+    { "id": "vpc", "label": "VPC", "kind": "vpc", "parentId": "aws" },
+    { "id": "g-order", "label": "주문 도메인", "kind": "layer", "parentId": "vpc" },
+    { "id": "g-catalog", "label": "상품 도메인", "kind": "layer", "parentId": "vpc" },
+    { "id": "g-member", "label": "회원 도메인", "kind": "layer", "parentId": "vpc" },
+    { "id": "g-search", "label": "검색 도메인", "kind": "layer", "parentId": "vpc" },
+    { "id": "g-async", "label": "비동기 처리", "kind": "zone", "parentId": "vpc" },
+    { "id": "g-ops", "label": "운영·보안 띠", "kind": "layer", "parentId": "vpc" },
+    { "id": "g-data", "label": "데이터 플랫폼", "kind": "stage", "parentId": "aws" }
+  ],
+  "nodes": [
+    { "id": "shopper", "label": "구매자", "category": "user", "lane": 0, "order": 0, "description": "웹·모바일로 접속하는 일반 사용자" },
+    { "id": "admin", "label": "운영자", "category": "user", "lane": 0, "order": 1, "description": "상품·주문을 관리하는 내부 직원" },
+
+    { "id": "cdn", "label": "CDN", "category": "cdn", "tech": "CloudFront", "parentId": "aws", "lane": 1, "order": 0, "description": "정적 자산 캐싱·엣지 배포" },
+    { "id": "waf", "label": "WAF", "category": "firewall", "tech": "AWS WAF", "parentId": "aws", "lane": 1, "order": 1, "description": "웹 공격 차단. 유일한 공개 진입 앞단" },
+
+    { "id": "alb", "label": "로드밸런서", "category": "lb", "tech": "ALB", "parentId": "vpc", "lane": 2, "order": 0, "badge": "AZ ×2", "description": "두 AZ에 걸친 L7 분산" },
+    { "id": "gw", "label": "API 게이트웨이", "category": "gateway", "tech": "Kong", "parentId": "vpc", "lane": 2, "order": 1, "description": "라우팅·레이트리밋·공통 미들웨어" },
+    { "id": "auth", "label": "인증", "category": "auth", "tech": "Cognito", "parentId": "vpc", "lane": 2, "order": 2, "description": "로그인·토큰 발급·검증" },
+
+    { "id": "order-svc", "label": "주문 서비스", "category": "service", "tech": "NestJS", "parentId": "g-order", "lane": 3, "order": 0, "href": "sample-event-flow", "description": "주문 생성·결제 오케스트레이션. 상세는 주문 이벤트 흐름 장 참조" },
+    { "id": "order-db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL", "parentId": "g-order", "lane": 4, "order": 0, "href": "sample-erd", "description": "주문·결제 데이터. 스키마는 ERD 장 참조" },
+    { "id": "catalog-svc", "label": "상품 서비스", "category": "service", "tech": "Spring Boot", "parentId": "g-catalog", "lane": 3, "order": 1, "description": "상품·재고·가격 관리" },
+    { "id": "catalog-db", "label": "상품 DB", "category": "db", "tech": "MySQL", "parentId": "g-catalog", "lane": 4, "order": 1, "description": "상품 카탈로그 저장소" },
+    { "id": "member-svc", "label": "회원 서비스", "category": "service", "tech": "NestJS", "parentId": "g-member", "lane": 3, "order": 2, "description": "회원 가입·프로필·등급" },
+    { "id": "member-db", "label": "회원 DB", "category": "db", "tech": "PostgreSQL", "parentId": "g-member", "lane": 4, "order": 2, "description": "회원·등급 데이터" },
+    { "id": "search-svc", "label": "검색 서비스", "category": "service", "tech": "FastAPI", "parentId": "g-search", "lane": 3, "order": 3, "description": "상품 검색·자동완성" },
+    { "id": "search-idx", "label": "검색 인덱스", "category": "db", "tech": "OpenSearch", "parentId": "g-search", "lane": 4, "order": 3, "description": "역색인. 상품 변경 이벤트로 갱신" },
+
+    { "id": "mq", "label": "주문 이벤트 큐", "category": "queue", "tech": "SQS", "parentId": "g-async", "lane": 5, "order": 0, "description": "주문 완료 이벤트 버퍼" },
+    { "id": "worker", "label": "후처리 워커", "category": "worker", "tech": "Node.js", "parentId": "g-async", "lane": 6, "order": 0, "badge": "×3", "description": "알림·정산·출고 지시를 처리하는 컨슈머 풀" },
+
+    { "id": "secret", "label": "시크릿 관리", "category": "secret", "tech": "KMS", "parentId": "g-ops", "lane": 5, "order": 8, "description": "키·자격증명 중앙 관리" },
+    { "id": "cicd", "label": "배포 파이프라인", "category": "pipeline", "tech": "GitHub Actions", "parentId": "g-ops", "lane": 5, "order": 9, "description": "빌드→테스트→배포 자동화" },
+    { "id": "monitor", "label": "관측", "category": "monitor", "tech": "CloudWatch", "parentId": "g-ops", "lane": 6, "order": 8, "description": "메트릭·로그·알람 수집" },
+
+    { "id": "stream", "label": "이벤트 스트림", "category": "topic", "tech": "Kafka", "parentId": "g-data", "lane": 7, "order": 0, "description": "도메인 이벤트를 토픽별로 수집" },
+    { "id": "etl", "label": "스트림 처리", "category": "pipeline", "tech": "Flink", "parentId": "g-data", "lane": 8, "order": 0, "description": "정제·집계 변환" },
+    { "id": "dwh", "label": "웨어하우스", "category": "analytics", "tech": "Redshift", "parentId": "g-data", "lane": 9, "order": 0, "description": "분석용 적재층" },
+    { "id": "bi", "label": "BI 대시보드", "category": "analytics", "tech": "QuickSight", "parentId": "g-data", "lane": 9, "order": 1, "description": "매출·운영 지표 시각화" },
+
+    { "id": "pg", "label": "토스페이먼츠", "category": "external", "lane": 10, "order": 0, "description": "외부 PG. 결제 승인·취소" },
+    { "id": "ses", "label": "메일 발송", "category": "external", "tech": "SES", "lane": 10, "order": 1, "description": "주문 확인·알림 메일" },
+    { "id": "logistics", "label": "물류 시스템", "category": "external", "lane": 10, "order": 2, "description": "출고·배송 추적 외부 시스템" }
+  ],
+  "edges": [
+    { "id": "e-shopper-cdn", "source": "shopper", "target": "cdn", "kind": "http" },
+    { "id": "e-admin-cdn", "source": "admin", "target": "cdn", "kind": "http" },
+    { "id": "e-cdn-waf", "source": "cdn", "target": "waf", "kind": "http" },
+    { "id": "e-waf-alb", "source": "waf", "target": "alb", "kind": "http" },
+    { "id": "e-alb-gw", "source": "alb", "target": "gw", "kind": "http" },
+    { "id": "e-gw-auth", "source": "gw", "target": "auth", "kind": "http", "label": "토큰 검증" },
+    { "id": "e-gw-order", "source": "gw", "target": "order-svc", "kind": "http" },
+    { "id": "e-gw-catalog", "source": "gw", "target": "catalog-svc", "kind": "http" },
+    { "id": "e-gw-member", "source": "gw", "target": "member-svc", "kind": "http" },
+    { "id": "e-gw-search", "source": "gw", "target": "search-svc", "kind": "http" },
+    { "id": "e-order-orderdb", "source": "order-svc", "target": "order-db", "kind": "write" },
+    { "id": "e-catalog-catalogdb", "source": "catalog-svc", "target": "catalog-db", "kind": "write" },
+    { "id": "e-member-memberdb", "source": "member-svc", "target": "member-db", "kind": "write" },
+    { "id": "e-search-searchidx", "source": "search-svc", "target": "search-idx", "kind": "read" },
+    { "id": "e-order-pg", "source": "order-svc", "target": "pg", "kind": "http", "label": "결제 승인" },
+    { "id": "e-order-mq", "source": "order-svc", "target": "mq", "kind": "event", "label": "주문 완료" },
+    { "id": "e-mq-worker", "source": "mq", "target": "worker", "kind": "event" },
+    { "id": "e-worker-ses", "source": "worker", "target": "ses", "kind": "http", "label": "메일" },
+    { "id": "e-worker-logistics", "source": "worker", "target": "logistics", "kind": "http", "label": "출고 지시" },
+    { "id": "e-order-stream", "source": "order-svc", "target": "stream", "kind": "event", "label": "주문 이벤트" },
+    { "id": "e-catalog-stream", "source": "catalog-svc", "target": "stream", "kind": "event", "label": "상품 변경" },
+    { "id": "e-stream-etl", "source": "stream", "target": "etl", "kind": "event" },
+    { "id": "e-etl-dwh", "source": "etl", "target": "dwh", "kind": "write" },
+    { "id": "e-dwh-bi", "source": "dwh", "target": "bi", "kind": "read" },
+    { "id": "e-auth-secret", "source": "auth", "target": "secret", "kind": "depends", "label": "키 조회" },
+    { "id": "e-worker-monitor", "source": "worker", "target": "monitor", "kind": "depends", "label": "지표" }
+  ],
+  "flows": [
+    {
+      "id": "order-e2e",
+      "label": "주문 결제 E2E",
+      "description": "진입부터 결제·후처리까지 원장 전체를 관통하는 대표 경로",
+      "steps": [
+        { "edge": "e-shopper-cdn", "text": "구매자가 접속한다" },
+        { "edge": "e-cdn-waf", "text": "WAF가 요청을 검사한다" },
+        { "edge": "e-waf-alb", "text": "로드밸런서가 AZ에 분산한다" },
+        { "edge": "e-alb-gw", "text": "게이트웨이로 전달한다" },
+        { "edge": "e-gw-order", "text": "주문 서비스로 라우팅한다" },
+        { "edge": "e-order-pg", "text": "PG에 결제 승인을 요청한다" },
+        { "edge": "e-order-orderdb", "text": "주문을 저장한다" },
+        { "edge": "e-order-mq", "text": "주문 완료 이벤트를 발행한다" },
+        { "edge": "e-mq-worker", "text": "워커가 이벤트를 소비한다" },
+        { "edge": "e-worker-ses", "text": "확인 메일을 발송한다" },
+        { "edge": "e-worker-logistics", "text": "물류에 출고를 지시한다" }
+      ]
+    },
+    {
+      "id": "analytics",
+      "label": "데이터 분석 경로",
+      "description": "도메인 이벤트가 대시보드 지표가 되기까지",
+      "steps": [
+        { "edge": "e-order-stream", "text": "주문 이벤트가 스트림에 쌓인다" },
+        { "edge": "e-catalog-stream", "text": "상품 변경 이벤트도 합류한다" },
+        { "edge": "e-stream-etl", "text": "스트림 처리기가 정제·집계한다" },
+        { "edge": "e-etl-dwh", "text": "웨어하우스에 적재한다" },
+        { "edge": "e-dwh-bi", "text": "대시보드가 지표를 조회한다" }
+      ]
+    }
+  ]
+}

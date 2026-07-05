@@ -1,0 +1,290 @@
+{
+  "specVersion": 1,
+  "title": "행동 로그 데이터 파이프라인",
+  "kind": "data-flow",
+  "description": "GCP/데이터 플랫폼 관례의 스테이지 밴드 패턴. 수집→처리→적재(메달리온)→서빙을 단계 밴드로 나누고, 거버넌스는 하단 횡단 띠, 실패 재처리는 본선 아래 곁가지로 그린다.",
+  "layout": {
+    "direction": "RIGHT",
+    "align": "start"
+  },
+  "groups": [
+    {
+      "id": "g-ingest",
+      "label": "수집 (Ingest)",
+      "kind": "stage"
+    },
+    {
+      "id": "g-process",
+      "label": "처리 (Process)",
+      "kind": "stage"
+    },
+    {
+      "id": "g-store",
+      "label": "적재 (Store)",
+      "kind": "stage"
+    },
+    {
+      "id": "g-serve",
+      "label": "서빙 (Serve)",
+      "kind": "stage"
+    },
+    {
+      "id": "g-gov",
+      "label": "거버넌스·오케스트레이션",
+      "kind": "layer"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "app-events",
+      "label": "앱 이벤트",
+      "category": "external",
+      "description": "웹·모바일 클라이언트가 발생시키는 행동 로그",
+      "lane": 0,
+      "order": 0
+    },
+    {
+      "id": "cdc",
+      "label": "운영 DB CDC",
+      "category": "external",
+      "order": 1,
+      "description": "운영 데이터베이스 변경 스트림",
+      "lane": 0
+    },
+    {
+      "id": "stream",
+      "label": "이벤트 스트림",
+      "category": "topic",
+      "tech": "Kafka",
+      "parentId": "g-ingest",
+      "description": "원천 이벤트를 토픽별로 버퍼링한다",
+      "lane": 1,
+      "order": 0
+    },
+    {
+      "id": "etl",
+      "label": "스트림 처리",
+      "category": "pipeline",
+      "tech": "Flink",
+      "parentId": "g-process",
+      "description": "정제·중복 제거·스키마 검증을 수행한다",
+      "lane": 2,
+      "order": 0
+    },
+    {
+      "id": "dlq",
+      "label": "실패 큐",
+      "category": "queue",
+      "tech": "DLQ",
+      "parentId": "g-process",
+      "order": 1,
+      "description": "검증 실패 이벤트를 격리해 재처리 대상으로 보관한다",
+      "lane": 2
+    },
+    {
+      "id": "bronze",
+      "label": "Bronze 원본",
+      "category": "storage",
+      "tech": "S3 Parquet",
+      "parentId": "g-store",
+      "description": "가공 전 원본 적재층",
+      "lane": 3,
+      "order": 0
+    },
+    {
+      "id": "silver",
+      "label": "Silver 정제",
+      "category": "db",
+      "tech": "Delta Lake",
+      "parentId": "g-store",
+      "order": 0,
+      "description": "정제·조인 완료된 신뢰 계층",
+      "lane": 4
+    },
+    {
+      "id": "gold",
+      "label": "Gold 집계",
+      "category": "analytics",
+      "tech": "BigQuery",
+      "parentId": "g-store",
+      "order": 0,
+      "description": "지표·마트 등 소비 최적화 계층",
+      "lane": 5
+    },
+    {
+      "id": "bi",
+      "label": "BI 대시보드",
+      "category": "analytics",
+      "tech": "Looker",
+      "parentId": "g-serve",
+      "description": "경영·운영 지표 시각화",
+      "lane": 6,
+      "order": 0
+    },
+    {
+      "id": "mlserve",
+      "label": "추천 모델",
+      "category": "ml",
+      "tech": "Vertex AI",
+      "parentId": "g-serve",
+      "order": 1,
+      "description": "Gold 피처로 학습·서빙되는 추천 모델",
+      "lane": 6
+    },
+    {
+      "id": "airflow",
+      "label": "오케스트레이터",
+      "category": "scheduler",
+      "tech": "Airflow",
+      "parentId": "g-gov",
+      "lane": 3,
+      "order": 8,
+      "description": "배치 변환·재처리 DAG 스케줄링"
+    },
+    {
+      "id": "catalog",
+      "label": "데이터 카탈로그",
+      "category": "doc",
+      "tech": "DataHub",
+      "parentId": "g-gov",
+      "lane": 3,
+      "order": 9,
+      "description": "스키마·리니지·품질 메타데이터 관리"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-app-stream",
+      "source": "app-events",
+      "target": "stream",
+      "kind": "event"
+    },
+    {
+      "id": "e-cdc-stream",
+      "source": "cdc",
+      "target": "stream",
+      "kind": "event"
+    },
+    {
+      "id": "e-stream-etl",
+      "source": "stream",
+      "target": "etl",
+      "kind": "event",
+      "label": "구독"
+    },
+    {
+      "id": "e-etl-dlq",
+      "source": "etl",
+      "target": "dlq",
+      "kind": "depends",
+      "label": "검증 실패"
+    },
+    {
+      "id": "e-etl-bronze",
+      "source": "etl",
+      "target": "bronze",
+      "kind": "write",
+      "label": "원본 적재"
+    },
+    {
+      "id": "e-bronze-silver",
+      "source": "bronze",
+      "target": "silver",
+      "kind": "write",
+      "label": "정제 변환"
+    },
+    {
+      "id": "e-silver-gold",
+      "source": "silver",
+      "target": "gold",
+      "kind": "write",
+      "label": "집계"
+    },
+    {
+      "id": "e-gold-bi",
+      "source": "gold",
+      "target": "bi",
+      "kind": "read"
+    },
+    {
+      "id": "e-gold-ml",
+      "source": "gold",
+      "target": "mlserve",
+      "kind": "read",
+      "label": "피처 조회"
+    },
+    {
+      "id": "e-airflow-etl",
+      "source": "airflow",
+      "target": "etl",
+      "kind": "depends",
+      "label": "스케줄"
+    },
+    {
+      "id": "e-catalog-silver",
+      "source": "catalog",
+      "target": "silver",
+      "kind": "depends",
+      "label": "메타데이터"
+    },
+    {
+      "id": "e-dlq-bronze",
+      "source": "dlq",
+      "target": "bronze",
+      "kind": "event",
+      "label": "재처리 적재"
+    }
+  ],
+  "flows": [
+    {
+      "id": "hot-path",
+      "label": "실시간 적재 경로",
+      "description": "이벤트 발생부터 대시보드 반영까지의 본선",
+      "steps": [
+        {
+          "edge": "e-app-stream",
+          "text": "클라이언트 이벤트가 스트림에 발행된다"
+        },
+        {
+          "edge": "e-stream-etl",
+          "text": "스트림 처리기가 토픽을 구독해 정제한다"
+        },
+        {
+          "edge": "e-etl-bronze",
+          "text": "원본을 Bronze 층에 적재한다"
+        },
+        {
+          "edge": "e-bronze-silver",
+          "text": "정제 변환으로 Silver 층을 만든다"
+        },
+        {
+          "edge": "e-silver-gold",
+          "text": "지표 집계로 Gold 층을 만든다"
+        },
+        {
+          "edge": "e-gold-bi",
+          "text": "대시보드가 Gold 지표를 조회한다"
+        }
+      ]
+    },
+    {
+      "id": "replay",
+      "label": "실패 재처리 경로",
+      "description": "검증 실패 이벤트의 격리와 재투입",
+      "steps": [
+        {
+          "edge": "e-etl-dlq",
+          "text": "스키마 검증에 실패한 이벤트를 실패 큐로 격리한다"
+        },
+        {
+          "edge": "e-airflow-etl",
+          "text": "오케스트레이터가 재처리 잡을 스케줄한다"
+        },
+        {
+          "edge": "e-dlq-bronze",
+          "text": "실패분을 재처리해 Bronze 층에 적재한다"
+        }
+      ]
+    }
+  ]
+}

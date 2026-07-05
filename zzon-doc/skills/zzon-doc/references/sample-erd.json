@@ -66,9 +66,9 @@
     }
   ],
   "edges": [
-    { "id": "fk-items-orders", "source": "order_items", "target": "orders", "kind": "reference", "sourceColumn": "order_id", "targetColumn": "id" },
-    { "id": "fk-items-products", "source": "order_items", "target": "products", "kind": "reference", "sourceColumn": "product_id", "targetColumn": "id" },
-    { "id": "fk-orders-users", "source": "orders", "target": "users", "kind": "reference", "sourceColumn": "user_id", "targetColumn": "id" }
+    { "id": "fk-items-orders", "source": "order_items", "target": "orders", "kind": "reference", "sourceColumn": "order_id", "targetColumn": "id", "sourceCardinality": "1..N", "targetCardinality": "1" },
+    { "id": "fk-items-products", "source": "order_items", "target": "products", "kind": "reference", "sourceColumn": "product_id", "targetColumn": "id", "sourceCardinality": "0..N", "targetCardinality": "1" },
+    { "id": "fk-orders-users", "source": "orders", "target": "users", "kind": "reference", "sourceColumn": "user_id", "targetColumn": "id", "sourceCardinality": "0..N", "targetCardinality": "1" }
   ],
   "flows": []
 }
