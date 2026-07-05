@@ -10,7 +10,7 @@
 
 [한국어](./README.md) · **English**
 
-> A **Claude Code plugin (skill)** that analyzes your codebase and draws interactive architecture diagrams. It produces an `.html` file — you just open it in a browser to view.
+> A **Claude Code plugin (two skills)** — it analyzes your codebase to draw interactive architecture diagrams (`zzon-doc`), and fills in a project documentation wiki through code scanning and interview-style questions (`zzon-wiki`). Everything ships as zero-dependency `.html` — just open it in a browser.
 
 ## Preview
 
@@ -26,11 +26,12 @@
 
 ## Features
 
-- **4 diagram kinds** — infra · data-flow · ERD · agent (`.claude`) topology
+- **4 diagram kinds** — infra · data-flow · ERD · agent (`.claude`) topology (with a type catalog: context, multi-region HA, data pipeline, full-depth landscape …)
 - **Zero dependencies** — no libraries or CDN; a self-contained single `.html`
-- **Interactive** — click nodes · highlight flows · step badges · hover tooltips · pan/zoom · dark mode
+- **Interactive** — click nodes · highlight flows · step badges · drill-down (⊕ double-click) · hover tooltips · pan/zoom · dark mode
 - **Unified docs** — bundle many diagrams into a left menu + overview
-- **Scope-aware** — for big projects it surveys the structure and proposes how many docs first
+- **Docs wiki (`zzon-wiki`)** — fills project documentation via code scan + questions, tracks progress and open questions as a wiki site; architecture pages embed the diagrams
+- **Scope-aware** — for big projects it surveys the structure and proposes how many docs and at which depth first
 - **Local-only** — your code is analyzed locally; no network, no telemetry
 
 ## Install
@@ -54,6 +55,12 @@ Call it with `/zzon-doc:zzon-doc <request>`, or just ask in natural language. (P
 
 ```
 /zzon-doc:zzon-doc draw the cloud architecture of this repo
+```
+
+**③ Project documentation wiki** — agree on a tier (lite/standard/full SI) first; whatever is readable from code gets drafted automatically, and everything else is filled through questions. On re-runs it detects missing docs and human edits, and continues from there.
+
+```
+/zzon-doc:zzon-wiki build a docs wiki for this project
 ```
 
 The generated `.html` is interactive: **click nodes · highlight flows · click step badges · hover tooltips · pan/zoom · dark mode.**

@@ -66,6 +66,7 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-doc/scripts/build-docs.mjs ./zzon-doc --t
 
 → `zzon-doc/{specs/, diagrams/, index.html, manifest.json}` 생성. `index.html`을 브라우저로 연다.
 출력 폴더는 인자로 변경 가능(기본 `zzon-doc/`). 스펙을 고치고 다시 실행하면 index가 갱신된다.
+**출력 폴더에 `wiki.json`이 있으면**(zzon-wiki 사용 중) index.html은 위키 소유다 — 위 빌드는 다이어그램만 갱신하니, 끝나면 `skills/zzon-wiki/scripts/build-wiki.mjs`도 실행해 위키 index를 갱신한다.
 
 **단일 한 장만:**
 

@@ -2,8 +2,8 @@
 
 문서·다이어그램 작성을 돕는 Claude Code 플러그인 묶음(suite).
 
-- **`/zzon-doc:zzon-doc`** (현재) — 코드를 분석해 아키텍처/인프라/ERD/Claude 에이전트 다이어그램을 그린다
-- *`/zzon-doc` (예정)* — 문서 작성 기능
+- **`/zzon-doc:zzon-doc`** — 코드를 분석해 아키텍처/인프라/ERD/Claude 에이전트 다이어그램을 그린다
+- **`/zzon-doc:zzon-wiki`** — 프로젝트 개발 문서 위키를 만들고, 코드 스캔 + 질문으로 채운다 (아키텍처 문서에 다이어그램 임베드)
 
 Claude가 (1) 소스를 읽어 **DiagramSpec JSON**을 저작하고 (2) `render.mjs`로 **단일 self-contained `.html`** 을 렌더링한다.
 출력 `.html`은 서버·React·CDN·외부 라이브러리 **없이** 브라우저로 열면 인터랙티브하게 동작한다.
@@ -42,6 +42,20 @@ node skills/zzon-doc/scripts/build-docs.mjs ./zzon-doc --title "내 아키텍처
 생성된 `index.html` 하나만 브라우저로 열면 모든 다이어그램을 메뉴로 오가며 본다.
 역시 서버·라이브러리 0의 self-contained HTML이다.
 
+**문서 위키** — 티어(라이트/표준/풀)를 합의하고 코드 스캔 + 질문으로 채운다. 재실행하면 빠진 문서·사람이 고친 문서(해시 감지)·열린 질문부터 이어간다:
+
+```
+/zzon-doc:zzon-wiki 이 프로젝트 문서 위키 만들어줘
+```
+
+```bash
+# 직접 빌드 (wiki.json + docs/*.md → 위키 index.html)
+node skills/zzon-wiki/scripts/build-wiki.mjs ./zzon-doc
+node skills/zzon-wiki/scripts/build-wiki.mjs ./zzon-doc --status   # 상태 리포트만
+```
+
+위키가 켜지면(`wiki.json` 존재) `index.html`은 위키 셸이 차지하고, 다이어그램 갤러리 빌드는 자동으로 index를 양보한다.
+
 ## 인터랙션 (.html)
 
 - **노드 클릭** — 인접 노드·엣지 하이라이트 + 상세 패널(설명·tech)
@@ -58,20 +72,26 @@ node skills/zzon-doc/scripts/build-docs.mjs ./zzon-doc --title "내 아키텍처
 zzon-doc/
 ├── .claude-plugin/plugin.json
 ├── README.md
-└── skills/zzon-doc/
-    ├── SKILL.md                  # 코드분석 → DiagramSpec 저작 → 렌더 절차
+├── skills/zzon-doc/              # 스킬 1 — 아키텍처 다이어그램
+│   ├── SKILL.md                  # 유형 판별 → DiagramSpec 저작 → 렌더 절차
+│   ├── references/
+│   │   ├── document-types.md     # 유형 카탈로그 (4계열 + 추상화 사다리)
+│   │   ├── diagram-spec.md       # 스펙 명세 + 레이아웃 가이드
+│   │   └── sample-*.json         # 모범 답안 11종 (컨텍스트·인프라·MSA·멀티리전·
+│   │                             #   이벤트·파이프라인·ERD·원장·에이전트 …)
+│   └── scripts/
+│       ├── render.mjs            # DiagramSpec JSON → 단일 .html (Node 20+ 내장만)
+│       ├── build-docs.mjs        # 여러 스펙 → 통합 문서 index.html (메뉴+뷰어)
+│       └── layout-lint.mjs       # 렌더 전 배치 검사 (그룹 겹침·삼킴 검출)
+└── skills/zzon-wiki/             # 스킬 2 — 프로젝트 문서 위키
+    ├── SKILL.md                  # 스캔 → 티어 승인 → 섹션 루프(질문) → 빌드
     ├── references/
-    │   ├── diagram-spec.md       # 스펙 명세 + good/bad 예시
-    │   ├── sample-infra.json         # 모범 답안 (그룹 + 플로우)
-    │   ├── sample-msa-infra.json     # 모범 답안 (멀티 경계 MSA, 레인 밴드)
-    │   ├── sample-platform-infra.json# 모범 답안 (대규모·균형 그리드 14노드)
-    │   ├── sample-event-flow.json    # 모범 답안 (이벤트드리븐 data-flow)
-    │   ├── sample-erd.json           # 모범 답안 (FK 앵커)
-    │   ├── sample-erd-large.json     # 모범 답안 (다수 테이블·FK)
-    │   └── sample-agent-topology.json# 모범 답안 (에이전트 토폴로지)
+    │   ├── wiki-spec.md          # wiki.json 스키마 + md 규약 (정본)
+    │   ├── doc-catalog.md        # SI 12섹션 카탈로그 템플릿 (티어·질문 은행)
+    │   ├── sample-wiki.json      # 모범 답안 + 검증 픽스처
+    │   └── sample-docs/          # 모범 문서 md
     └── scripts/
-        ├── render.mjs            # DiagramSpec JSON → 단일 .html (Node 20+ 내장만)
-        └── build-docs.mjs        # 여러 스펙 → 통합 문서 index.html (메뉴+뷰어)
+        └── build-wiki.mjs        # wiki.json + docs/*.md → 위키 index.html (--status)
 ```
 
 ## 엔진 노트

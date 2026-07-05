@@ -7,12 +7,12 @@
 | 층 | 이름 | 비고 |
 |---|---|---|
 | 마켓플레이스 | `zzon` | `.claude-plugin/marketplace.json` (레포 루트) |
-| 플러그인(우산) | `zzon-doc` | `zzon-doc/.claude-plugin/plugin.json`. 앞으로 스킬 여러 개 담음 |
-| 스킬 (현재) | `zzon-doc` | → `/zzon-doc:zzon-doc` (플러그인 스킬은 `플러그인명:스킬명` 네임스페이스). 아키텍처 그리기 |
-| 스킬 (예정) | 미정 (`/zzon-doc` 등) | 문서 작성 기능 |
+| 플러그인(우산) | `zzon-doc` | `zzon-doc/.claude-plugin/plugin.json` |
+| 스킬 1 | `zzon-doc` | → `/zzon-doc:zzon-doc` (플러그인 스킬은 `플러그인명:스킬명` 네임스페이스). 아키텍처 다이어그램 |
+| 스킬 2 | `zzon-wiki` | → `/zzon-doc:zzon-wiki`. 프로젝트 문서 위키 (질문 기반 채움 + 다이어그램 임베드) |
 
 설치: `/plugin marketplace add <owner>/<repo>` → `/plugin install zzon-doc@zzon`
-호출: `/zzon-doc:zzon-doc <대상>` (예: `/zzon-doc:zzon-doc 이 레포의 인프라`). 자연어 요청으로도 자동 동작.
+호출: `/zzon-doc:zzon-doc <대상>` / `/zzon-doc:zzon-wiki`. 자연어 요청으로도 자동 동작.
 
 ## 구조
 
@@ -41,8 +41,17 @@ plugins-zzon-doc/
         │   └── sample-agent-topology.json # 모범 답안 (에이전트 토폴로지)
         └── scripts/
             ├── render.mjs              # DiagramSpec JSON → 단일 .html (엔진)
-            ├── build-docs.mjs          # 여러 스펙 → 통합 문서 index.html (메뉴+전체보기+iframe 뷰어)
+            ├── build-docs.mjs          # 여러 스펙 → 통합 문서 index.html (wiki.json 있으면 index 양보)
             └── layout-lint.mjs         # 스펙 저작 후 배치 검사 (그룹 겹침·비멤버 삼킴 검출, 렌더 전 실행)
+    └── skills/zzon-wiki/
+        ├── SKILL.md                    # 프로세스 강제: 스캔→티어 승인→섹션 루프(질문)→빌드, 재진입은 --status부터
+        ├── references/
+        │   ├── wiki-spec.md            # wiki.json 스키마 + md 규약(@diagram, ❓ 콜아웃) 정본
+        │   ├── doc-catalog.md          # SI 12섹션 카탈로그 템플릿 (tier 태그·dynamic 규칙·질문 은행)
+        │   ├── sample-wiki.json        # 모범 답안 + 검증 픽스처
+        │   └── sample-docs/            # 모범 문서 md (다이어그램 임베드·콜아웃 예시)
+        └── scripts/
+            └── build-wiki.mjs          # wiki.json+docs/*.md → self-contained 위키 index.html (--status 지원)
 ```
 
 ## 핵심 계약 (깨지 말 것)
@@ -51,6 +60,8 @@ plugins-zzon-doc/
 2. **render.mjs는 이 프로젝트의 독자 엔진이다(info-hub와 무관).** 레인 레이아웃, 라운드 직교 엣지(관통 회피), 분산 앵커(fan-out/fan-in 겹침 방지), 그룹 언더레이, 플로우 순번/애니메이션, 팬·줌이 들어있다. **수정해도 되지만 반드시 브라우저 렌더로 재검증**한다(노드/엣지 수 일치, 선 겹침, pageerror 0). 원복은 git으로 가능.
 3. **build-docs.mjs는 엔진을 건드리지 않는다.** render.mjs를 자식 프로세스로 호출해 개별 .html을 만든 뒤, 출력 폴더를 스캔해 통합 셸(`index.html`)만 생성한다. 통합 뷰는 각 다이어그램을 iframe으로 끼워 보여줄 뿐 — 다이어그램 자체는 독립 .html 그대로다.
 4. **DiagramSpec 스키마가 계약.** 노드/그룹/엣지/플로우 평탄 배열 + slug id, 픽셀 좌표 없음(lane/order 힌트만). 통합 문서 메뉴용 선택 필드 `section`/`order`만 추가됨. 스펙 형태는 `references/diagram-spec.md` 참고.
+5. **index.html 소유권**: 출력 폴더에 `wiki.json`이 있으면 index.html은 **build-wiki 소유** — build-docs는 다이어그램·manifest만 갱신하고 index를 건너뛴다(가드 내장). build-wiki는 build-docs를 자식 프로세스로 호출해 렌더를 위임한다.
+6. **wiki.json이 위키의 단일 상태 소스.** 스키마는 `skills/zzon-wiki/references/wiki-spec.md`가 정본. todo 문서는 빈 md를 만들지 않는다. 상태를 md frontmatter에 이중화하지 않는다.
 
 ## 최초 이식 출처 (역사적 참고 — 이제 독립)
 
@@ -73,13 +84,14 @@ plugins-zzon-doc/
 - **통합 문서 디자인 v2**: shadcn 풍(중립 팔레트·접이식 그룹·lucide 아이콘만·제목 아이콘 제거·무료 폰트·사이드바 접기·전체화면). 라이브러리 0 유지.
 - **v0.3.0 — 유형 체계 + 엔진 고도화** (2026-07, 리서치 기반): C4/DFD/arc42 + AWS·Azure·GCP 레퍼런스 40+ 조사 → `document-types.md` 전면 개정(4계열 카탈로그 + 추상화 사다리 + 요소 수 예산). 엔진 신기능: **드릴다운**(`node.href` → 통합 문서에서 더블클릭 이동, postMessage), **nodeDescriptions**(C4 노드 내 설명), **그룹 kind 7종 추가**(region/az/account/security/onprem/stage/cluster — 논리=점선·물리=실선), **카테고리 10종 추가**(lb/dns/firewall/monitor/secret/ml/analytics/topic/pipeline/device), **ERD 카디널리티**(sourceCardinality/targetCardinality → 까마귀발 마커), **노드 badge**(AZ ×2 등 주석), **타이틀바**(제목+kind 배지), **범례에 그룹 kind**, `layout.align:"start"`(밴드형). 샘플 11종. 하위호환 유지(전부 선택 필드). 검증: 헤드리스 DOM 심 스모크(scratchpad, 11/11 예외 0) + **layout-lint.mjs**(엔진 배치 수식 재현 — 그룹 겹침·삼킴 검출, 11/11 통과) + strict validate 통과.
 - **뎁스 3택 제안 규칙**(SKILL.md §1): 개괄 / 사다리 세트(드릴다운) / **풀뎁스 원장**(큰 그림 유지+전 레이어 한 장, 20~40노드, sample-full-landscape가 증명) — 사용자에게 반드시 뎁스를 묻고 그린다.
+- **v0.4.0 — zzon-wiki 스킬 추가** (2026-07): 프로젝트 문서 위키. linkonn nav 모델을 일반화한 12섹션 카탈로그(티어 1/2/3 태그, dynamic 노드) + wiki.json 단일 상태 소스(문서 status·질문 대장 q-NNN·이력) + build-wiki.mjs(strict 검증→build-docs 자식 위임→미니 md 렌더러(raw HTML 금지·스킴 허용목록)→@diagram iframe 치환→위키 셸: 3단 nav·진행 현황·zzon:navigate 드릴다운 수신). `--status`가 해시 대조로 사람 수정·질문 마커 소멸을 감지(재진입 게이트). 검증: 검증기 적대 픽스처 7종·md 렌더러 적대 입력 9종·셸 헤드리스 스모크 17항목·재진입 왕복 — 전부 통과(스크립트는 scratchpad).
 - 소유자 표준은 **메모리**에 기록됨(무의존/문서 디자인/레이아웃 품질) — 로컬, 레포 밖.
 - git: 첫 커밋(main) 존재. **GitHub push는 소유자가 직접 함.** 이후 변경분(통합 문서 등)은 아직 커밋 안 됨 — 소유자 검토 후 커밋.
 
 ## 다음 작업 (TODO)
 
-1. **통합 문서 스킬 추가** — `zzon-doc/skills/<새스킬>/`. linkonn(`~/Documents/src/linkonn/doc-html`)의 메뉴 골격(`src/config/nav.ts` = 단일 소스, 사이드바·브레드크럼·홈 카드)이 참고 모델. 단, **vite/react는 따라가지 말 것** — zzon의 의존성 0 단일 HTML 계약 유지. build-docs.mjs의 통합 셸을 확장하거나 같은 방식으로 메뉴 골격을 생성하는 형태가 자연스러움.
-2. (선택) info-hub 연동 출력 옵션 — render 대신 실행 중인 info-hub API로 적재하는 모드.
+1. (선택) info-hub 연동 출력 옵션 — render 대신 실행 중인 info-hub API로 적재하는 모드.
+2. (선택) zzon-wiki 승격 자동화 고도화 — manifest의 기존 다이어그램을 위키 문서로 편입하는 대화 절차는 스킬 지침에 있음. 대량 편입 헬퍼 스크립트는 필요해지면.
 
 ## 테스트 방법
 
@@ -94,6 +106,18 @@ open -a "Google Chrome" playground/zzon-doc/index.html
 
 # manifest 검증
 node -e 'const m=require("./playground/zzon-doc/manifest.json");console.log(m.diagrams.length+"개")'
+
+# 위키 (플러그인 오염 없이 playground에서)
+mkdir -p playground/wiki-demo/specs
+cp zzon-doc/skills/zzon-doc/references/sample-context.json playground/wiki-demo/specs/context.json
+cp zzon-doc/skills/zzon-doc/references/sample-full-landscape.json playground/wiki-demo/specs/full-landscape.json
+cp zzon-doc/skills/zzon-doc/references/sample-erd.json playground/wiki-demo/specs/erd.json
+cp zzon-doc/skills/zzon-wiki/references/sample-wiki.json playground/wiki-demo/wiki.json
+cp -R zzon-doc/skills/zzon-wiki/references/sample-docs playground/wiki-demo/docs
+node zzon-doc/skills/zzon-wiki/scripts/build-wiki.mjs playground/wiki-demo
+node zzon-doc/skills/zzon-wiki/scripts/build-wiki.mjs playground/wiki-demo --status
+open -a "Google Chrome" playground/wiki-demo/index.html
+
 # 브라우저 자동화(claude-in-chrome)는 로컬 루프백 접속이 막혀 스크린샷 불가 → open 으로 실제 Chrome에서 확인.
 ```
 

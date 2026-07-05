@@ -138,10 +138,18 @@ function main() {
   const manifest = { title: title || "아키텍처 문서", diagrams };
 
   writeFileSync(join(root, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
-  writeFileSync(join(root, "index.html"), buildIndexHtml(manifest));
+
+  // wiki.json이 있으면 index.html은 build-wiki(zzon-wiki 스킬) 소유 — 덮어쓰지 않는다.
+  const wikiOwned = existsSync(join(root, "wiki.json"));
+  if (wikiOwned) {
+    console.log(`다이어그램 갱신 완료 (index.html은 위키 소유라 건너뜀)`);
+    console.log(`  위키 갱신: node <플러그인>/skills/zzon-wiki/scripts/build-wiki.mjs ${docsDir}`);
+  } else {
+    writeFileSync(join(root, "index.html"), buildIndexHtml(manifest));
+    console.log(`문서 생성 완료: ${join(root, "index.html")}`);
+  }
 
   const total = diagrams.reduce((a, d) => a + d.counts.nodes, 0);
-  console.log(`문서 생성 완료: ${join(root, "index.html")}`);
   console.log(`  다이어그램 ${diagrams.length}개 · 총 노드 ${total}개`);
   if (failures.length) {
     console.log(`\n⚠ 렌더 실패 ${failures.length}건 (인덱스에서 제외됨):`);

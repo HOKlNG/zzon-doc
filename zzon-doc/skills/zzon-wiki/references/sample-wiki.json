@@ -1,0 +1,275 @@
+{
+  "version": 1,
+  "title": "데모숍 개발 문서",
+  "tier": "standard",
+  "createdAt": "2026-07-05T11:00:00+09:00",
+  "updatedAt": "2026-07-05T14:20:00+09:00",
+  "interview": {
+    "projectMode": "existing",
+    "excludedSections": [
+      { "id": "design", "reason": "디자인 산출물은 Figma에서 별도 관리한다" },
+      { "id": "pmo", "reason": "1인 프로젝트 — 프로젝트 관리 문서 불필요" }
+    ],
+    "decisions": [
+      { "ts": "2026-07-05T11:05:00+09:00", "q": "티어?", "a": "standard" },
+      { "ts": "2026-07-05T11:06:00+09:00", "q": "아키텍처 뎁스?", "a": "풀뎁스 원장 1장 + 기능 흐름 세트" }
+    ]
+  },
+  "sections": [
+    {
+      "code": "00",
+      "id": "overview",
+      "title": "프로젝트 개요",
+      "purpose": "프로젝트 전체 맥락을 한눈에 본다.",
+      "items": [
+        {
+          "slug": "vision",
+          "title": "프로젝트 비전·배경",
+          "summary": "왜 이 제품을 만드는가 — 문제 정의와 지향점.",
+          "tier": 1,
+          "status": "done",
+          "naReason": null,
+          "file": "docs/overview/vision.md",
+          "diagrams": [],
+          "source": "interview",
+          "hash": null,
+          "syncedAt": null,
+          "questions": [],
+          "children": []
+        },
+        {
+          "slug": "glossary",
+          "title": "용어 사전",
+          "summary": "프로젝트 공통 용어 정의.",
+          "tier": 2,
+          "status": "todo",
+          "naReason": null,
+          "file": null,
+          "diagrams": [],
+          "source": "interview",
+          "hash": null,
+          "syncedAt": null,
+          "questions": [],
+          "children": []
+        }
+      ]
+    },
+    {
+      "code": "05",
+      "id": "architecture",
+      "title": "아키텍처 설계",
+      "purpose": "시스템·인프라 구조와 기술 선택을 정의한다.",
+      "items": [
+        {
+          "slug": "context",
+          "title": "시스템 컨텍스트",
+          "summary": "시스템과 외부 행위자.",
+          "tier": 1,
+          "status": "draft",
+          "naReason": null,
+          "file": "docs/architecture/context.md",
+          "diagrams": ["context"],
+          "source": "mixed",
+          "hash": null,
+          "syncedAt": null,
+          "questions": ["q-001"],
+          "children": []
+        },
+        {
+          "slug": "landscape",
+          "title": "전체 아키텍처 원장",
+          "summary": "경계·도메인 밴드를 유지한 풀뎁스 한 장.",
+          "tier": 1,
+          "status": "done",
+          "naReason": null,
+          "file": "docs/architecture/landscape.md",
+          "diagrams": ["full-landscape"],
+          "source": "code",
+          "hash": null,
+          "syncedAt": null,
+          "questions": [],
+          "children": []
+        },
+        {
+          "slug": "adr",
+          "title": "아키텍처 의사결정 기록 (ADR)",
+          "summary": "주요 결정과 근거 기록.",
+          "tier": 2,
+          "status": "todo",
+          "naReason": null,
+          "file": null,
+          "diagrams": [],
+          "source": "interview",
+          "hash": null,
+          "syncedAt": null,
+          "questions": [],
+          "children": []
+        }
+      ]
+    },
+    {
+      "code": "06",
+      "id": "data",
+      "title": "데이터 설계",
+      "purpose": "데이터 모델·흐름을 설계한다.",
+      "items": [
+        {
+          "slug": "logical-erd",
+          "title": "논리 ERD",
+          "summary": "핵심 테이블과 관계.",
+          "tier": 1,
+          "status": "done",
+          "naReason": null,
+          "file": "docs/data/logical-erd.md",
+          "diagrams": ["erd"],
+          "source": "code",
+          "hash": null,
+          "syncedAt": null,
+          "questions": [],
+          "children": []
+        },
+        {
+          "slug": "migration",
+          "title": "마이그레이션 전략",
+          "summary": "스키마 변경 관리.",
+          "tier": 2,
+          "status": "draft",
+          "naReason": null,
+          "file": "docs/data/migration.md",
+          "diagrams": [],
+          "source": "mixed",
+          "hash": null,
+          "syncedAt": null,
+          "questions": ["q-002"],
+          "children": []
+        }
+      ]
+    },
+    {
+      "code": "07",
+      "id": "interface",
+      "title": "인터페이스 설계",
+      "purpose": "API·이벤트 인터페이스 규약을 정의한다.",
+      "items": [
+        {
+          "slug": "api-spec",
+          "title": "API 명세 (도메인별)",
+          "summary": "엔드포인트 상세 — children은 코드 스캔으로 인스턴스화됨.",
+          "tier": 1,
+          "status": "draft",
+          "naReason": null,
+          "file": "docs/interface/api-spec.md",
+          "diagrams": [],
+          "source": "code",
+          "hash": null,
+          "syncedAt": null,
+          "questions": [],
+          "children": [
+            {
+              "slug": "orders",
+              "title": "Orders API",
+              "summary": "주문 도메인 엔드포인트.",
+              "tier": 1,
+              "status": "todo",
+              "naReason": null,
+              "file": null,
+              "diagrams": [],
+              "source": "code",
+              "hash": null,
+              "syncedAt": null,
+              "questions": [],
+              "children": []
+            },
+            {
+              "slug": "catalog",
+              "title": "Catalog API",
+              "summary": "상품 도메인 엔드포인트.",
+              "tier": 1,
+              "status": "todo",
+              "naReason": null,
+              "file": null,
+              "diagrams": [],
+              "source": "code",
+              "hash": null,
+              "syncedAt": null,
+              "questions": [],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "08",
+      "id": "development",
+      "title": "구현",
+      "purpose": "개발 환경·표준을 정의한다.",
+      "items": [
+        {
+          "slug": "environment",
+          "title": "개발 환경 / 퀵스타트",
+          "summary": "로컬 셋업과 첫 실행.",
+          "tier": 1,
+          "status": "done",
+          "naReason": null,
+          "file": "docs/development/environment.md",
+          "diagrams": [],
+          "source": "code",
+          "hash": null,
+          "syncedAt": null,
+          "questions": [],
+          "children": []
+        }
+      ]
+    },
+    {
+      "code": "09",
+      "id": "test",
+      "title": "시험",
+      "purpose": "테스트 전략으로 품질을 검증한다.",
+      "items": [
+        {
+          "slug": "strategy",
+          "title": "테스트 전략",
+          "summary": "범위·접근·게이트.",
+          "tier": 2,
+          "status": "na",
+          "naReason": "E2E 스위트가 코드 저장소 tests/에 자체 문서화되어 있어 별도 문서를 두지 않는다",
+          "file": null,
+          "diagrams": [],
+          "source": "interview",
+          "hash": null,
+          "syncedAt": null,
+          "questions": [],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-001",
+      "doc": "architecture/context",
+      "text": "외부 PG는 토스 단일인가, 복수 연동 예정인가?",
+      "status": "open",
+      "askedAt": "2026-07-05T13:10:00+09:00",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "q-002",
+      "doc": "data/migration",
+      "text": "스키마 변경은 어떤 도구로 관리하나? (Prisma Migrate / Flyway / 수동)",
+      "status": "answered",
+      "askedAt": "2026-07-05T13:30:00+09:00",
+      "answer": "Prisma Migrate, PR마다 마이그레이션 파일 리뷰",
+      "answeredAt": "2026-07-05T14:00:00+09:00"
+    }
+  ],
+  "history": [
+    { "ts": "2026-07-05T11:05:00+09:00", "actor": "skill", "action": "init", "note": "tier=standard, 섹션 7개 승인 (design·pmo 제외)" },
+    { "ts": "2026-07-05T13:10:00+09:00", "actor": "skill", "action": "draft", "docs": ["architecture/context"], "note": "코드 스캔 초안 + 질문 1건" },
+    { "ts": "2026-07-05T14:00:00+09:00", "actor": "skill", "action": "fill", "docs": ["data/migration"], "note": "q-002 답변 반영" },
+    { "ts": "2026-07-05T14:20:00+09:00", "actor": "human", "action": "edited", "docs": ["data/logical-erd"], "note": "빌드 시 해시 불일치 감지" }
+  ]
+}
