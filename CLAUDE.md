@@ -29,8 +29,11 @@ plugins-zzon-doc/
         │   ├── document-types.md       # 유형 카탈로그 4계열(개요/구조·인프라/흐름/데이터) + 추상화 사다리 (리서치 40+ 근거)
         │   ├── diagram-spec.md         # DiagramSpec 스펙 + 레이아웃 가이드 + 자가질문 (저작 가이드)
         │   ├── sample-context.json     # 모범 답안 (C4 컨텍스트: nodeDescriptions+드릴다운 href)
+        │   ├── sample-container.json   # 모범 답안 (C4 컨테이너: 경계 그룹+밖에 L1 이웃 — L1~L2 한 장)
+        │   ├── sample-component.json   # 모범 답안 (C4 컴포넌트: 컨테이너 경계+이웃 — L2~L3 한 장)
         │   ├── sample-full-landscape.json # 모범 답안 (풀뎁스 원장 27노드: 경계·도메인 밴드·데이터·운영 띠+드릴다운)
         │   ├── sample-infra.json       # 모범 답안 (그룹+플로우)
+        │   ├── sample-eks.json         # 모범 답안 (EKS 2레이어: cluster+파드 그룹+파드 내부, KEDA/Karpenter 주석 노드, Spot badge)
         │   ├── sample-msa-infra.json   # 모범 답안 (멀티 경계 MSA, 레인 밴드)
         │   ├── sample-platform-infra.json # 모범 답안 (대규모·균형 그리드 14노드)
         │   ├── sample-multiregion-ha.json # 모범 답안 (리전 미러 스탬프+badge+페일오버)
@@ -85,6 +88,19 @@ plugins-zzon-doc/
 - **v0.3.0 — 유형 체계 + 엔진 고도화** (2026-07, 리서치 기반): C4/DFD/arc42 + AWS·Azure·GCP 레퍼런스 40+ 조사 → `document-types.md` 전면 개정(4계열 카탈로그 + 추상화 사다리 + 요소 수 예산). 엔진 신기능: **드릴다운**(`node.href` → 통합 문서에서 더블클릭 이동, postMessage), **nodeDescriptions**(C4 노드 내 설명), **그룹 kind 7종 추가**(region/az/account/security/onprem/stage/cluster — 논리=점선·물리=실선), **카테고리 10종 추가**(lb/dns/firewall/monitor/secret/ml/analytics/topic/pipeline/device), **ERD 카디널리티**(sourceCardinality/targetCardinality → 까마귀발 마커), **노드 badge**(AZ ×2 등 주석), **타이틀바**(제목+kind 배지), **범례에 그룹 kind**, `layout.align:"start"`(밴드형). 샘플 11종. 하위호환 유지(전부 선택 필드). 검증: 헤드리스 DOM 심 스모크(scratchpad, 11/11 예외 0) + **layout-lint.mjs**(엔진 배치 수식 재현 — 그룹 겹침·삼킴 검출, 11/11 통과) + strict validate 통과.
 - **뎁스 3택 제안 규칙**(SKILL.md §1): 개괄 / 사다리 세트(드릴다운) / **풀뎁스 원장**(큰 그림 유지+전 레이어 한 장, 20~40노드, sample-full-landscape가 증명) — 사용자에게 반드시 뎁스를 묻고 그린다.
 - **v0.4.0 — zzon-wiki 스킬 추가** (2026-07): 프로젝트 문서 위키. linkonn nav 모델을 일반화한 12섹션 카탈로그(티어 1/2/3 태그, dynamic 노드) + wiki.json 단일 상태 소스(문서 status·질문 대장 q-NNN·이력) + build-wiki.mjs(strict 검증→build-docs 자식 위임→미니 md 렌더러(raw HTML 금지·스킴 허용목록)→@diagram iframe 치환→위키 셸: 3단 nav·진행 현황·zzon:navigate 드릴다운 수신). `--status`가 해시 대조로 사람 수정·질문 마커 소멸을 감지(재진입 게이트). 검증: 검증기 적대 픽스처 7종·md 렌더러 적대 입력 9종·셸 헤드리스 스모크 17항목·재진입 왕복 — 전부 통과(스크립트는 scratchpad).
+- **v0.5.0 — 우측 상세 사이드바 + C4 혼합 레벨 샘플** (2026-07-10):
+  - **엔진 UI 개편**: 플로팅 패널 2종(노드 상세·플로우 단계) 제거 → **우측 상세 사이드바**(슬라이드 인) 공용화. 노드 클릭 = 설명+ERD 컬럼(FK 툴팁)+**연결 목록**(클릭 시 상대 노드로 이동)+드릴다운 링크. 플로우 = 단계 목록. 플로우 버튼 아래 **순번 스트립**(숫자 칩, 클릭=단계 강조, 배지·목록과 동기화). Escape로 닫기. 사이드바 열리면 툴바가 왼쪽으로 밀림.
+  - **통합 문서 상호 배타**: iframe이 `zzon:sidebar` postMessage → 셸이 좌측 메뉴 자동 접힘, 좌측 메뉴를 다시 열면 셸이 `zzon:sidebar-close`를 보내 우측 사이드바 닫힘. 장 전환 시 좌측 메뉴 복원.
+  - **zzon-wiki 셸도 동일 프로토콜 연동**(build-wiki.mjs): 임베드 다이어그램의 사이드바가 열리면 **해당 figure를 본문 폭(860px) 밖으로 확장**(`.dgm.expanded` — 94vw·높이 72vh) + 좌측 네비 자동 접힘(열린 사이드바 카운트 관리, 여러 임베드 대응). 네비 재오픈 시 모든 임베드 iframe에 닫기 브로드캐스트, 문서 전환 시 복원.
+  - **위키 홈 = 문서 개요로 개편**: 홈이 진행 대시보드가 아니라 **섹션 소개(purpose)+문서 카드**(제목·summary·상태 배지, todo는 옅게, na 제외)를 보여준다. 진행 현황(통계·진행바·열린 질문·이력)은 별도 뷰 `#/_progress`로 이동 — 네비 상단에 "개요/진행 현황" 버튼 2개. 스키마 변경 없음.
+  - **위키 네비 서브트리 접기**: 자식 있는 문서 노드는 접이식(`.nsub` + 셰브런 토글, 기본 접힘). 활성 문서의 조상은 자동 펼침(직접 URL·드릴다운 진입 대비). lv3 들여쓰기 CSS 추가(기존엔 3depth 스타일 부재). 데모: playground/wiki-demo를 **풀 SI 전체 메뉴**(12섹션·93문서, 3depth 예시 interface/api-spec/orders/{create,query} 포함)로 재구성 — 전체 카탈로그 열람용이며 실사용은 인터뷰 선별(interview.decisions에 기록).
+  - **섹션 code 연속 재부여 규칙**: 섹션은 원래 인터뷰에서 필요한 것만 선별되는데, code가 카탈로그 번호를 그대로 써서 구멍(00,05,06…)이 남았었다 → **포함된 섹션 기준 00부터 연속 부여**로 확정(doc-catalog.md 인스턴스화 절차 6, wiki-spec.md 갱신). build-wiki가 비연속 code에 ⚠ 경고. 섹션 추가 시 카탈로그 순서 자리에 끼우고 전체 재부여(참조는 path 기준이라 안전). sample-wiki.json 재번호 완료.
+  - **샘플 12종**: sample-container(C4 L2, **경계 그룹+밖에 L1 이웃 = L1~L2 한 장**)·sample-component(C4 L3, 경계+이웃 = L2~L3 한 장) 추가 — "한 장=한 레이어"로만 그리던 문제의 저작 측 해결. sample-context 드릴다운을 sample-container로 연결. document-types.md(컨테이너 행 개정+컴포넌트 행 추가)·diagram-spec.md·SKILL.md 갱신.
+  - **단계 포커스**: 순번(칩·배지·목록)을 고르면 그 단계의 엣지(+배지)만 선명하게 남고 나머지 플로우 엣지는 0.15로 가라앉음. 활성 단계 양끝 노드만 온전, 다른 플로우 노드는 soft-dim. 재클릭으로 해제.
+  - **EKS 유형 추가**: sample-eks(2레이어 — cluster 그룹 안 파드 그룹 미러 스탬프 + 파드 내부 컴포넌트, KEDA/Karpenter는 엣지 없는 주석 노드, Spot/GPU는 badge). document-types.md에 "쿠버네티스(EKS) 워크로드" 행(1레이어 클러스터 뷰 vs 2레이어 한 장 선택 규칙) 추가. 샘플 총 13종.
+  - 검증: 헤드리스 DOM 심 스모크 32항목(scratchpad, 부팅·사이드바·스트립·단계 포커스·메시지 왕복·ERD 컬럼) 통과 + layout-lint + `claude plugin validate` (마켓플레이스·플러그인) 통과.
+  - **playground/examples/**: 가상 서비스 "피크닉" 예제 세트 10종(context/container/component/landscape/infra/eks/eks-workloads/flow-booking/event-fanout/erd, 서로 href 드릴다운 연결) — gitignore된 데모. 기존 playground 데모는 삭제됨.
+- 엔진 개선 백로그(엣지 겹침·라벨 디컨플릭트 등 P1~P3)는 2026-07-10 세션에서 리스트업됨 — 메모리 `zzon-engine-priorities` 참조.
 - 소유자 표준은 **메모리**에 기록됨(무의존/문서 디자인/레이아웃 품질) — 로컬, 레포 밖.
 - git: 첫 커밋(main) 존재. **GitHub push는 소유자가 직접 함.** 이후 변경분(통합 문서 등)은 아직 커밋 안 됨 — 소유자 검토 후 커밋.
 

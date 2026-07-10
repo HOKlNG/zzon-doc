@@ -412,10 +412,24 @@ body {
   padding:1px 7px; font-size:10px; font-weight:600; color:var(--muted-foreground); }
 .dg-title-text { font-size:12.5px; font-weight:600; letter-spacing:-.01em;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dg-flowsel { left:12px; top:52px; display:flex; flex-wrap:wrap; align-items:center; gap:6px;
-  max-width:60%; }
+.dg-flowcol { left:12px; top:52px; display:flex; flex-direction:column; align-items:flex-start;
+  gap:8px; max-width:60%; }
+.dg-flowsel { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
 .dg-flowsel .dg-route { color:var(--muted-foreground); }
-.dg-toolbar { right:12px; top:12px; display:flex; flex-direction:column; gap:4px; }
+.dg-stepstrip { display:flex; flex-wrap:wrap; align-items:center; gap:5px; padding:5px 8px;
+  border-radius:9999px; border:1px solid var(--color-border);
+  background:color-mix(in oklab,var(--card) 95%,transparent);
+  box-shadow:0 1px 2px rgba(0,0,0,.05); backdrop-filter:blur(6px); }
+.dg-stepchip { width:22px; height:22px; border-radius:9999px; border:2px solid var(--color-background);
+  cursor:pointer; padding:0; font:inherit; font-size:10px; font-weight:700; color:#fff;
+  background:var(--diagram-flow); display:inline-flex; align-items:center; justify-content:center;
+  opacity:.78; transition:opacity .12s, box-shadow .12s, transform .12s; }
+.dg-stepchip:hover { opacity:1; }
+.dg-stepchip.active { opacity:1; transform:scale(1.1);
+  box-shadow:0 0 0 3px color-mix(in oklab, var(--diagram-flow) 30%, transparent); }
+.dg-toolbar { right:12px; top:12px; display:flex; flex-direction:column; gap:4px;
+  transition:right .2s ease; }
+#dg-root.side-open .dg-toolbar { right:320px; }
 .dg-warn { left:12px; top:90px; }
 .dg-warn .chip { display:inline-block; border:1px solid color-mix(in oklab,#f59e0b 50%,transparent);
   background:color-mix(in oklab,#f59e0b 10%,transparent); color:#b45309;
@@ -430,30 +444,46 @@ body {
   color:var(--muted-foreground); }
 .dg-legend .sep { width:1px; height:12px; background:var(--color-border); }
 
-.dg-panel { width:288px; border-radius:8px; border:1px solid var(--color-border);
-  background:color-mix(in oklab,var(--card) 96%,transparent); box-shadow:0 8px 24px rgba(0,0,0,.14);
-  backdrop-filter:blur(8px); }
-.dg-detail { right:48px; top:12px; }
-.dg-steps { right:12px; bottom:12px; }
-.dg-panel-head { display:flex; align-items:flex-start; gap:8px; border-bottom:1px solid var(--color-border);
-  padding:12px; cursor:grab; touch-action:none; }
-.dg-panel-head:active { cursor:grabbing; }
-.dg-panel-head .grip { color:color-mix(in oklab,var(--muted-foreground) 60%,transparent);
-  flex-shrink:0; }
+/* ---- 우측 상세 사이드바 (플로우 단계 / 노드 상세) ---- */
+.dg-side { position:absolute; z-index:40; top:0; right:0; bottom:0; width:304px;
+  display:flex; flex-direction:column; border-left:1px solid var(--color-border);
+  background:color-mix(in oklab,var(--card) 96%,transparent); backdrop-filter:blur(10px);
+  box-shadow:-10px 0 30px rgba(0,0,0,.10); transform:translateX(105%); transition:transform .2s ease; }
+.dg-side.open { transform:translateX(0); }
+.dg-side-head { display:flex; align-items:flex-start; gap:10px; padding:14px;
+  border-bottom:1px solid var(--color-border); }
 .dg-panel-title { font-size:14px; font-weight:600; line-height:1.2; }
-.dg-panel-sub { font-size:12px; color:var(--muted-foreground); }
-.dg-panel-close { margin-left:auto; }
-.dg-panel-body { padding:10px 12px; font-size:12px; line-height:1.6; color:var(--muted-foreground); }
-.dg-steps ol { list-style:none; margin:0; padding:12px; max-height:256px; overflow-y:auto; }
-.dg-steps li { display:flex; gap:8px; font-size:12px; line-height:1.6; margin-bottom:8px; }
-.dg-steps li:last-child { margin-bottom:0; }
+.dg-panel-sub { font-size:12px; color:var(--muted-foreground); margin-top:2px; }
+.dg-panel-close { margin-left:auto; flex-shrink:0; }
+.dg-side-body { flex:1; min-height:0; overflow-y:auto; padding:12px 14px 18px;
+  font-size:12px; line-height:1.6; color:var(--muted-foreground); }
+.dg-side-desc { margin:0 0 4px; }
+.dg-side-sec { margin:16px 0 6px; font-size:10.5px; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; color:color-mix(in oklab,var(--muted-foreground) 80%,transparent); }
+.dg-side-body > .dg-side-sec:first-child { margin-top:2px; }
+.dg-steplist { list-style:none; margin:0; padding:0; }
+.dg-steplist li { display:flex; gap:8px; font-size:12px; line-height:1.6;
+  cursor:pointer; border-radius:7px; padding:4px 6px; margin:0 -6px 4px; transition:background 120ms; }
+.dg-steplist li:hover { background:var(--muted); }
+.dg-steplist li.active { background:color-mix(in oklab, var(--diagram-flow) 16%, transparent); }
+.dg-steplist li.active .dg-stepnum { box-shadow:0 0 0 3px color-mix(in oklab, var(--diagram-flow) 30%, transparent); }
 .dg-stepnum { flex-shrink:0; width:20px; height:20px; border-radius:9999px; display:flex;
   align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff;
   background:var(--diagram-flow); transition:box-shadow 120ms; }
-.dg-steps li { cursor:pointer; border-radius:7px; padding:3px 6px; margin:0 -6px 8px; transition:background 120ms; }
-.dg-steps li:hover { background:var(--muted); }
-.dg-steps li.active { background:color-mix(in oklab, var(--diagram-flow) 16%, transparent); }
-.dg-steps li.active .dg-stepnum { box-shadow:0 0 0 3px color-mix(in oklab, var(--diagram-flow) 30%, transparent); }
+.dg-conn { display:flex; align-items:center; gap:7px; padding:5px 8px; margin:0 -8px;
+  border-radius:7px; cursor:pointer; font-size:12px; color:var(--foreground); }
+.dg-conn:hover { background:var(--muted); }
+.dg-conn .dir { flex-shrink:0; width:14px; text-align:center; font-weight:700;
+  color:var(--muted-foreground); }
+.dg-conn .lbl { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dg-conn .kind { margin-left:auto; flex-shrink:0; padding-left:8px; font-size:10px;
+  color:var(--muted-foreground); }
+.dg-side-col { display:flex; align-items:center; gap:6px; padding:3px 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; color:var(--foreground); }
+.dg-side-col .pk-ic { flex-shrink:0; display:inline-flex; }
+.dg-side-col .t { margin-left:auto; padding-left:8px; font-size:10px;
+  color:color-mix(in oklab,var(--muted-foreground) 80%,transparent);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #dg-tip { position:fixed; z-index:1000; left:0; top:0; pointer-events:none; opacity:0;
   max-width:260px; padding:6px 9px; border-radius:7px; font-size:11.5px; font-weight:500; line-height:1.45;
   white-space:pre-line; background:var(--foreground); color:var(--background);
@@ -1094,6 +1124,9 @@ const ENGINE_JS = String.raw`
       const dimmed = activeEdges !== null && !active;
       return { active, dimmed, isHover: hoveredEdge === id };
     };
+    // 단계 포커스: 순번을 고르면 그 단계의 엣지만 남기고 나머지 플로우 엣지는 가라앉힌다
+    const stepFocus = flowSteps !== null && activeStep != null;
+    const inStep = (id) => { const st = flowSteps && flowSteps.get(id); return !!st && st.indexOf(activeStep) !== -1; };
     const ordered = edgeGeos.slice().sort((a, b) => Number(stateOf(a.edge.id).active) - Number(stateOf(b.edge.id).active));
 
     // 1층: 경로
@@ -1104,7 +1137,8 @@ const ENGINE_JS = String.raw`
       const stepIndex = flowSteps && flowSteps.get(edge.id) ? flowSteps.get(edge.id)[0] : 0;
 
       const g = svgEl("g");
-      g.style.opacity = st.dimmed ? (mode === "hover" ? 0.35 : 0.1) : 1;
+      g.style.opacity = st.dimmed ? (mode === "hover" ? 0.35 : 0.1)
+        : (stepFocus && isFlow && !inStep(edge.id) ? 0.15 : 1);
       g.style.transition = "opacity 150ms";
 
       const stroke = st.active ? "var(--diagram-flow)"
@@ -1152,7 +1186,8 @@ const ENGINE_JS = String.raw`
       const st = stateOf(edge.id);
       const steps = flowSteps ? flowSteps.get(edge.id) : null;
       const g = svgEl("g");
-      g.style.opacity = st.dimmed ? (mode === "hover" ? 0.35 : 0.08) : 1;
+      g.style.opacity = st.dimmed ? (mode === "hover" ? 0.35 : 0.08)
+        : (stepFocus && steps && !inStep(edge.id) ? 0.15 : 1); // 배지도 함께 가라앉힘(클릭은 유지)
       g.style.transition = "opacity 150ms";
 
       if (steps) {
@@ -1175,7 +1210,7 @@ const ENGINE_JS = String.raw`
           ev.stopPropagation();
           const i = steps.indexOf(activeStep);
           activeStep = i === -1 ? steps[0] : (i + 1 < steps.length ? steps[i + 1] : null);
-          hideTip(); renderEdges(); updateStepHighlight();
+          hideTip(); applyHighlight(); updateStepHighlight();
         });
         g.appendChild(badge);
       } else if (edge.label && (showLabels || st.isHover || st.active)) {
@@ -1242,11 +1277,24 @@ const ENGINE_JS = String.raw`
   function applyHighlight() {
     const hl = computeHighlight();
     const strong = hl && (hl.mode === "flow" || hl.mode === "select");
+    // 단계 포커스 중이면 활성 단계 엣지의 양끝 노드만 완전 강조
+    let stepNodes = null;
+    if (hl && hl.mode === "flow" && activeStep != null && hl.steps) {
+      stepNodes = new Set();
+      const edgeById = new Map(SPEC.edges.map(e => [e.id, e]));
+      for (const [eid, nums] of hl.steps) {
+        if (nums.indexOf(activeStep) === -1) continue;
+        const e = edgeById.get(eid);
+        if (e) { stepNodes.add(e.source); stepNodes.add(e.target); }
+      }
+    }
     content.querySelectorAll("[data-node-id]").forEach(node => {
       const id = node.getAttribute("data-node-id");
       const inHl = hl ? hl.nodes.has(id) : false;
       node.classList.toggle("dimmed", strong ? !inHl : false);
-      node.classList.toggle("soft-dim", hl && hl.mode === "hover" ? !inHl : false);
+      node.classList.toggle("soft-dim",
+        (hl && hl.mode === "hover" ? !inHl : false) ||
+        (stepNodes !== null && inHl && !stepNodes.has(id)));
       node.classList.toggle("selected", selected === id);
     });
     renderEdges();
@@ -1255,16 +1303,29 @@ const ENGINE_JS = String.raw`
 
   /* ===== 선택/플로우 ===== */
   function onSelectNode(id) {
-    flowId = null; updateFlowButtons();
+    flowId = null; activeStep = null;
+    updateFlowButtons(); renderStepStrip(null);
     selected = (selected === id) ? null : id;
-    renderDetailPanel(); renderStepsPanel(); applyHighlight();
+    if (selected) renderNodeSide(SPEC.nodes.find(n => n.id === selected));
+    else closeSide();
+    applyHighlight();
   }
   function setFlow(id) {
     selected = null;
     flowId = id;
     flowAnimate = !!id; // 켤 때만 진입 애니메이션 1회
     activeStep = null; hideTip();
-    updateFlowButtons(); renderDetailPanel(); renderStepsPanel(); applyHighlight();
+    updateFlowButtons();
+    const flow = id ? SPEC.flows.find(f => f.id === id) : null;
+    renderStepStrip(flow);
+    if (flow) renderFlowSide(flow);
+    else closeSide();
+    applyHighlight();
+  }
+  function clearSelection() {
+    if (flowId) { setFlow(null); return; }
+    if (selected) { selected = null; closeSide(); applyHighlight(); return; }
+    closeSide();
   }
 
   /* ===== 팬/줌 (usePanZoom) ===== */
@@ -1318,7 +1379,8 @@ const ENGINE_JS = String.raw`
   viewport.addEventListener("click", (e) => {
     if (downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) < 5) {
       if (!e.target.closest("[data-node-id],[data-diagram-ui]")) {
-        selected = null; renderDetailPanel(); applyHighlight();
+        if (selected) { selected = null; closeSide(); }
+        applyHighlight();
       }
     }
   });
@@ -1348,14 +1410,14 @@ const ENGINE_JS = String.raw`
   }
   function hideTip() { if (tipEl) tipEl.classList.remove("show"); }
 
-  /* ---- 단계 강조 (배지 클릭 ↔ 단계 패널) ---- */
-  function setActiveStep(n) { activeStep = (activeStep === n ? null : n); renderEdges(); updateStepHighlight(); }
+  /* ---- 단계 강조 (배지 클릭 ↔ 순번 스트립 ↔ 사이드바 목록) ---- */
+  function setActiveStep(n) { activeStep = (activeStep === n ? null : n); applyHighlight(); updateStepHighlight(); }
   function updateStepHighlight() {
-    if (!stepsEl) return;
     let target = null;
-    stepsEl.querySelectorAll("[data-step]").forEach((li) => {
-      const on = Number(li.getAttribute("data-step")) === activeStep;
-      li.classList.toggle("active", on); if (on) target = li;
+    root.querySelectorAll("[data-step]").forEach((item) => {
+      const on = Number(item.getAttribute("data-step")) === activeStep;
+      item.classList.toggle("active", on);
+      if (on && item.tagName === "LI") target = item;
     });
     if (target) target.scrollIntoView({ block: "nearest" });
   }
@@ -1382,12 +1444,13 @@ const ENGINE_JS = String.raw`
     root.appendChild(bar);
   }
 
-  /* ---- 플로우 셀렉터 ---- */
-  let flowSelEl = null;
+  /* ---- 플로우 셀렉터 + 순번 스트립 (숫자만, 클릭=단계 강조) ---- */
+  let flowSelEl = null, flowColEl = null, stripEl = null;
   function renderFlowSelector() {
     if (!SPEC.flows.length) return;
-    flowSelEl = el("div", "dg-ui dg-flowsel");
-    flowSelEl.setAttribute("data-diagram-ui", "");
+    flowColEl = el("div", "dg-ui dg-flowcol");
+    flowColEl.setAttribute("data-diagram-ui", "");
+    flowSelEl = el("div", "dg-flowsel");
     const route = el("span", "dg-route"); route.appendChild(iconSpan("Route", 16)); flowSelEl.appendChild(route);
     SPEC.flows.forEach(f => {
       const b = el("button", "dg-btn", f.label);
@@ -1396,7 +1459,22 @@ const ENGINE_JS = String.raw`
       b.addEventListener("click", () => setFlow(flowId === f.id ? null : f.id));
       flowSelEl.appendChild(b);
     });
-    root.appendChild(flowSelEl);
+    flowColEl.appendChild(flowSelEl);
+    root.appendChild(flowColEl);
+  }
+  function renderStepStrip(flow) {
+    if (stripEl) { stripEl.remove(); stripEl = null; }
+    if (!flow || !flowColEl) return;
+    stripEl = el("div", "dg-stepstrip");
+    flow.steps.forEach((s, i) => {
+      const b = el("button", "dg-stepchip", String(i + 1));
+      b.type = "button";
+      b.setAttribute("data-step", String(i + 1));
+      attachTip(b, (i + 1) + ". " + s.text);
+      b.addEventListener("click", () => setActiveStep(i + 1));
+      stripEl.appendChild(b);
+    });
+    flowColEl.appendChild(stripEl);
   }
   function updateFlowButtons() {
     if (!flowSelEl) return;
@@ -1427,7 +1505,7 @@ const ENGINE_JS = String.raw`
   function renderWarning() {
     if (!layout.warnings.length) return;
     const w = el("div", "dg-ui dg-warn"); w.setAttribute("data-diagram-ui", "");
-    if (!SPEC.flows.length) w.style.top = "52px";
+    w.style.top = SPEC.flows.length ? "132px" : "52px"; // 플로우 있으면 순번 스트립 아래로
     w.appendChild(el("span", "chip", layout.warnings[0]));
     root.appendChild(w);
   }
@@ -1471,95 +1549,126 @@ const ENGINE_JS = String.raw`
     root.appendChild(lg);
   }
 
-  /* ---- 드래그 가능한 패널 헤드 ---- */
-  function makeDraggable(handle, panel) {
-    let drag = null;
-    handle.addEventListener("pointerdown", (e) => {
-      if (e.target.closest(".dg-panel-close")) return;
-      const m = (panel.style.transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/));
-      const ox = m ? parseFloat(m[1]) : 0, oy = m ? parseFloat(m[2]) : 0;
-      drag = { sx:e.clientX, sy:e.clientY, ox, oy };
-      handle.setPointerCapture(e.pointerId); e.stopPropagation();
-    });
-    handle.addEventListener("pointermove", (e) => {
-      if (!drag) return;
-      panel.style.transform = "translate(" + (drag.ox + e.clientX - drag.sx) + "px," + (drag.oy + e.clientY - drag.sy) + "px)";
-    });
-    handle.addEventListener("pointerup", (e) => { drag = null; try { handle.releasePointerCapture(e.pointerId); } catch (_) {} });
+  /* ---- 우측 상세 사이드바 (플로우 단계 / 노드 상세 공용) ----
+     열리면 부모(통합 문서)에 알려 좌측 메뉴와 상호 배타로 동작한다. */
+  let sideEl = null, sideOpen = false;
+  function ensureSide() {
+    if (sideEl) return sideEl;
+    sideEl = el("div", "dg-ui dg-side");
+    sideEl.setAttribute("data-diagram-ui", "");
+    root.appendChild(sideEl);
+    return sideEl;
   }
-
-  /* ---- 노드 상세 패널 ---- */
-  let detailEl = null;
-  function renderDetailPanel() {
-    if (detailEl) { detailEl.remove(); detailEl = null; }
-    if (!selected) return;
-    const node = SPEC.nodes.find(n => n.id === selected);
+  function postSideState(open) {
+    if (window.parent === window) return;
+    window.parent.postMessage({ type: "zzon:sidebar", open: !!open }, "*");
+  }
+  function setSideOpen(open) {
+    ensureSide();
+    if (sideOpen === open) return;
+    sideOpen = open;
+    sideEl.classList.toggle("open", open);
+    root.classList.toggle("side-open", open);
+    postSideState(open);
+  }
+  function closeSide() { if (sideEl) setSideOpen(false); }
+  function sideHead(titleText, subText, onClose, tileNode) {
+    const head = el("div", "dg-side-head");
+    if (tileNode) head.appendChild(tileNode);
+    const txt = el("div");
+    txt.appendChild(el("div", "dg-panel-title", titleText));
+    if (subText) txt.appendChild(el("div", "dg-panel-sub", subText));
+    head.appendChild(txt);
+    const close = el("button", "dg-btn icon dg-panel-close"); close.innerHTML = uiIcon("X", 14);
+    close.addEventListener("click", onClose);
+    head.appendChild(close);
+    return head;
+  }
+  function hrefRow(node) {
+    const wrap = el("div", "dg-href");
+    const a = el("a"); a.href = "#"; a.title = node.href;
+    a.appendChild(document.createTextNode("상세 보기: " + node.href));
+    a.appendChild(iconSpan("ZoomIn", 14));
+    a.addEventListener("click", (e) => { e.preventDefault(); navigateHref(node.href); });
+    wrap.appendChild(a);
+    return wrap;
+  }
+  function renderNodeSide(node) {
     if (!node) return;
+    const s = ensureSide(); s.innerHTML = "";
     const color = catColor(node.category), m = meta(node.category);
-    const panel = el("div", "dg-ui dg-panel dg-detail"); panel.setAttribute("data-diagram-ui", "");
-    const head = el("div", "dg-panel-head");
-    const left = el("div"); left.style.display = "flex"; left.style.alignItems = "center"; left.style.gap = "10px";
     const tile = el("div", "dg-tile");
     tile.style.width = "36px"; tile.style.height = "36px";
     tile.style.backgroundColor = "color-mix(in oklab, " + color + " 14%, transparent)";
     tile.appendChild(iconSpan(catIconName(node.category), 20, color));
-    const txt = el("div");
-    txt.appendChild(el("div", "dg-panel-title", node.label));
-    txt.appendChild(el("div", "dg-panel-sub", m.labelKo + (node.tech ? " · " + node.tech : "")));
-    left.appendChild(tile); left.appendChild(txt);
-    head.appendChild(left);
-    const close = el("button", "dg-btn icon dg-panel-close"); close.innerHTML = uiIcon("X", 14);
-    close.addEventListener("click", () => { selected = null; renderDetailPanel(); applyHighlight(); });
-    head.appendChild(close);
-    panel.appendChild(head);
-    if (node.description) panel.appendChild(el("div", "dg-panel-body", node.description));
+    s.appendChild(sideHead(node.label, m.labelKo + (node.tech ? " · " + node.tech : ""),
+      () => { selected = null; closeSide(); applyHighlight(); }, tile));
+    const body = el("div", "dg-side-body");
+    if (node.description) body.appendChild(el("p", "dg-side-desc", node.description));
     if (node.table) {
-      const p = el("div", "dg-panel-body", (node.table.columns.length) + "개 컬럼");
-      panel.appendChild(p);
+      body.appendChild(el("div", "dg-side-sec", "컬럼 " + node.table.columns.length));
+      node.table.columns.forEach((c) => {
+        const row = el("div", "dg-side-col");
+        if (c.pk) { const pk = el("span", "pk-ic"); pk.appendChild(iconSpan("KeyRound", 11, "#f59e0b")); row.appendChild(pk); }
+        row.appendChild(el("span", null, c.name));
+        const tags = el("span", "dg-tags");
+        if (c.fk) tags.appendChild(el("span", "dg-tag fk", "FK"));
+        if (c.unique) tags.appendChild(el("span", "dg-tag", "UQ"));
+        if (c.nullable) tags.appendChild(el("span", "dg-tag", "N"));
+        if (tags.childNodes.length) row.appendChild(tags);
+        row.appendChild(el("span", "t", c.type));
+        if (c.fk) attachTip(row, "FK → " + c.fk.table + "." + c.fk.column);
+        body.appendChild(row);
+      });
     }
-    if (node.href) {
-      const wrap = el("div", "dg-href");
-      const a = el("a"); a.href = "#"; a.title = node.href;
-      a.appendChild(document.createTextNode("상세 보기: " + node.href));
-      a.appendChild(iconSpan("ZoomIn", 14));
-      a.addEventListener("click", (e) => { e.preventDefault(); navigateHref(node.href); });
-      wrap.appendChild(a); panel.appendChild(wrap);
+    const rel = SPEC.edges.filter(e => e.source === node.id || e.target === node.id);
+    if (rel.length) {
+      body.appendChild(el("div", "dg-side-sec", "연결 " + rel.length));
+      rel.forEach((e) => {
+        const outgoing = e.source === node.id;
+        const other = SPEC.nodes.find(n => n.id === (outgoing ? e.target : e.source));
+        if (!other) return;
+        const row = el("div", "dg-conn");
+        row.appendChild(el("span", "dir", outgoing ? "→" : "←"));
+        row.appendChild(iconSpan(catIconName(other.category), 12, catColor(other.category)));
+        row.appendChild(el("span", "lbl", other.label));
+        row.appendChild(el("span", "kind", e.label || EDGE_KIND_LABEL[e.kind] || ""));
+        row.addEventListener("click", () => onSelectNode(other.id));
+        body.appendChild(row);
+      });
     }
-    root.appendChild(panel);
-    makeDraggable(head, panel);
-    detailEl = panel;
+    s.appendChild(body);
+    if (node.href) s.appendChild(hrefRow(node));
+    setSideOpen(true);
   }
-
-  /* ---- 플로우 단계 패널 ---- */
-  let stepsEl = null;
-  function renderStepsPanel() {
-    if (stepsEl) { stepsEl.remove(); stepsEl = null; }
-    if (!flowId) return;
-    const flow = SPEC.flows.find(f => f.id === flowId);
-    if (!flow) return;
-    const panel = el("div", "dg-ui dg-panel dg-steps"); panel.setAttribute("data-diagram-ui", "");
-    const head = el("div", "dg-panel-head");
-    head.appendChild(iconSpan("GripVertical", 14)).classList.add("grip");
-    head.appendChild(el("span", "dg-panel-title", flow.label));
-    const close = el("button", "dg-btn icon dg-panel-close"); close.innerHTML = uiIcon("X", 14);
-    close.addEventListener("click", () => setFlow(null));
-    head.appendChild(close);
-    panel.appendChild(head);
-    if (flow.description) panel.appendChild(el("div", "dg-panel-body", flow.description));
-    const ol = el("ol");
-    flow.steps.forEach((s, i) => {
+  function renderFlowSide(flow) {
+    const s = ensureSide(); s.innerHTML = "";
+    s.appendChild(sideHead(flow.label, flow.steps.length + "단계", () => setFlow(null)));
+    const body = el("div", "dg-side-body");
+    if (flow.description) body.appendChild(el("p", "dg-side-desc", flow.description));
+    body.appendChild(el("div", "dg-side-sec", "단계"));
+    const ol = el("ol", "dg-steplist");
+    flow.steps.forEach((st, i) => {
       const li = el("li"); li.setAttribute("data-step", String(i + 1));
       if (activeStep === i + 1) li.classList.add("active");
       li.appendChild(el("span", "dg-stepnum", String(i + 1)));
-      li.appendChild(el("span", null, s.text));
+      li.appendChild(el("span", null, st.text));
       li.addEventListener("click", () => setActiveStep(i + 1));
       ol.appendChild(li);
     });
-    panel.appendChild(ol);
-    root.appendChild(panel);
-    makeDraggable(head, panel);
-    stepsEl = panel;
+    body.appendChild(ol);
+    s.appendChild(body);
+    setSideOpen(true);
   }
+
+  /* ---- 부모(통합 문서)가 좌측 메뉴를 다시 열면 이쪽 사이드바를 닫는다 ---- */
+  window.addEventListener("message", (e) => {
+    const d = e.data;
+    if (d && d.type === "zzon:sidebar-close") clearSelection();
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && (flowId || selected)) clearSelection();
+  });
 
   /* ========================================================================
    * 부트

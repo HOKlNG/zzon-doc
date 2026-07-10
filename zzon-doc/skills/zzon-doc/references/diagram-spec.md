@@ -232,12 +232,15 @@ render.mjs는 실행 전 스펙을 검증하고, 실패 시 `path: 메시지` �
 
 ## 모범 답안
 
-같은 디렉터리의 샘플 10종이 완성 예시다. **새 다이어그램을 만들기 전에 해당 유형의 샘플을 먼저 읽어라** (유형→샘플 매핑은 `document-types.md`).
+같은 디렉터리의 샘플 13종이 완성 예시다. **새 다이어그램을 만들기 전에 해당 유형의 샘플을 먼저 읽어라** (유형→샘플 매핑은 `document-types.md`).
 
 - `sample-context` — C4 컨텍스트: nodeDescriptions + 드릴다운 href
+- `sample-container` — C4 컨테이너: **경계(boundary) 그룹 + 밖에 L1 이웃(액터·외부) 유지** — L1~L2를 한 장에
+- `sample-component` — C4 컴포넌트: 컨테이너 경계 + 밖에 호출자·협력자 유지 — L2~L3를 한 장에
 - `sample-infra` — 그룹(경계/VPC)+플로우 기본형
 - `sample-msa-infra` / `sample-platform-infra` — 도메인 레인 밴드 / 대규모 균형 그리드
 - `sample-multiregion-ha` — 리전 미러 스탬프 + badge + 페일오버 플로우
+- `sample-eks` — EKS 2레이어(클러스터+파드 그룹+파드 내부) 한 장: cluster 중첩 + 오토스케일러 주석 노드 + Spot/GPU badge
 - `sample-event-flow` — 이벤트드리븐 fan-out
 - `sample-data-pipeline` — stage 밴드 + 횡단 거버넌스 띠 + 데드레터 곁가지
 - `sample-erd` / `sample-erd-large` — FK 컬럼 앵커 + 카디널리티

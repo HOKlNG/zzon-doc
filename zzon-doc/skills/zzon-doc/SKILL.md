@@ -50,7 +50,7 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 
 ## 3. 스펙 작성 — 계약 (틀리기 쉬움)
 
-- **작성 전 세 가지를 읽는다: `references/document-types.md`(유형 판별·권장 배치) → `references/diagram-spec.md`(스펙 계약 + 레이아웃 가이드 + 자가질문) → 해당 유형의 샘플.** (references/ 샘플 10종: context(드릴다운·노드설명) · infra · msa-infra · platform-infra(대규모) · multiregion-ha(미러·배지) · event-flow · data-pipeline(stage 밴드) · erd · erd-large(카디널리티) · agent-topology)
+- **작성 전 세 가지를 읽는다: `references/document-types.md`(유형 판별·권장 배치) → `references/diagram-spec.md`(스펙 계약 + 레이아웃 가이드 + 자가질문) → 해당 유형의 샘플.** (references/ 샘플 13종: context(드릴다운·노드설명) · **container(경계+이웃, L1~L2 한 장)** · **component(경계+이웃, L2~L3 한 장)** · infra · **eks(클러스터+파드 2레이어)** · msa-infra · platform-infra(대규모) · multiregion-ha(미러·배지) · event-flow · data-pipeline(stage 밴드) · erd · erd-large(카디널리티) · agent-topology)
 - **레이아웃**: 픽셀 좌표 금지. `lane`/`order`로 2D 격자처럼 분산해 가로·세로 쏠림을 막고, **공통·횡단은 전용 띠로, 그룹은 같은 레인 밴드로** 모은다. 노드 13↑/되먹임이면 쪼갠다. **그리기 전·후 diagram-spec.md의 "자가질문 8개"에 스스로 답한다**(유형 맞나·공통 띄웠나·일자 아닌가·병렬 펼쳤나…).
 - 평탄 배열 + slug id(`^[a-z0-9][a-z0-9_-]*$`). 그룹 중첩도 `parentId` 문자열.
 - 라벨 한국어, 기술명 `tech`, 설명 `description`(한 문장). 대표 플로우 1~3개를 `flows`로.
@@ -85,7 +85,7 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-doc/scripts/layout-lint.mjs <spec.json>
 
 ## 출력 .html에서 되는 것 (사용자에게 안내)
 
-타이틀바(제목+유형 배지) · 노드 클릭(인접 하이라이트+상세) · **드릴다운(`href` 노드 ⊕ 더블클릭 → 통합 문서에서 해당 장으로 이동)** · 플로우 버튼(경로 강조+순번 배지+단계 패널) · **배지(①②③)·단계 클릭→해당 단계 강조** · **버튼·배지 호버→설명 툴팁** · ERD 카디널리티(까마귀발) · 노드 주석 배지 · 팬/줌 · 다크/라이트 · 범례(카테고리+엣지+그룹).
+타이틀바(제목+유형 배지) · **우측 상세 사이드바**(노드 클릭→설명·ERD 컬럼·연결 목록·드릴다운 / 플로우 켜면→단계 목록. 통합 문서에선 좌측 메뉴와 상호 배타로 열림) · **드릴다운(`href` 노드 ⊕ 더블클릭 → 통합 문서에서 해당 장으로 이동)** · 플로우 버튼(경로 강조+순번 배지+**버튼 아래 순번 스트립**) · **배지(①②③)·스트립·단계 클릭→해당 단계 강조** · **버튼·배지 호버→설명 툴팁** · ERD 카디널리티(까마귀발) · 노드 주석 배지 · 팬/줌 · 다크/라이트 · 범례(카테고리+엣지+그룹).
 
 ## 절대 규칙
 

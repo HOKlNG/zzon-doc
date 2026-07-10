@@ -1,0 +1,56 @@
+{
+  "specVersion": 1,
+  "title": "주문 서비스 컴포넌트 구조 (경계 + 이웃)",
+  "kind": "infra",
+  "description": "C4 L3 컴포넌트 장의 표준 문법 — 컨테이너(주문 서비스) 경계 안을 컴포넌트로 펴되, 호출자(게이트웨이)와 협력자(DB·PG·큐)를 경계 밖 이웃으로 남긴다. 즉 L2~L3를 한 장에서 본다.",
+  "section": "구조",
+  "order": 2,
+  "layout": { "direction": "RIGHT" },
+  "groups": [
+    { "id": "order-svc", "label": "주문 서비스 (NestJS)", "kind": "boundary" }
+  ],
+  "nodes": [
+    { "id": "gateway", "label": "API 게이트웨이", "category": "gateway", "tech": "Kong", "lane": 0, "description": "주문 API의 호출자 — 상위 장(컨테이너)의 이웃" },
+
+    { "id": "order-api", "label": "주문 API", "category": "backend", "tech": "REST Controller", "parentId": "order-svc", "lane": 1, "description": "요청 검증·인증 컨텍스트 해석 후 유스케이스에 위임" },
+
+    { "id": "orchestrator", "label": "주문 오케스트레이터", "category": "service", "tech": "Use Case", "parentId": "order-svc", "lane": 2, "description": "재고 확인 → 결제 → 주문 저장 → 이벤트 발행을 조율" },
+
+    { "id": "inventory", "label": "재고 검사기", "category": "service", "parentId": "order-svc", "lane": 3, "order": 0, "description": "상품 재고를 조회해 주문 가능 여부를 판정" },
+    { "id": "pay-adapter", "label": "결제 어댑터", "category": "service", "parentId": "order-svc", "lane": 3, "order": 1, "description": "PG API 호출을 캡슐화" },
+    { "id": "publisher", "label": "이벤트 퍼블리셔", "category": "service", "parentId": "order-svc", "lane": 3, "order": 2, "description": "주문 완료 이벤트를 큐 스키마로 직렬화해 발행" },
+
+    { "id": "order-db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL", "lane": 4, "order": 0, "href": "sample-erd", "description": "주문·결제 데이터 — 스키마는 ERD 장 참조" },
+    { "id": "pg", "label": "토스페이먼츠", "category": "external", "lane": 4, "order": 1, "description": "외부 PG — 결제 승인·취소" },
+    { "id": "mq", "label": "주문 이벤트 큐", "category": "queue", "tech": "SQS", "lane": 4, "order": 2, "href": "sample-event-flow", "description": "주문 완료 이벤트가 발행되는 큐" }
+  ],
+  "edges": [
+    { "id": "e-gw-api", "source": "gateway", "target": "order-api", "kind": "http", "label": "REST" },
+    { "id": "e-api-orch", "source": "order-api", "target": "orchestrator", "kind": "http", "label": "유스케이스 호출" },
+    { "id": "e-orch-inv", "source": "orchestrator", "target": "inventory", "kind": "http", "label": "재고 확인" },
+    { "id": "e-orch-pay", "source": "orchestrator", "target": "pay-adapter", "kind": "http", "label": "결제 위임" },
+    { "id": "e-orch-pub", "source": "orchestrator", "target": "publisher", "kind": "event", "label": "완료 전달" },
+    { "id": "e-orch-db", "source": "orchestrator", "target": "order-db", "kind": "write", "label": "주문 저장" },
+    { "id": "e-inv-db", "source": "inventory", "target": "order-db", "kind": "read", "label": "재고 조회" },
+    { "id": "e-pay-pg", "source": "pay-adapter", "target": "pg", "kind": "http", "label": "승인 요청" },
+    { "id": "e-pub-mq", "source": "publisher", "target": "mq", "kind": "event", "label": "발행" }
+  ],
+  "flows": [
+    {
+      "id": "confirm",
+      "label": "주문 확정",
+      "description": "컨테이너 안에서 주문 한 건이 확정되기까지",
+      "steps": [
+        { "edge": "e-gw-api", "text": "게이트웨이가 주문 API를 호출한다" },
+        { "edge": "e-api-orch", "text": "API가 유스케이스를 실행한다" },
+        { "edge": "e-orch-inv", "text": "재고 검사기에 주문 가능 여부를 묻는다" },
+        { "edge": "e-inv-db", "text": "재고를 조회한다" },
+        { "edge": "e-orch-pay", "text": "결제 어댑터에 결제를 위임한다" },
+        { "edge": "e-pay-pg", "text": "PG가 승인을 처리한다" },
+        { "edge": "e-orch-db", "text": "주문을 확정 상태로 저장한다" },
+        { "edge": "e-orch-pub", "text": "완료 사실을 퍼블리셔에 넘긴다" },
+        { "edge": "e-pub-mq", "text": "주문 완료 이벤트를 발행한다" }
+      ]
+    }
+  ]
+}

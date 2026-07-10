@@ -1,0 +1,86 @@
+{
+  "specVersion": 1,
+  "title": "AI 이미지 생성 서빙 — EKS 워크로드 (클러스터+파드)",
+  "kind": "infra",
+  "description": "EKS 2레이어 뷰의 모범 문법 — 인프라 레이어(매니지드 서비스)와 워크로드 레이어(클러스터 안 모델별 파드 그룹, 파드 내부 컴포넌트)를 한 장에 담는다. 모델별 큐 fan-out → 파드 그룹(큐 에이전트→런타임) 미러 스탬프, 오토스케일러(KEDA·Karpenter)는 클러스터 안 주석 노드, 스팟·GPU는 badge로.",
+  "section": "구조",
+  "order": 4,
+  "layout": { "direction": "RIGHT" },
+  "groups": [
+    { "id": "aws", "label": "AWS 클라우드", "kind": "boundary" },
+    { "id": "region", "label": "리전 (ap-northeast-2)", "kind": "region", "parentId": "aws" },
+    { "id": "eks", "label": "EKS 클러스터", "kind": "cluster", "parentId": "region" },
+    { "id": "g-pod-a", "label": "모델 A 파드", "kind": "layer", "parentId": "eks" },
+    { "id": "g-pod-b", "label": "모델 B 파드", "kind": "layer", "parentId": "eks" },
+    { "id": "g-pod-c", "label": "모델 C 파드", "kind": "layer", "parentId": "eks" }
+  ],
+  "nodes": [
+    { "id": "creator", "label": "크리에이터", "category": "user", "lane": 0, "description": "프롬프트로 이미지를 생성하는 사용자" },
+
+    { "id": "cdn", "label": "CDN", "category": "cdn", "tech": "CloudFront", "parentId": "aws", "lane": 1, "description": "웹 서빙·생성 결과 이미지 캐싱" },
+
+    { "id": "backend", "label": "앱 백엔드", "category": "backend", "tech": "ECS Fargate", "parentId": "region", "lane": 2, "description": "잡 접수·상태 조회 API. 결과는 버킷을 폴링해 응답" },
+
+    { "id": "dispatcher", "label": "잡 디스패처", "category": "lambda", "tech": "Lambda", "parentId": "region", "lane": 3, "description": "요청을 검증하고 모델별 토픽으로 잡을 발행" },
+
+    { "id": "jobs", "label": "잡 토픽", "category": "topic", "tech": "SNS", "parentId": "region", "lane": 4, "description": "모델별 큐로 잡을 fan-out" },
+
+    { "id": "queue-a", "label": "잡 큐 A", "category": "queue", "tech": "SQS", "parentId": "region", "lane": 5, "order": 0, "description": "모델 A 전용 잡 버퍼 — 깊이가 KEDA 스케일 신호" },
+    { "id": "queue-b", "label": "잡 큐 B", "category": "queue", "tech": "SQS", "parentId": "region", "lane": 5, "order": 1, "description": "모델 B 전용 잡 버퍼" },
+    { "id": "queue-c", "label": "잡 큐 C", "category": "queue", "tech": "SQS", "parentId": "region", "lane": 5, "order": 2, "description": "모델 C 전용 잡 버퍼" },
+
+    { "id": "agent-a", "label": "큐 에이전트", "category": "worker", "parentId": "g-pod-a", "lane": 6, "order": 0, "description": "큐에서 잡을 꺼내 런타임에 전달하는 사이드카" },
+    { "id": "runtime-a", "label": "모델 A 런타임", "category": "ml", "tech": "SD", "parentId": "g-pod-a", "lane": 7, "order": 0, "badge": "Spot G5", "description": "GPU 스팟 노드에서 도는 추론 런타임" },
+    { "id": "agent-b", "label": "큐 에이전트", "category": "worker", "parentId": "g-pod-b", "lane": 6, "order": 1, "description": "큐에서 잡을 꺼내 런타임에 전달하는 사이드카" },
+    { "id": "runtime-b", "label": "모델 B 런타임", "category": "ml", "tech": "SDXL", "parentId": "g-pod-b", "lane": 7, "order": 1, "badge": "Spot G5", "description": "GPU 스팟 노드에서 도는 추론 런타임" },
+    { "id": "agent-c", "label": "큐 에이전트", "category": "worker", "parentId": "g-pod-c", "lane": 6, "order": 2, "description": "큐에서 잡을 꺼내 런타임에 전달하는 사이드카" },
+    { "id": "runtime-c", "label": "모델 C 런타임", "category": "ml", "tech": "업스케일러", "parentId": "g-pod-c", "lane": 7, "order": 2, "badge": "Spot P4", "description": "GPU 스팟 노드에서 도는 추론 런타임" },
+
+    { "id": "keda", "label": "KEDA", "category": "scheduler", "parentId": "eks", "lane": 6, "order": 3, "description": "큐 깊이를 보고 파드 수를 0~N으로 오토스케일" },
+    { "id": "karpenter", "label": "Karpenter", "category": "scheduler", "parentId": "eks", "lane": 7, "order": 3, "description": "파드 수요에 맞춰 GPU 스팟 노드를 프로비저닝" },
+
+    { "id": "s3", "label": "결과 버킷", "category": "storage", "tech": "S3", "parentId": "region", "lane": 8, "order": 0, "description": "생성 이미지 저장 — 백엔드가 폴링해 응답" },
+    { "id": "efs", "label": "모델 스토리지", "category": "storage", "tech": "EFS", "parentId": "region", "lane": 8, "order": 1, "description": "모델 가중치 공유 볼륨 — 모든 파드가 마운트" },
+    { "id": "ecr", "label": "이미지 레지스트리", "category": "storage", "tech": "ECR", "parentId": "region", "lane": 8, "order": 2, "description": "런타임 컨테이너 이미지 — 노드가 풀" },
+    { "id": "monitor", "label": "관측", "category": "monitor", "tech": "CloudWatch·X-Ray", "parentId": "region", "lane": 8, "order": 3, "description": "큐 깊이·GPU 사용률·잡 지연 수집" }
+  ],
+  "edges": [
+    { "id": "e-creator-cdn", "source": "creator", "target": "cdn", "kind": "http", "label": "생성 요청" },
+    { "id": "e-cdn-backend", "source": "cdn", "target": "backend", "kind": "http" },
+    { "id": "e-backend-dispatcher", "source": "backend", "target": "dispatcher", "kind": "http", "label": "잡 접수" },
+    { "id": "e-dispatcher-jobs", "source": "dispatcher", "target": "jobs", "kind": "event", "label": "잡 발행" },
+    { "id": "e-jobs-qa", "source": "jobs", "target": "queue-a", "kind": "event" },
+    { "id": "e-jobs-qb", "source": "jobs", "target": "queue-b", "kind": "event" },
+    { "id": "e-jobs-qc", "source": "jobs", "target": "queue-c", "kind": "event" },
+    { "id": "e-qa-agenta", "source": "queue-a", "target": "agent-a", "kind": "event" },
+    { "id": "e-qb-agentb", "source": "queue-b", "target": "agent-b", "kind": "event" },
+    { "id": "e-qc-agentc", "source": "queue-c", "target": "agent-c", "kind": "event" },
+    { "id": "e-agenta-runtimea", "source": "agent-a", "target": "runtime-a", "kind": "http", "label": "추론 실행" },
+    { "id": "e-agentb-runtimeb", "source": "agent-b", "target": "runtime-b", "kind": "http" },
+    { "id": "e-agentc-runtimec", "source": "agent-c", "target": "runtime-c", "kind": "http" },
+    { "id": "e-runtimea-s3", "source": "runtime-a", "target": "s3", "kind": "write", "label": "결과 저장" },
+    { "id": "e-runtimeb-s3", "source": "runtime-b", "target": "s3", "kind": "write" },
+    { "id": "e-runtimec-s3", "source": "runtime-c", "target": "s3", "kind": "write" },
+    { "id": "e-runtimea-efs", "source": "runtime-a", "target": "efs", "kind": "read", "label": "모델 로드" },
+    { "id": "e-backend-s3", "source": "backend", "target": "s3", "kind": "read", "label": "결과 조회" }
+  ],
+  "flows": [
+    {
+      "id": "generate",
+      "label": "이미지 생성 잡",
+      "description": "요청 접수부터 결과 조회까지 — 비동기 잡의 왕복",
+      "steps": [
+        { "edge": "e-creator-cdn", "text": "크리에이터가 생성을 요청한다" },
+        { "edge": "e-cdn-backend", "text": "백엔드가 요청을 받는다" },
+        { "edge": "e-backend-dispatcher", "text": "디스패처에 잡을 접수한다" },
+        { "edge": "e-dispatcher-jobs", "text": "잡 토픽에 발행한다" },
+        { "edge": "e-jobs-qa", "text": "모델별 큐로 fan-out된다" },
+        { "edge": "e-qa-agenta", "text": "큐 에이전트가 잡을 꺼낸다 (KEDA가 파드를 깨움)" },
+        { "edge": "e-agenta-runtimea", "text": "런타임이 추론을 실행한다" },
+        { "edge": "e-runtimea-efs", "text": "모델 가중치를 공유 볼륨에서 로드한다" },
+        { "edge": "e-runtimea-s3", "text": "생성 결과를 버킷에 저장한다" },
+        { "edge": "e-backend-s3", "text": "백엔드가 결과를 조회해 응답한다" }
+      ]
+    }
+  ]
+}

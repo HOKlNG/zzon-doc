@@ -1,0 +1,72 @@
+{
+  "specVersion": 1,
+  "title": "데모숍 컨테이너 구조 (경계 + 이웃)",
+  "kind": "infra",
+  "description": "C4 L2 컨테이너 장의 표준 문법 — L1의 액터·외부 시스템을 경계 밖에 그대로 남긴 채 시스템 경계(boundary) 안을 컨테이너로 편다. 즉 L1~L2를 한 장에서 본다. 주문 서비스는 컴포넌트 장으로, 주문 DB는 ERD로 드릴다운된다.",
+  "section": "구조",
+  "order": 1,
+  "layout": { "direction": "RIGHT" },
+  "groups": [
+    { "id": "platform", "label": "데모숍 플랫폼", "kind": "boundary" }
+  ],
+  "nodes": [
+    { "id": "shopper", "label": "구매자", "category": "user", "lane": 0, "order": 0, "description": "상품을 탐색하고 주문·결제하는 일반 사용자" },
+    { "id": "admin", "label": "운영자", "category": "user", "lane": 0, "order": 1, "description": "상품·재고·주문을 관리하는 내부 직원" },
+
+    { "id": "web", "label": "웹 앱", "category": "frontend", "tech": "Next.js", "parentId": "platform", "lane": 1, "description": "구매자·운영자 공용 웹 프론트엔드" },
+
+    { "id": "gateway", "label": "API 게이트웨이", "category": "gateway", "tech": "Kong", "parentId": "platform", "lane": 2, "order": 0, "description": "라우팅·레이트리밋·공통 미들웨어" },
+    { "id": "auth", "label": "인증", "category": "auth", "tech": "Cognito", "parentId": "platform", "lane": 2, "order": 1, "description": "로그인·토큰 발급·검증" },
+
+    { "id": "order-svc", "label": "주문 서비스", "category": "service", "tech": "NestJS", "parentId": "platform", "lane": 3, "order": 0, "href": "sample-component", "description": "주문 생성·결제 오케스트레이션. 내부는 컴포넌트 장 참조" },
+    { "id": "catalog-svc", "label": "상품 서비스", "category": "service", "tech": "Spring Boot", "parentId": "platform", "lane": 3, "order": 1, "description": "상품·재고·가격 관리" },
+    { "id": "search-svc", "label": "검색 서비스", "category": "service", "tech": "FastAPI", "parentId": "platform", "lane": 3, "order": 2, "description": "상품 검색·자동완성" },
+
+    { "id": "order-db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL", "parentId": "platform", "lane": 4, "order": 0, "href": "sample-erd", "description": "주문·결제 데이터. 스키마는 ERD 장 참조" },
+    { "id": "catalog-db", "label": "상품 DB", "category": "db", "tech": "MySQL", "parentId": "platform", "lane": 4, "order": 1, "description": "상품 카탈로그 저장소" },
+    { "id": "search-idx", "label": "검색 인덱스", "category": "db", "tech": "OpenSearch", "parentId": "platform", "lane": 4, "order": 2, "description": "상품 역색인" },
+
+    { "id": "mq", "label": "주문 이벤트 큐", "category": "queue", "tech": "SQS", "parentId": "platform", "lane": 5, "href": "sample-event-flow", "description": "주문 완료 이벤트 버퍼. 소비 구조는 이벤트 흐름 장 참조" },
+
+    { "id": "worker", "label": "후처리 워커", "category": "worker", "tech": "Node.js", "parentId": "platform", "lane": 6, "badge": "×3", "description": "알림·정산·출고 지시를 처리하는 컨슈머 풀" },
+
+    { "id": "pg", "label": "토스페이먼츠", "category": "external", "lane": 7, "order": 0, "description": "외부 PG. 결제 승인·취소" },
+    { "id": "mailer", "label": "메일 서비스", "category": "external", "tech": "SES", "lane": 7, "order": 1, "description": "주문 확인·알림 메일 발송" },
+    { "id": "logistics", "label": "물류 시스템", "category": "external", "lane": 7, "order": 2, "description": "출고·배송 추적 외부 시스템" }
+  ],
+  "edges": [
+    { "id": "e-shopper-web", "source": "shopper", "target": "web", "kind": "http", "label": "주문·결제" },
+    { "id": "e-admin-web", "source": "admin", "target": "web", "kind": "http", "label": "상품 관리" },
+    { "id": "e-web-gw", "source": "web", "target": "gateway", "kind": "http", "label": "REST API" },
+    { "id": "e-gw-auth", "source": "gateway", "target": "auth", "kind": "http", "label": "토큰 검증" },
+    { "id": "e-gw-order", "source": "gateway", "target": "order-svc", "kind": "http" },
+    { "id": "e-gw-catalog", "source": "gateway", "target": "catalog-svc", "kind": "http" },
+    { "id": "e-gw-search", "source": "gateway", "target": "search-svc", "kind": "http" },
+    { "id": "e-order-orderdb", "source": "order-svc", "target": "order-db", "kind": "write", "label": "주문 저장" },
+    { "id": "e-catalog-catalogdb", "source": "catalog-svc", "target": "catalog-db", "kind": "write" },
+    { "id": "e-search-idx", "source": "search-svc", "target": "search-idx", "kind": "read", "label": "검색 질의" },
+    { "id": "e-order-pg", "source": "order-svc", "target": "pg", "kind": "http", "label": "결제 승인" },
+    { "id": "e-order-mq", "source": "order-svc", "target": "mq", "kind": "event", "label": "주문 완료" },
+    { "id": "e-mq-worker", "source": "mq", "target": "worker", "kind": "event" },
+    { "id": "e-worker-mailer", "source": "worker", "target": "mailer", "kind": "http", "label": "메일" },
+    { "id": "e-worker-logistics", "source": "worker", "target": "logistics", "kind": "http", "label": "출고 지시" }
+  ],
+  "flows": [
+    {
+      "id": "order",
+      "label": "주문 결제",
+      "description": "주문 요청부터 결제·후처리까지의 대표 경로",
+      "steps": [
+        { "edge": "e-shopper-web", "text": "구매자가 주문을 요청한다" },
+        { "edge": "e-web-gw", "text": "웹 앱이 API를 호출한다" },
+        { "edge": "e-gw-order", "text": "게이트웨이가 주문 서비스로 라우팅한다" },
+        { "edge": "e-order-pg", "text": "PG에 결제 승인을 요청한다" },
+        { "edge": "e-order-orderdb", "text": "주문을 저장한다" },
+        { "edge": "e-order-mq", "text": "주문 완료 이벤트를 발행한다" },
+        { "edge": "e-mq-worker", "text": "워커가 이벤트를 소비한다" },
+        { "edge": "e-worker-mailer", "text": "확인 메일을 발송한다" },
+        { "edge": "e-worker-logistics", "text": "물류에 출고를 지시한다" }
+      ]
+    }
+  ]
+}

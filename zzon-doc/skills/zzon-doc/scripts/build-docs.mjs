@@ -339,6 +339,7 @@ function setActive(slug){
 function render(){
   var slug=decodeURIComponent((location.hash||"").replace(/^#/,""));
   var d=slug&&bySlug[slug];
+  restoreSide(); // 장을 바꾸면 iframe 사이드바가 사라지므로 좌측 메뉴를 되살린다
   if(d){
     frame.src=d.file;frame.classList.add("show");home.classList.remove("show");
     crumb.innerHTML='<a href="#">전체보기</a><span class="sep">/</span>'+kbadge(d.kind)+'<span class="sep">/</span><b>'+esc(d.title)+'</b>';
@@ -352,16 +353,29 @@ function render(){
 }
 addEventListener("hashchange",render);render();
 
-// 다이어그램 iframe 안에서 노드 드릴다운(href) → 해당 다이어그램으로 이동
+// 다이어그램 iframe 메시지: 드릴다운 이동 + 우측 상세 사이드바 ↔ 좌측 메뉴 상호 배타
+var autoCollapsed=false; // 우측 사이드바 때문에 "자동으로" 접었는지 (사용자가 접은 것과 구분)
+function restoreSide(){if(autoCollapsed){document.body.classList.remove("side-collapsed");autoCollapsed=false;}}
 addEventListener("message",function(e){
   var d=e.data;
-  if(d&&d.type==="zzon:navigate"&&typeof d.slug==="string"&&bySlug[d.slug]){
+  if(!d)return;
+  if(d.type==="zzon:navigate"&&typeof d.slug==="string"&&bySlug[d.slug]){
     location.hash="#"+encodeURIComponent(d.slug);
+  }
+  if(d.type==="zzon:sidebar"&&e.source===frame.contentWindow){
+    if(d.open&&!document.body.classList.contains("side-collapsed")){
+      document.body.classList.add("side-collapsed");autoCollapsed=true;
+    }else if(!d.open){restoreSide();}
   }
 });
 
-// 사이드바 접기 / 전체화면 / 테마
-document.getElementById("sidetoggle").onclick=function(){document.body.classList.toggle("side-collapsed");};
+// 사이드바 접기 / 전체화면 / 테마 — 좌측 메뉴를 다시 열면 iframe의 우측 사이드바를 닫는다
+document.getElementById("sidetoggle").onclick=function(){
+  var opening=document.body.classList.contains("side-collapsed");
+  document.body.classList.toggle("side-collapsed");
+  autoCollapsed=false;
+  if(opening){try{frame.contentWindow&&frame.contentWindow.postMessage({type:"zzon:sidebar-close"},"*");}catch(err){}}
+};
 document.getElementById("fs").onclick=function(){
   var s=document.getElementById("stage");
   if(!document.fullscreenElement){(s.requestFullscreen||s.webkitRequestFullscreen||function(){}).call(s);}

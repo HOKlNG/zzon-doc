@@ -381,6 +381,12 @@ function build(root, wiki) {
   const warnings = [];
   const docErrors = [];
 
+  // 섹션 code는 "포함된 섹션" 기준 00부터 연속 순번 — 제외 섹션의 카탈로그 번호를 비워두지 않는다
+  wiki.sections.forEach((s, i) => {
+    const want = String(i).padStart(2, "0");
+    if (s.code !== want) warnings.push(`sections[${i}].code '${s.code}' — 연속 순번 '${want}' 권장 (제외 섹션 번호는 재부여, doc-catalog.md 인스턴스화 절차 6)`);
+  });
+
   walkDocs(wiki, (n, path) => {
     if (!n.file) { n.html = null; return; }
     const abs = join(root, n.file);
@@ -517,8 +523,19 @@ body.side-collapsed #side{margin-left:-288px}
 .navlink:hover{background:var(--accent);color:var(--fg)}
 .navlink.active{background:var(--accent);color:var(--accent-fg);font-weight:600}
 .navlink.lv2{padding-left:24px;font-size:12.5px}
+.navlink.lv3{padding-left:38px;font-size:12.5px}
 .navlink .dot{width:7px;height:7px;border-radius:99px;flex:0 0 auto}
 .navlink.na{text-decoration:line-through;opacity:.55}
+/* 자식 있는 문서 노드 — 접이식 서브트리 (2depth 아래 3depth 접기) */
+.nrow{display:flex;align-items:center;gap:2px}
+.nrow .navlink{flex:1;min-width:0}
+.ntog{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border:0;background:none;color:var(--muted-fg);cursor:pointer;border-radius:6px;padding:0}
+.ntog:hover{background:var(--accent);color:var(--fg)}
+.ntog .ic{width:13px;height:13px;transition:transform .15s;transform:rotate(90deg)}
+.nsub.collapsed>.nrow .ntog .ic{transform:none}
+.nsub .nkids{display:flex;flex-direction:column;gap:1px}
+.nsub.collapsed>.nkids{display:none}
 .dot.done{background:var(--ok)} .dot.draft{background:var(--warn)}
 .dot.todo{background:transparent;border:1.5px solid var(--idle)} .dot.na{background:var(--idle)}
 
@@ -568,10 +585,14 @@ body.side-collapsed #side{margin-left:-288px}
 .prose th{background:var(--muted);font-weight:600}
 .prose hr{border:0;border-top:1px solid var(--border);margin:22px 0}
 .prose a{color:inherit;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--ring)}
-.dgm{margin:6px 0 18px}
-.dgm iframe{width:100%;height:440px;border:1px solid var(--border);border-radius:12px;background:var(--bg)}
+.dgm{margin:6px 0 18px;transition:width .2s ease,margin-left .2s ease}
+.dgm iframe{width:100%;height:440px;border:1px solid var(--border);border-radius:12px;background:var(--bg);
+  transition:height .2s ease}
 .dgm figcaption{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted-fg)}
 .dgm figcaption a:hover{color:var(--fg)}
+/* 다이어그램 우측 상세 사이드바가 열리면 figure를 본문 폭 밖으로 확장 (좌측 네비는 자동 접힘) */
+.dgm.expanded{width:min(94vw,1500px);margin-left:calc((100% - min(94vw,1500px))/2)}
+.dgm.expanded iframe{height:72vh}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:14px}
 .card{display:flex;flex-direction:column;gap:6px;border:1px solid var(--border);border-radius:var(--radius);
@@ -600,7 +621,12 @@ body.side-collapsed #side{margin-left:-288px}
 .secrow .t .pct{margin-left:auto;font-size:12px;color:var(--muted-fg);font-weight:500}
 .hero h1{margin:0 0 6px;font-size:25px;font-weight:650;letter-spacing:-.02em}
 .hero p{margin:0;color:var(--muted-fg)}
+.hero .herolink{color:var(--fg);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--ring)}
 .h2{margin:32px 0 4px;font-size:12px;font-weight:600;color:var(--muted-fg);text-transform:uppercase;letter-spacing:.05em}
+.h2 .code{font-family:ui-monospace,Menlo,monospace;margin-right:8px;opacity:.7}
+.secdesc{margin:2px 0 12px;font-size:13px;color:var(--muted-fg)}
+.card.faded{opacity:.6}
+.card.faded:hover{opacity:1}
 .empty{color:var(--muted-fg);font-size:13px;padding:10px 0}
 @media(max-width:760px){#side{position:absolute;z-index:20;box-shadow:var(--shadow)}.page{padding:24px 20px 60px}}
 `;
@@ -614,7 +640,8 @@ var IC={
   chev:'<path d="m9 18 6-6-6-6"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
   moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
-  file:'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/>'
+  file:'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/>',
+  chart:'<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>'
 };
 var STATUS_KO={todo:"작성 예정",draft:"초안",done:"완료",na:"해당 없음"};
 
@@ -630,18 +657,27 @@ function pct(st){var t=st.done+st.draft+st.todo;return t?Math.round(st.done/t*10
 document.getElementById("doctitle").textContent=W.title;
 document.getElementById("docsub").textContent="zzon-wiki · "+(W.tier==="lite"?"라이트":W.tier==="full"?"풀":"표준")+" 티어";
 var nav=document.getElementById("nav");
-var h='<button class="navhome" data-home>'+ic(IC.home)+'<span>진행 현황</span></button>';
+var h='<button class="navhome" data-home>'+ic(IC.home)+'<span>개요</span></button>'
+  +'<button class="navhome" data-progress>'+ic(IC.chart)+'<span>진행 현황</span></button>';
 W.sections.forEach(function(s,idx){
   h+='<div class="grp" data-grp="'+idx+'"><button class="grp-h"><span class="code">'+esc(s.code)+'</span><span>'+esc(s.title)+'</span><span class="cnt">'+s.items.length+'</span><span class="chev">'+ic(IC.chev)+'</span></button><div class="grp-items">';
   (function walk(nodes,depth){nodes.forEach(function(n){
-    h+='<a class="navlink lv'+depth+(n.status==="na"?" na":"")+'" data-path="'+esc(n.path)+'" href="#/'+esc(n.path)+'"><span class="dot '+n.status+'"></span><span style="overflow:hidden;text-overflow:ellipsis">'+esc(n.title)+'</span></a>';
-    if(n.children&&n.children.length)walk(n.children,depth+1);
+    var link='<a class="navlink lv'+depth+(n.status==="na"?" na":"")+'" data-path="'+esc(n.path)+'" href="#/'+esc(n.path)+'"><span class="dot '+n.status+'"></span><span style="overflow:hidden;text-overflow:ellipsis">'+esc(n.title)+'</span></a>';
+    if(n.children&&n.children.length){
+      h+='<div class="nsub collapsed"><div class="nrow">'+link+'<button class="ntog" title="하위 문서 펼치기/접기">'+ic(IC.chev)+'</button></div><div class="nkids">';
+      walk(n.children,depth+1);
+      h+='</div></div>';
+    }else{
+      h+=link;
+    }
   });})(s.items,1);
   h+='</div></div>';
 });
 nav.innerHTML=h;
 nav.querySelector("[data-home]").onclick=function(){location.hash="";};
+nav.querySelector("[data-progress]").onclick=function(){location.hash="#/_progress";};
 [].forEach.call(nav.querySelectorAll(".grp-h"),function(b){b.onclick=function(){b.parentNode.classList.toggle("collapsed");};});
+[].forEach.call(nav.querySelectorAll(".ntog"),function(b){b.onclick=function(e){e.preventDefault();b.closest(".nsub").classList.toggle("collapsed");};});
 
 function badge(st){return '<span class="badge '+st+'">'+STATUS_KO[st]+'</span>';}
 function qhtml(q){
@@ -650,11 +686,38 @@ function qhtml(q){
     +(q.answer?'<div class="ans">답: '+esc(q.answer)+'</div>':"")+'</div></div>';
 }
 
-// 진행 현황 (홈)
-function renderHome(){
+// 개요 (홈) — 문서가 주인공: 섹션 소개 + 문서 카드
+function renderOverview(){
   var st=W.stats,total=st.done+st.draft+st.todo;
   var open=W.questions.filter(function(q){return q.status==="open";});
-  var h='<div class="hero"><h1>'+esc(W.title)+'</h1><p>문서 '+total+'개 · 완료율 '+(total?Math.round(st.done/total*100):0)+'% · 생성 '+esc((W.generatedAt||"").slice(0,10))+'</p></div>';
+  var docCount=flat.filter(function(n){return n.status!=="na";}).length;
+  var h='<div class="hero"><h1>'+esc(W.title)+'</h1><p>섹션 '+W.sections.length+'개 · 문서 '+docCount+'개'
+    +(total?' · 완료율 '+Math.round(st.done/total*100)+'%':'')
+    +(open.length?' · 열린 질문 '+open.length+'건':'')
+    +' — <a href="#/_progress" class="herolink">진행 현황 →</a></p></div>';
+  W.sections.forEach(function(s){
+    var hasVisible=false;
+    (function chk(ns){ns.forEach(function(n){if(n.status!=="na")hasVisible=true;if(n.children)chk(n.children);});})(s.items);
+    if(!hasVisible)return;
+    h+='<div class="h2"><span class="code">'+esc(s.code)+'</span>'+esc(s.title)+'</div>';
+    if(s.purpose)h+='<p class="secdesc">'+esc(s.purpose)+'</p>';
+    h+='<div class="cards">';
+    (function walk(ns){ns.forEach(function(n){
+      if(n.status!=="na"){
+        h+='<a class="card'+(n.status==="todo"?" faded":"")+'" href="#/'+esc(n.path)+'"><span class="t">'+ic(IC.file)+esc(n.title)+'</span><span class="s">'+esc(n.summary||"")+'</span><span>'+badge(n.status)+'</span></a>';
+      }
+      if(n.children)walk(n.children);
+    });})(s.items);
+    h+='</div>';
+  });
+  return h;
+}
+
+// 진행 현황 (#/_progress)
+function renderProgress(){
+  var st=W.stats,total=st.done+st.draft+st.todo;
+  var open=W.questions.filter(function(q){return q.status==="open";});
+  var h='<div class="hero"><h1>진행 현황</h1><p>문서 '+total+'개 · 완료율 '+(total?Math.round(st.done/total*100):0)+'% · 생성 '+esc((W.generatedAt||"").slice(0,10))+'</p></div>';
   h+='<div class="stats"><span class="stat">완료 <b>'+st.done+'</b></span><span class="stat">초안 <b>'+st.draft+'</b></span><span class="stat">예정 <b>'+st.todo+'</b></span><span class="stat">해당 없음 <b>'+st.na+'</b></span><span class="stat">열린 질문 <b>'+open.length+'</b></span></div>';
   h+='<div class="h2">섹션별 진행</div>';
   W.sections.forEach(function(s){
@@ -699,36 +762,75 @@ function renderDoc(n){
 // 라우팅
 var stage=document.getElementById("stage"),crumb=document.getElementById("crumb");
 function setActive(path){
-  [].forEach.call(document.querySelectorAll(".navlink"),function(a){a.classList.toggle("active",a.dataset.path===path);});
+  [].forEach.call(document.querySelectorAll(".navlink"),function(a){
+    var on=a.dataset.path===path;
+    a.classList.toggle("active",on);
+    if(on){ // 활성 문서의 조상 서브트리를 펼친다 (직접 URL 진입·드릴다운 대비)
+      var p=a.parentNode;
+      while(p&&p!==nav){if(p.classList&&p.classList.contains("nsub"))p.classList.remove("collapsed");p=p.parentNode;}
+    }
+  });
   document.querySelector("[data-home]").classList.toggle("active",!path);
+  document.querySelector("[data-progress]").classList.toggle("active",path==="_progress");
 }
 function render(){
   var path=decodeURIComponent((location.hash||"").replace(/^#\\/?/,""));
   var n=path&&byPath[path];
-  if(n){
+  restoreSide(); // 문서를 바꾸면 다이어그램 iframe이 사라지므로 좌측 네비 복원
+  if(path==="_progress"){
+    stage.innerHTML='<div class="page">'+renderProgress()+'</div>';
+    crumb.innerHTML='<a href="#">개요</a><span class="sep">/</span><b>진행 현황</b>';
+    setActive("_progress");document.title="진행 현황 · "+W.title;
+  }else if(n){
     stage.innerHTML='<div class="page">'+renderDoc(n)+'</div>';
-    crumb.innerHTML='<a href="#">진행 현황</a><span class="sep">/</span><span>'+esc(n._section.title)+'</span><span class="sep">/</span><b>'+esc(n.title)+'</b>';
+    crumb.innerHTML='<a href="#">개요</a><span class="sep">/</span><span>'+esc(n._section.title)+'</span><span class="sep">/</span><b>'+esc(n.title)+'</b>';
     setActive(path);document.title=n.title+" · "+W.title;
   }else{
-    stage.innerHTML='<div class="page">'+renderHome()+'</div>';
-    crumb.innerHTML='<b>진행 현황</b>';
+    stage.innerHTML='<div class="page">'+renderOverview()+'</div>';
+    crumb.innerHTML='<b>개요</b>';
     setActive(null);document.title=W.title;
   }
   stage.scrollTop=0;
 }
 addEventListener("hashchange",render);render();
 
-// 다이어그램 iframe 안 드릴다운(zzon:navigate) → 해당 다이어그램을 참조하는 문서로 이동
+// 다이어그램 iframe 메시지: 드릴다운(zzon:navigate) + 우측 상세 사이드바(zzon:sidebar) 연동
+// 사이드바가 열리면 그 figure를 확장하고 좌측 네비를 자동으로 접는다. 닫히면 복원.
+var autoCollapsed=false,sideOpenCount=0;
+function dgmFrames(){return [].slice.call(document.querySelectorAll(".dgm iframe"));}
+function restoreSide(){sideOpenCount=0;if(autoCollapsed){document.body.classList.remove("side-collapsed");autoCollapsed=false;}}
 addEventListener("message",function(e){
   var d=e.data;
-  if(!d||d.type!=="zzon:navigate"||typeof d.slug!=="string")return;
-  var hit=null;
-  flat.some(function(n){if((n.diagrams||[]).indexOf(d.slug)!==-1){hit=n;return true;}return false;});
-  if(hit)location.hash="#/"+encodeURIComponent(hit.path).replace(/%2F/g,"/");
+  if(!d)return;
+  if(d.type==="zzon:navigate"&&typeof d.slug==="string"){
+    var hit=null;
+    flat.some(function(n){if((n.diagrams||[]).indexOf(d.slug)!==-1){hit=n;return true;}return false;});
+    if(hit)location.hash="#/"+encodeURIComponent(hit.path).replace(/%2F/g,"/");
+    return;
+  }
+  if(d.type==="zzon:sidebar"){
+    var frame=dgmFrames().filter(function(f){return f.contentWindow===e.source;})[0];
+    if(!frame)return;
+    var fig=frame.closest(".dgm");
+    if(d.open){
+      sideOpenCount++;
+      if(fig)fig.classList.add("expanded");
+      if(!document.body.classList.contains("side-collapsed")){document.body.classList.add("side-collapsed");autoCollapsed=true;}
+    }else{
+      sideOpenCount=Math.max(0,sideOpenCount-1);
+      if(fig)fig.classList.remove("expanded");
+      if(sideOpenCount===0)restoreSide();
+    }
+  }
 });
 
-// 사이드바 접기 / 테마
-document.getElementById("sidetoggle").onclick=function(){document.body.classList.toggle("side-collapsed");};
+// 사이드바 접기 / 테마 — 좌측 네비를 다시 열면 모든 다이어그램의 우측 사이드바를 닫는다
+document.getElementById("sidetoggle").onclick=function(){
+  var opening=document.body.classList.contains("side-collapsed");
+  document.body.classList.toggle("side-collapsed");
+  autoCollapsed=false;
+  if(opening){sideOpenCount=0;dgmFrames().forEach(function(f){try{f.contentWindow&&f.contentWindow.postMessage({type:"zzon:sidebar-close"},"*");}catch(err){}});}
+};
 var root=document.documentElement;
 try{var t=localStorage.getItem("zzon-theme");if(t)root.dataset.theme=t;}catch(e){}
 function paintTheme(){document.getElementById("themeic").innerHTML=ic(root.dataset.theme==="dark"?IC.sun:IC.moon);}

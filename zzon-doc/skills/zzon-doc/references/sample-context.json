@@ -2,7 +2,7 @@
   "specVersion": 1,
   "title": "데모숍 시스템 컨텍스트",
   "kind": "infra",
-  "description": "C4 L1 컨텍스트 다이어그램. 중앙 시스템 1개 + 사람·외부 시스템만 두고, 노드 안에 설명을 표시한다(nodeDescriptions). 시스템 노드를 더블클릭하면 상세(인프라)로 드릴다운된다.",
+  "description": "C4 L1 컨텍스트 다이어그램. 중앙 시스템 1개 + 사람·외부 시스템만 두고, 노드 안에 설명을 표시한다(nodeDescriptions). 시스템 노드를 더블클릭하면 컨테이너 장으로 드릴다운된다.",
   "section": "개요",
   "order": 1,
   "layout": { "direction": "RIGHT", "nodeDescriptions": true },
@@ -26,7 +26,7 @@
       "label": "데모숍",
       "category": "service",
       "tech": "커머스 플랫폼",
-      "href": "sample-infra",
+      "href": "sample-container",
       "description": "상품 전시부터 주문·결제·알림까지 담당하는 중심 시스템"
     },
     {
