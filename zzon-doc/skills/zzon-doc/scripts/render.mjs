@@ -250,6 +250,7 @@ const ICONS = {
   Building2: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
   Columns3: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/>',
   ZoomIn: '<circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/>',
+  Tag: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
 };
 
 const ICONS_JSON = JSON.stringify(ICONS);
@@ -776,7 +777,8 @@ const ENGINE_JS = String.raw`
       const dir = fwd ? 1 : -1;
       const g1 = sx + dir * GUTTER_HALF + i.gutterOffset;
       const g2 = tx - dir * GUTTER_HALF + i.gutterOffset;
-      const runY = clearBand((sy + ty) / 2, i.obstacles || [], "y");
+      // 오프셋은 clearBand 스냅 뒤에 더한다 — 같은 밴드에 스냅된 엣지끼리도 주행선이 분리된다
+      const runY = clearBand((sy + ty) / 2, i.obstacles || [], "y") + i.gutterOffset;
       return geo([{x:sx,y:sy},{x:g1,y:sy},{x:g1,y:runY},{x:g2,y:runY},{x:g2,y:ty},{x:tx,y:ty}]);
     }
     const scy = i.sourceAnchor != null ? i.sourceAnchor : cy(i.source);
@@ -799,7 +801,7 @@ const ENGINE_JS = String.raw`
       const dir = fwd ? 1 : -1;
       const g1 = sy + dir * GUTTER_HALF + i.gutterOffset;
       const g2 = ty - dir * GUTTER_HALF + i.gutterOffset;
-      const runX = clearBand((sx + tx) / 2, i.obstacles || [], "x");
+      const runX = clearBand((sx + tx) / 2, i.obstacles || [], "x") + i.gutterOffset;
       return geo([{x:sx,y:sy},{x:sx,y:g1},{x:runX,y:g1},{x:runX,y:g2},{x:tx,y:g2},{x:tx,y:ty}]);
     }
     const scx = i.sourceAnchor != null ? i.sourceAnchor : cx(i.source);
@@ -827,6 +829,7 @@ const ENGINE_JS = String.raw`
   let transform = { x:0, y:0, k:1 };
   let nodeRects = new Map(), colRects = new Map(), contentSize = { w:0, h:0 };
   let selected = null, flowId = null, hovered = null, hoveredEdge = null, activeStep = null;
+  let labelMode = "auto"; // "auto"(줌 0.55↑에서만 라벨) | "always"(항상 표시)
   let flowAnimate = false; // 플로우를 막 켰을 때만 1회 진입 애니메이션. 이후 재렌더(호버·팬·줌)는 정적.
   let firstFit = false;
 
@@ -990,8 +993,20 @@ const ENGINE_JS = String.raw`
     };
     const byGutter = new Map();
     for (const e of SPEC.edges) { const k = gutterKey(e); if (!byGutter.has(k)) byGutter.set(k, []); byGutter.get(k).push(e); }
+    // 거터 내 슬롯을 "양끝의 교차축 중점" 순으로 배정한다 — 스펙 순서 기반이면 불필요한 교차가 생긴다.
+    // 엣지가 많으면 스텝을 줄여 거터 폭(GUTTER_HALF×2)을 넘지 않게 한다.
+    const RIGHT_AXIS = layout.direction !== "DOWN";
+    const crossMid = (e) => {
+      const s = nodeRects.get(e.source), t = nodeRects.get(e.target);
+      if (!s || !t) return 0;
+      return RIGHT_AXIS ? (s.y + s.h / 2 + t.y + t.h / 2) / 2 : (s.x + s.w / 2 + t.x + t.w / 2) / 2;
+    };
     const offsetOf = new Map();
-    for (const list of byGutter.values()) list.forEach((e, i) => offsetOf.set(e.id, (i - (list.length - 1) / 2) * GUTTER_STEP));
+    for (const list of byGutter.values()) {
+      list.sort((a, b) => crossMid(a) - crossMid(b));
+      const step = list.length > 1 ? Math.min(GUTTER_STEP, (GUTTER_HALF * 2 - 12) / (list.length - 1)) : 0;
+      list.forEach((e, i) => offsetOf.set(e.id, (i - (list.length - 1) / 2) * step));
+    }
 
     // 분산 앵커: 한 노드의 같은 변(邊)에 여러 엣지가 붙으면 변을 따라 펼쳐 fan-out/fan-in 겹침을 막는다.
     const RIGHT_DIR = layout.direction !== "DOWN";
@@ -1116,7 +1131,7 @@ const ENGINE_JS = String.raw`
     const activeEdges = hl ? hl.edges : null;
     const flowSteps = hl && hl.steps ? hl.steps : null;
     const mode = hl ? hl.mode : null;
-    const showLabels = transform.k >= 0.55;
+    const showLabels = labelMode === "always" || transform.k >= 0.55;
     const animateEntrance = flowAnimate; flowAnimate = false; // 첫 렌더에만 진입 연출, 이후 정적
 
     const stateOf = (id) => {
@@ -1128,6 +1143,28 @@ const ENGINE_JS = String.raw`
     const stepFocus = flowSteps !== null && activeStep != null;
     const inStep = (id) => { const st = flowSteps && flowSteps.get(id); return !!st && st.indexOf(activeStep) !== -1; };
     const ordered = edgeGeos.slice().sort((a, b) => Number(stateOf(a.edge.id).active) - Number(stateOf(b.edge.id).active));
+
+    // 라벨 디컨플릭트: 표시될 라벨의 예상 박스끼리 겹침을 검사해 세로로 밀어낸다
+    const labelPos = new Map();
+    if (showLabels) {
+      const est = (s) => { let w = 16; for (const ch of String(s)) w += /[ᄀ-ᇿ㄰-㆏가-힣一-鿿]/.test(ch) ? 10 : 5.6; return w; };
+      const boxes = [];
+      for (const { edge, geo } of ordered) {
+        if (!edge.label) continue;
+        if (flowSteps && flowSteps.has(edge.id)) continue; // 플로우 엣지는 배지가 대신 표시됨
+        boxes.push({ id: edge.id, x: geo.mid.x, y: geo.mid.y, w: est(edge.label), h: 18 });
+      }
+      boxes.sort((a, b) => a.y - b.y || a.x - b.x);
+      for (let pass = 0; pass < 3; pass++) {
+        for (let i = 1; i < boxes.length; i++) for (let j = 0; j < i; j++) {
+          const a = boxes[j], b = boxes[i];
+          if (Math.abs(a.x - b.x) < (a.w + b.w) / 2 - 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2 + 1) {
+            b.y = a.y + (a.h + b.h) / 2 + 3; // 아래로 밀기 (y 오름차순이라 연쇄 안정)
+          }
+        }
+      }
+      for (const b of boxes) labelPos.set(b.id, b);
+    }
 
     // 1층: 경로
     for (const { edge, geo } of ordered) {
@@ -1214,7 +1251,8 @@ const ENGINE_JS = String.raw`
         });
         g.appendChild(badge);
       } else if (edge.label && (showLabels || st.isHover || st.active)) {
-        const fo = svgEl("foreignObject", { x:geo.mid.x, y:geo.mid.y, width:1, height:1 });
+        const p = labelPos.get(edge.id) || geo.mid;
+        const fo = svgEl("foreignObject", { x:p.x, y:p.y, width:1, height:1 });
         fo.style.overflow = "visible";
         const div = el("div", "dg-edge-label" + (st.active || st.isHover ? " active" : ""), edge.label);
         fo.appendChild(div); g.appendChild(fo);
@@ -1493,6 +1531,12 @@ const ENGINE_JS = String.raw`
     bar.appendChild(mk("Plus", "확대", () => { const r = viewport.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1.25); renderEdges(); }));
     bar.appendChild(mk("Minus", "축소", () => { const r = viewport.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, 0.8); renderEdges(); }));
     bar.appendChild(mk("Maximize", "화면 맞춤", () => fit()));
+    const labelBtn = mk("Tag", "라벨 항상 표시 (줌아웃해도 유지)", () => {
+      labelMode = labelMode === "always" ? "auto" : "always";
+      labelBtn.classList.toggle("active", labelMode === "always");
+      renderEdges();
+    });
+    bar.appendChild(labelBtn);
     const themeBtn = mk(document.documentElement.classList.contains("dark") ? "Sun" : "Moon", "테마 전환", () => {
       document.documentElement.classList.toggle("dark");
       themeBtn.innerHTML = uiIcon(document.documentElement.classList.contains("dark") ? "Sun" : "Moon", 14);

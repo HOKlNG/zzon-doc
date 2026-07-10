@@ -100,7 +100,13 @@ plugins-zzon-doc/
   - **EKS 유형 추가**: sample-eks(2레이어 — cluster 그룹 안 파드 그룹 미러 스탬프 + 파드 내부 컴포넌트, KEDA/Karpenter는 엣지 없는 주석 노드, Spot/GPU는 badge). document-types.md에 "쿠버네티스(EKS) 워크로드" 행(1레이어 클러스터 뷰 vs 2레이어 한 장 선택 규칙) 추가. 샘플 총 13종.
   - 검증: 헤드리스 DOM 심 스모크 32항목(scratchpad, 부팅·사이드바·스트립·단계 포커스·메시지 왕복·ERD 컬럼) 통과 + layout-lint + `claude plugin validate` (마켓플레이스·플러그인) 통과.
   - **playground/examples/**: 가상 서비스 "피크닉" 예제 세트 10종(context/container/component/landscape/infra/eks/eks-workloads/flow-booking/event-fanout/erd, 서로 href 드릴다운 연결) — gitignore된 데모. 기존 playground 데모는 삭제됨.
-- 엔진 개선 백로그(엣지 겹침·라벨 디컨플릭트 등 P1~P3)는 2026-07-10 세션에서 리스트업됨 — 메모리 `zzon-engine-priorities` 참조.
+- **v0.6.0 — 엔진 P1: 엣지 겹침·라벨 개선** (2026-07-10):
+  - **주행선 분리**: 2칸+ 엣지의 가로/세로 주행선(runY/runX)에 거터 오프셋 적용(clearBand 스냅 **후** 가산 → 같은 밴드에 스냅돼도 분리) — 장거리 엣지 선 포개짐 해소.
+  - **거터 슬롯 정렬 배정**: 스펙 순서가 아니라 양끝 교차축 중점 순으로 오프셋 배정 + 엣지 많으면 스텝 자동 축소(거터 폭 GUTTER_HALF×2 초과 방지) — 불필요한 교차 감소.
+  - **라벨 디컨플릭트**: 표시될 라벨의 예상 박스(한글 10px/자 추정)끼리 겹침 검사 → 세로 밀어내기 3패스.
+  - **라벨 항상 표시 토글**(툴바 Tag 버튼): 줌<0.55에서 라벨 전멸하던 하드코딩을 우회 — "전체를 보면 글씨가 없는" 문제 해소.
+  - 검증: DOM 심 스모크 39항목(라벨 y 전부 상이·토글 왕복 포함) 통과.
+- 남은 엔진 백로그는 P2~P3(같은 레인 좌측 C자 우회·접근 세그먼트 회피·lint 엣지/라벨 검사·그룹 접기·시맨틱 줌) — 메모리 `zzon-engine-priorities` 참조.
 - 소유자 표준은 **메모리**에 기록됨(무의존/문서 디자인/레이아웃 품질) — 로컬, 레포 밖.
 - git: 첫 커밋(main) 존재. **GitHub push는 소유자가 직접 함.** 이후 변경분(통합 문서 등)은 아직 커밋 안 됨 — 소유자 검토 후 커밋.
 
