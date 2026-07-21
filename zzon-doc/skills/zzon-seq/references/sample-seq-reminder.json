@@ -1,0 +1,134 @@
+{
+  "specVersion": 1,
+  "kind": "sequence",
+  "title": "예약 리마인더 발송 배치",
+  "subtitle": "매시 정각 cron이 내일 예약을 골라 메일·푸시를 동시 발송",
+  "description": "피크닉의 리마인더 배치다. 스케줄러가 매시 정각에 워커를 깨우면, 24시간 내 시작하는 미알림 예약을 조회해 예약마다 메일과 푸시를 병렬 발송하고 발송 여부를 기록한다. 수신 거부 사용자는 건너뛴다.",
+  "order": 2,
+  "actors": [
+    {
+      "id": "cron",
+      "name": "node-cron",
+      "type": "scheduler",
+      "description": "워커 프로세스 내 스케줄러. '0 * * * *'(매시 정각)에 배치를 트리거한다."
+    },
+    {
+      "id": "batch",
+      "name": "Reminder Worker",
+      "type": "worker",
+      "description": "대상 조회·발송·기록을 수행하는 배치 워커."
+    },
+    {
+      "id": "db",
+      "name": "PostgreSQL",
+      "type": "database",
+      "description": "bookings·user_preferences·reminders 테이블."
+    },
+    {
+      "id": "mail",
+      "name": "SMTP",
+      "type": "email",
+      "description": "메일 발송 서버."
+    },
+    {
+      "id": "push",
+      "name": "Push API",
+      "type": "external",
+      "description": "외부 푸시 게이트웨이(Expo Push). HTTP로 배치 전송한다."
+    }
+  ],
+  "steps": [
+    {
+      "type": "message",
+      "from": "cron",
+      "to": "batch",
+      "label": "cron tick ('0 * * * *')",
+      "arrow": "sync",
+      "essential": true,
+      "description": "매시 정각 배치 사이클을 시작한다. 이전 사이클이 돌고 있으면 스킵한다(중복 방지 플래그).",
+      "sourceRef": "services/notifier/src/scheduler.ts:12"
+    },
+    {
+      "type": "message",
+      "from": "batch",
+      "to": "db",
+      "label": "SELECT bookings WHERE starts_at < now()+24h AND reminded=false",
+      "arrow": "sync",
+      "essential": true,
+      "description": "24시간 안에 시작하는 미알림 확정 예약을 사용자 설정과 조인해 가져온다.",
+      "sourceRef": "services/notifier/src/reminder.job.ts:23"
+    },
+    {
+      "type": "message",
+      "from": "db",
+      "to": "batch",
+      "label": "대상 예약 rows",
+      "arrow": "reply",
+      "description": "0건이면 사이클을 조용히 끝낸다."
+    },
+    {
+      "type": "fragment",
+      "kind": "loop",
+      "label": "대상 예약마다",
+      "essential": true
+    },
+    {
+      "type": "fragment",
+      "kind": "opt",
+      "label": "수신 거부(opt-out)가 아닌 경우"
+    },
+    {
+      "type": "fragment",
+      "kind": "par",
+      "label": "메일·푸시 동시 발송",
+      "essential": true
+    },
+    {
+      "type": "message",
+      "from": "batch",
+      "to": "mail",
+      "label": "SMTP send: 리마인더 메일",
+      "arrow": "sync",
+      "essential": true,
+      "description": "예약 시각·장소·준비물을 담은 리마인더 메일을 보낸다.",
+      "sourceRef": "services/notifier/src/reminder.job.ts:41"
+    },
+    {
+      "type": "message",
+      "from": "batch",
+      "to": "push",
+      "label": "POST /push/send { to, title, body }",
+      "arrow": "sync",
+      "essential": true,
+      "description": "등록된 기기 토큰으로 푸시를 보낸다. 한쪽 실패가 다른 쪽을 막지 않는다(Promise.allSettled).",
+      "sourceRef": "services/notifier/src/reminder.job.ts:47"
+    },
+    {
+      "type": "fragment_end"
+    },
+    {
+      "type": "message",
+      "from": "batch",
+      "to": "db",
+      "label": "UPDATE reminders SET sent_at, channels",
+      "arrow": "sync",
+      "essential": true,
+      "description": "발송 결과(채널별 성공 여부)를 기록해 재실행 시 중복 발송을 막는다.",
+      "sourceRef": "services/notifier/src/reminder.job.ts:58"
+    },
+    {
+      "type": "fragment_end"
+    },
+    {
+      "type": "fragment_end"
+    },
+    {
+      "type": "message",
+      "from": "batch",
+      "to": "batch",
+      "label": "사이클 요약 로그 (sent / skipped / failed)",
+      "arrow": "sync",
+      "description": "관측용 카운터를 남긴다. 실패 건은 다음 사이클이 자연 재시도한다(reminded=false 유지)."
+    }
+  ]
+}

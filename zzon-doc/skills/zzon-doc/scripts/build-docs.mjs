@@ -23,6 +23,8 @@ import { execFileSync } from "node:child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RENDER = join(HERE, "render.mjs");
+// kind:"sequence" 스펙은 형제 스킬 zzon-seq의 렌더러로 위임한다
+const RENDER_SEQ = join(HERE, "..", "..", "zzon-seq", "scripts", "render-seq.mjs");
 
 /* ── CLI ─────────────────────────────────────────────────────────────── */
 
@@ -55,7 +57,7 @@ function usage() {
 
 /* ── 스펙 로딩 ───────────────────────────────────────────────────────── */
 
-const KIND_ORDER = ["infra", "data-flow", "erd", "agent-topology"];
+const KIND_ORDER = ["infra", "data-flow", "sequence", "erd", "agent-topology"];
 
 function loadSpec(path) {
   const raw = JSON.parse(readFileSync(path, "utf8"));
@@ -103,13 +105,33 @@ function main() {
       failures.push({ slug, msg: `JSON 파싱 실패: ${e.message}` });
       continue;
     }
+    const isSeq = spec.kind === "sequence";
+    if (isSeq && !existsSync(RENDER_SEQ)) {
+      failures.push({ slug, msg: `kind:"sequence" 스펙인데 zzon-seq 스킬이 없다: ${RENDER_SEQ}` });
+      continue;
+    }
     try {
-      execFileSync(process.execPath, [RENDER, specPath, "-o", outHtml], { stdio: "pipe" });
+      execFileSync(process.execPath, [isSeq ? RENDER_SEQ : RENDER, specPath, "-o", outHtml], { stdio: "pipe" });
     } catch (e) {
       const out = (e.stdout?.toString() || "") + (e.stderr?.toString() || "");
       failures.push({ slug, msg: out.trim() || e.message });
       continue;
     }
+    const counts = isSeq
+      ? (() => {
+          const msgs = (spec.steps || []).filter((s) => s && s.type === "message").length;
+          const frags = (spec.steps || []).filter((s) => s && s.type === "fragment").length;
+          return {
+            nodes: (spec.actors || []).length, edges: msgs, flows: 0, groups: frags,
+            actors: (spec.actors || []).length, messages: msgs,
+          };
+        })()
+      : {
+          nodes: Array.isArray(spec.nodes) ? spec.nodes.length : 0,
+          edges: Array.isArray(spec.edges) ? spec.edges.length : 0,
+          flows: Array.isArray(spec.flows) ? spec.flows.length : 0,
+          groups: Array.isArray(spec.groups) ? spec.groups.length : 0,
+        };
     diagrams.push({
       slug,
       title: spec.title || slug,
@@ -118,12 +140,7 @@ function main() {
       order: typeof spec.order === "number" ? spec.order : null,
       summary: spec.description || "",
       file: `diagrams/${slug}.html`,
-      counts: {
-        nodes: Array.isArray(spec.nodes) ? spec.nodes.length : 0,
-        edges: Array.isArray(spec.edges) ? spec.edges.length : 0,
-        flows: Array.isArray(spec.flows) ? spec.flows.length : 0,
-        groups: Array.isArray(spec.groups) ? spec.groups.length : 0,
-      },
+      counts,
     });
   }
 
@@ -277,12 +294,14 @@ var IC = {
   Server:'<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>',
   Webhook:'<path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/><path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/><path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/>',
   Database:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
-  Bot:'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>'
+  Bot:'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
+  Seq:'<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>'
 };
 function ic(n){return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(IC[n]||"")+'</svg>';}
 var KINDS = {
   "infra":{label:"인프라",icon:"Server"},
   "data-flow":{label:"데이터 흐름",icon:"Webhook"},
+  "sequence":{label:"시퀀스",icon:"Seq"},
   "erd":{label:"ERD",icon:"Database"},
   "agent-topology":{label:"에이전트 구조",icon:"Bot"}
 };
@@ -310,12 +329,14 @@ nav.querySelector("[data-home]").onclick=function(){location.hash="";};
 
 // 홈(전체보기)
 function kbadge(kind){var m=kmeta(kind);return '<span class="kbadge">'+ic(m.icon)+esc(m.label)+'</span>';}
-function metaLine(c){var p=['<span>노드 '+c.nodes+'</span>'];if(c.edges)p.push('<span>엣지 '+c.edges+'</span>');if(c.groups)p.push('<span>그룹 '+c.groups+'</span>');if(c.flows)p.push('<span>플로우 '+c.flows+'</span>');return p.join("");}
+function metaLine(c){
+  if(c.actors!=null){var q=['<span>액터 '+c.actors+'</span>','<span>메시지 '+c.messages+'</span>'];if(c.groups)q.push('<span>프래그먼트 '+c.groups+'</span>');return q.join("");}
+  var p=['<span>노드 '+c.nodes+'</span>'];if(c.edges)p.push('<span>엣지 '+c.edges+'</span>');if(c.groups)p.push('<span>그룹 '+c.groups+'</span>');if(c.flows)p.push('<span>플로우 '+c.flows+'</span>');return p.join("");}
 function buildHome(){
   var byKind={};M.diagrams.forEach(function(d){byKind[d.kind]=(byKind[d.kind]||0)+1;});
   var h='<div class="hero"><h1>'+esc(M.title)+'</h1><p>'+M.diagrams.length+'개의 아키텍처를 한 곳에서 본다. 왼쪽 메뉴나 아래 카드에서 고른다.</p></div>';
   h+='<div class="stats">';
-  ["infra","data-flow","erd","agent-topology"].forEach(function(k){if(!byKind[k])return;var m=kmeta(k);h+='<span class="stat">'+ic(m.icon)+esc(m.label)+' <b>'+byKind[k]+'</b></span>';});
+  ["infra","data-flow","sequence","erd","agent-topology"].forEach(function(k){if(!byKind[k])return;var m=kmeta(k);h+='<span class="stat">'+ic(m.icon)+esc(m.label)+' <b>'+byKind[k]+'</b></span>';});
   h+='</div>';
   if(!M.diagrams.length){h+='<div class="empty">아직 다이어그램이 없다. specs/ 에 스펙을 넣고 다시 빌드한다.</div>';}
   groups.forEach(function(g){

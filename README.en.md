@@ -10,7 +10,7 @@
 
 [한국어](./README.md) · **English**
 
-> A **Claude Code plugin (two skills)** — it analyzes your codebase to draw interactive architecture diagrams (`zzon-doc`), and fills in a project documentation wiki through code scanning and interview-style questions (`zzon-wiki`). Everything ships as zero-dependency `.html` — just open it in a browser.
+> A **Claude Code plugin (three skills)** — it analyzes your codebase to draw interactive architecture diagrams (`zzon-doc`), draws time-axis sequence diagrams of key features (`zzon-seq`), and fills in a project documentation wiki through code scanning and interview-style questions (`zzon-wiki`). Everything ships as zero-dependency `.html` — just open it in a browser.
 
 ## Preview
 
@@ -26,10 +26,11 @@
 
 ## Features
 
-- **4 diagram kinds** — infra · data-flow · ERD · agent (`.claude`) topology (with a type catalog: context, multi-region HA, data pipeline, full-depth landscape …)
+- **5 diagram kinds** — infra · data-flow · **sequence** · ERD · agent (`.claude`) topology (with a type catalog: context, multi-region HA, data pipeline, full-depth landscape …)
 - **Zero dependencies** — no libraries or CDN; a self-contained single `.html`
 - **Interactive** — click nodes · highlight flows · step badges · drill-down (⊕ double-click) · hover tooltips · pan/zoom · dark mode
 - **Unified docs** — bundle many diagrams into a left menu + overview
+- **Sequence diagrams (`zzon-seq`)** — traces code paths into actor lifelines over time: full/simplified toggle · per-step detail with source refs · step-through playback · alt/opt/loop/par fragments · SVG/PNG export
 - **Docs wiki (`zzon-wiki`)** — fills project documentation via code scan + questions, tracks progress and open questions as a wiki site; architecture pages embed the diagrams
 - **Scope-aware** — for big projects it surveys the structure and proposes how many docs and at which depth first
 - **Local-only** — your code is analyzed locally; no network, no telemetry

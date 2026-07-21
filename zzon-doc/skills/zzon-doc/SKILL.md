@@ -42,6 +42,7 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 |---|---|
 | A 개요, B 구조·인프라 → `infra` | 컨텍스트는 `nodeDescriptions: true` + 5~9노드 |
 | C 흐름, D 파이프라인·리니지 → `data-flow` | 흐름은 `flows` 순번이 주인공, 파이프라인은 `stage` 밴드 |
+| C 중 시간축·왕복이 주인공 → **zzon-seq로 위임** | 액터 간 요청/응답 왕복·활성 구간·alt/opt/loop 분기가 핵심이면 시퀀스 다이어그램이다(`/zzon-doc:zzon-seq`, `kind:"sequence"`). 판별: "어떤 구조를 지나가는가"→data-flow, "누가 누구에게 순서대로 주고받는가"→시퀀스. 같은 주제의 두 표현 병행은 중복이 아니라 보완 |
 | D ERD → `erd` | **모든 노드 `table` 필수**, FK 컬럼 앵커 + 카디널리티 |
 | `.claude` 구성 → `agent-topology` | category: agent/skill/hook |
 

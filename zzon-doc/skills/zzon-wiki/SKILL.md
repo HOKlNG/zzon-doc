@@ -10,7 +10,9 @@ argument-hint: '[대상 — 비우면 현재 프로젝트]'
 의존성 0짜리 self-contained 위키 사이트(index.html)를 만든다. 산출물은 `zzon-doc/` 하위에 기존 다이어그램 산출물과 공존한다.
 
 > 계약 정본: `references/wiki-spec.md`(스키마·md 규약) · `references/doc-catalog.md`(문서 카탈로그·질문 은행).
-> 아키텍처·데이터 다이어그램은 **zzon-doc 스킬 절차**(유형 판별→스펙→layout-lint→render)로 그린다.
+> 아키텍처·데이터 다이어그램은 **zzon-doc 스킬 절차**(유형 판별→스펙→layout-lint→render)로,
+> 시간축 상호작용(요청/응답 왕복·분기)은 **zzon-seq 스킬 절차**(SeqSpec 저작→render-seq)로 그린다.
+> 둘 다 같은 specs/→diagrams/→manifest 파이프라인이라 위키 임베드 방법(`@diagram`)은 동일하다.
 
 ## 0. 분기 — 첫 행동을 정한다
 
@@ -39,7 +41,7 @@ argument-hint: '[대상 — 비우면 현재 프로젝트]'
 1. **초안**: 코드에서 읽힌 것만으로 문서를 쓴다. **못 읽은 값을 추측으로 채우지 마라** — 그 자리는 ❓ 콜아웃으로 남긴다.
 2. **질문은 섹션당 한 묶음(3~5개)**, 번호 목록으로, 각 질문에 "모름/스킵 가능"을 명시한다. 10개 이상 몰아 묻기 금지.
    무응답·모름은 **즉시 wiki.json 질문 대장(q-NNN) + 본문 `> ❓ 미확인(q-NNN): …` 콜아웃**으로 남기고 진행을 막지 마라.
-3. **다이어그램 노드**(architecture/data의 `@diagram` 표시)는 zzon-doc 스킬 절차로 스펙을 저작해 `specs/`에 두고, 문서에는 `@diagram(slug)` 한 줄만 쓴다. HTML 직접 작성 금지.
+3. **다이어그램 노드**(architecture/data의 `@diagram` 표시)는 zzon-doc(구조·ERD·플로우) 또는 zzon-seq(시퀀스 — usecase·event-flow류 시간축 왕복) 스킬 절차로 스펙을 저작해 `specs/`에 두고, 문서에는 `@diagram(slug)` 한 줄만 쓴다. HTML 직접 작성 금지.
 4. 섹션을 마치면 **빌드하고**(아래 명령) 결과를 보여준 뒤 **"이 섹션에 빠진 내용은 없나?"를 반드시 묻는다.** 다음 섹션은 그 답을 반영한 후에.
 5. **todo 문서는 빈 md를 만들지 않는다** — wiki.json 엔트리로만 둔다.
 

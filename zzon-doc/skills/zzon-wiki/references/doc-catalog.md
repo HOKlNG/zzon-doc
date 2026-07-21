@@ -56,7 +56,7 @@ na 판별 우선: "개인/소규모 프로젝트라 착수 문서가 불필요�
 | slug | 제목 | tier | 목적 |
 |---|---|---|---|
 | concept | 서비스 컨셉 / 가치 제안 | 2 | 핵심 가치·차별점 |
-| usecase | 핵심 시나리오 / 유스케이스 | 2 | 대표 사용 흐름 |
+| usecase | 핵심 시나리오 / 유스케이스 | 2 | 대표 사용 흐름 (`@diagram` 가능 — zzon-seq 시퀀스로 요청/응답 왕복) |
 | feature-spec | 기능 명세 | 2 | 기능 단위 상세 |
 | policy | 정책·비즈니스 룰 | 2 | 운영 정책·규칙 |
 | persona / journey | 페르소나 / 사용자 여정 | 3 | 사용자 정의·접점 |
@@ -83,7 +83,7 @@ na 판별 우선: **"디자인 산출물을 별도 도구(Figma 등)로 관리�
 | container | 컨테이너 구성 | 2 | `@diagram` — C4 L2 |
 | cloud-diagram | 클라우드/인프라 구성도 | 1 | `@diagram` — 인프라 유형 |
 | tech-stack | 기술 스택 / 선정 근거 | 1 | 스택과 이유 |
-| event-flow | 이벤트·메시지 흐름 | 2 | `@diagram` — 이벤트드리븐 (dynamic: 실제 기능별) |
+| event-flow | 이벤트·메시지 흐름 | 2 | `@diagram` — 이벤트드리븐 (dynamic: 실제 기능별). 토폴로지+순번은 data-flow, 왕복·분기 시간축은 zzon-seq 시퀀스 — 병행 임베드 가능 |
 | network | 네트워크 설계 | 2 | `@diagram` — 허브스포크/서브넷 |
 | security | 보안 아키텍처 | 2 | 인증·인가/시크릿/암호화 (children tier 3) |
 | environments | 환경 분리 (dev/prd) | 2 | 환경 전략 |

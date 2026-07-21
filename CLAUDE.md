@@ -10,6 +10,7 @@
 | 플러그인(우산) | `zzon-doc` | `zzon-doc/.claude-plugin/plugin.json` |
 | 스킬 1 | `zzon-doc` | → `/zzon-doc:zzon-doc` (플러그인 스킬은 `플러그인명:스킬명` 네임스페이스). 아키텍처 다이어그램 |
 | 스킬 2 | `zzon-wiki` | → `/zzon-doc:zzon-wiki`. 프로젝트 문서 위키 (질문 기반 채움 + 다이어그램 임베드) |
+| 스킬 3 | `zzon-seq` | → `/zzon-doc:zzon-seq`. 시퀀스 다이어그램 (액터 간 시간축 상호작용, `kind:"sequence"`) |
 
 설치: `/plugin marketplace add <owner>/<repo>` → `/plugin install zzon-doc@zzon`
 호출: `/zzon-doc:zzon-doc <대상>` / `/zzon-doc:zzon-wiki`. 자연어 요청으로도 자동 동작.
@@ -55,6 +56,15 @@ plugins-zzon-doc/
         │   └── sample-docs/            # 모범 문서 md (다이어그램 임베드·콜아웃 예시)
         └── scripts/
             └── build-wiki.mjs          # wiki.json+docs/*.md → self-contained 위키 index.html (--status 지원)
+    └── skills/zzon-seq/
+        ├── SKILL.md                    # 판별(vs data-flow)→코드 추적→SeqSpec 저작→렌더/빌드→위키 임베드
+        ├── references/
+        │   ├── seq-spec.md             # SeqSpec 정본 (kind:"sequence", actors/steps/fragments, essential 규칙)
+        │   ├── sample-seq-booking.json # 모범 답안 (결제 흐름: alt/else, reply 짝, async, 셀프, sourceRef)
+        │   └── sample-seq-reminder.json# 모범 답안 (배치: loop/opt/par 중첩, scheduler 트리거)
+        └── scripts/
+            ├── render-seq.mjs          # SeqSpec 검증 + 템플릿 (seq-engine.js 인라인 주입)
+            └── seq-engine.js           # 뷰어 엔진 (순수 JS 정본 — render.mjs와 같은 규칙: 수정 시 브라우저 재검증)
 ```
 
 ## 핵심 계약 (깨지 말 것)
@@ -65,6 +75,7 @@ plugins-zzon-doc/
 4. **DiagramSpec 스키마가 계약.** 노드/그룹/엣지/플로우 평탄 배열 + slug id, 픽셀 좌표 없음(lane/order 힌트만). 통합 문서 메뉴용 선택 필드 `section`/`order`만 추가됨. 스펙 형태는 `references/diagram-spec.md` 참고.
 5. **index.html 소유권**: 출력 폴더에 `wiki.json`이 있으면 index.html은 **build-wiki 소유** — build-docs는 다이어그램·manifest만 갱신하고 index를 건너뛴다(가드 내장). build-wiki는 build-docs를 자식 프로세스로 호출해 렌더를 위임한다.
 6. **wiki.json이 위키의 단일 상태 소스.** 스키마는 `skills/zzon-wiki/references/wiki-spec.md`가 정본. todo 문서는 빈 md를 만들지 않는다. 상태를 md frontmatter에 이중화하지 않는다.
+7. **시퀀스 엔진(zzon-seq)도 순수 JS가 정본이다 — 레포에 빌드 도구 0.** `skills/zzon-seq/scripts/seq-engine.js`는 render.mjs와 같은 규칙으로 직접 수정하고 반드시 브라우저 렌더로 재검증한다(샘플 2종 렌더, 겹침 없음·pageerror 0). SeqSpec 스키마 정본은 `skills/zzon-seq/references/seq-spec.md`. `kind:"sequence"` 스펙은 build-docs가 render-seq.mjs로 라우팅하며(형제 스킬 경로 참조), DiagramSpec과 스키마가 다르다(actors/steps — nodes/edges 아님). 뷰어는 zzon 셸 프로토콜(zzon:sidebar/zzon:sidebar-close, zzon-theme)을 구현한다. 최초 이식 출처는 ~/Documents/src/test_sequence_diagram(FlowScope TS를 1회 트랜스파일) — render.mjs의 info-hub 전례처럼 **이식 후 독립**, 다시 포팅하지 않는다.
 
 ## 최초 이식 출처 (역사적 참고 — 이제 독립)
 
@@ -106,6 +117,12 @@ plugins-zzon-doc/
   - **라벨 디컨플릭트**: 표시될 라벨의 예상 박스(한글 10px/자 추정)끼리 겹침 검사 → 세로 밀어내기 3패스.
   - **라벨 항상 표시 토글**(툴바 Tag 버튼): 줌<0.55에서 라벨 전멸하던 하드코딩을 우회 — "전체를 보면 글씨가 없는" 문제 해소.
   - 검증: DOM 심 스모크 39항목(라벨 y 전부 상이·토글 왕복 포함) 통과.
+- **v0.7.0 — zzon-seq 스킬 추가 (시퀀스 다이어그램)** (2026-07-21):
+  - **세 번째 스킬 zzon-seq**: 액터 간 시간축 상호작용을 `kind:"sequence"` SeqSpec(actors/steps/fragments)으로 저작 → render-seq.mjs가 의존성 0 단일 .html 렌더. 뷰어(FlowScope 이식): 행 단위 겹침 방지 레이아웃, 액터 아이콘 19종·카테고리 5색(CVD 검증 팔레트), 활성 바(sync 열고 reply 닫음, 미응답은 짧은 펄스), alt/opt/loop/par 중첩 프래그먼트, **전체/간소화 토글**(essential 마킹), 단계 상세 패널(sourceRef), 액터 하이라이트, 둘러보기(단계 재생), **SVG/PNG 다운로드**, zzon-theme 공유.
+  - **build-docs 확장(3곳)**: kind:"sequence" → render-seq 라우팅(형제 스킬 경로), KIND_ORDER에 sequence(3번째), 인덱스 KINDS 맵·통계에 시퀀스 배지(액터/메시지 counts). build-wiki는 무수정으로 @diagram 임베드 동작.
+  - **라우팅 명문화**: zzon-doc SKILL.md kind 표 + document-types.md C계열 + zzon-wiki(doc-catalog usecase/event-flow)에 위임 기준 — "구조를 지나가는가→data-flow, 순서대로 주고받는가→시퀀스, 병행은 보완".
+  - **엔진은 순수 JS로 이식**: FlowScope(TS)를 1회 트랜스파일해 seq-engine.js(1,553줄, 63KB)로 확정 — 레포에 빌드 도구 없이 기존 엔진들과 동일하게 직접 수정한다. 핵심 계약 7 참조.
+  - 검증: playground/examples에 시퀀스 2장 혼합 빌드(12장) → 단독 열기·통합 index 배지/카드·iframe 임베드·postMessage 왕복(패널 열림→좌메뉴 접힘, 재오픈→패널 닫힘)·다크 전환 스크린샷 확인, pageerror 0.
 - 남은 엔진 백로그는 P2~P3(같은 레인 좌측 C자 우회·접근 세그먼트 회피·lint 엣지/라벨 검사·그룹 접기·시맨틱 줌) — 메모리 `zzon-engine-priorities` 참조.
 - 소유자 표준은 **메모리**에 기록됨(무의존/문서 디자인/레이아웃 품질) — 로컬, 레포 밖.
 - git: 첫 커밋(main) 존재. **GitHub push는 소유자가 직접 함.** 이후 변경분(통합 문서 등)은 아직 커밋 안 됨 — 소유자 검토 후 커밋.
@@ -128,6 +145,9 @@ open -a "Google Chrome" playground/zzon-doc/index.html
 
 # manifest 검증
 node -e 'const m=require("./playground/zzon-doc/manifest.json");console.log(m.diagrams.length+"개")'
+
+# 시퀀스 단일 렌더
+node zzon-doc/skills/zzon-seq/scripts/render-seq.mjs zzon-doc/skills/zzon-seq/references/sample-seq-booking.json -o /tmp/seq.html
 
 # 위키 (플러그인 오염 없이 playground에서)
 mkdir -p playground/wiki-demo/specs
