@@ -552,7 +552,7 @@ body.side-collapsed #side{margin-left:-288px}
 .iconbtn:hover{background:var(--accent)}
 .iconbtn.sq{width:34px;padding:0}
 #stage{flex:1;min-height:0;overflow-y:auto}
-.page{max-width:860px;margin:0 auto;padding:34px 36px 80px}
+.page{max-width:1240px;margin:0 auto;padding:34px 40px 80px} /* 반응형 — 네비/사이드바가 줄면 같이 넓어진다 */
 
 .badge{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border:1px solid var(--border);
   border-radius:999px;font-size:11.5px;font-weight:600;color:var(--muted-fg);background:var(--card)}
@@ -590,9 +590,11 @@ body.side-collapsed #side{margin-left:-288px}
   transition:height .2s ease}
 .dgm figcaption{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted-fg)}
 .dgm figcaption a:hover{color:var(--fg)}
-/* 다이어그램 우측 상세 사이드바가 열리면 figure를 본문 폭 밖으로 확장 (좌측 네비는 자동 접힘) */
-.dgm.expanded{width:min(94vw,1500px);margin-left:calc((100% - min(94vw,1500px))/2)}
-.dgm.expanded iframe{height:72vh}
+/* 다이어그램 우측 상세 사이드바가 열리면 figure를 뷰포트 크기로 확장 (좌측 네비는 자동 접힘)
+   → 프레임 안 사이드바가 사실상 "페이지 오른쪽 전체 높이 사이드바"가 된다 */
+.dgm{scroll-margin-top:14px}
+.dgm.expanded{width:min(96vw,1720px);margin-left:calc((100% - min(96vw,1720px))/2)}
+.dgm.expanded iframe{height:calc(100vh - 118px)}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:14px}
 .card{display:flex;flex-direction:column;gap:6px;border:1px solid var(--border);border-radius:var(--radius);
@@ -814,7 +816,7 @@ addEventListener("message",function(e){
     var fig=frame.closest(".dgm");
     if(d.open){
       sideOpenCount++;
-      if(fig)fig.classList.add("expanded");
+      if(fig){fig.classList.add("expanded");try{fig.scrollIntoView({block:"start"});}catch(err){}}
       if(!document.body.classList.contains("side-collapsed")){document.body.classList.add("side-collapsed");autoCollapsed=true;}
     }else{
       sideOpenCount=Math.max(0,sideOpenCount-1);

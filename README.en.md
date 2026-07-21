@@ -14,21 +14,25 @@
 
 ## Preview
 
-| Unified docs (menu + overview) | Large ERD (FK column anchors) |
+| Unified docs (menu + overview) | Sequence diagram (`zzon-seq`) |
 |---|---|
-| ![Unified docs](assets/integrated-doc.png) | ![Large ERD](assets/diagram-erd.png) |
+| ![Unified docs](assets/integrated-doc.png) | ![Sequence diagram](assets/diagram-seq.png) |
 
-**Flow highlight** — click a flow button and the path lights up with **step badges (①②③)** and a **step panel**.
+**Flow highlight** — click a flow button and the path lights up with **step badges (①②③)**, a **step strip**, and a **right-side step panel**.
 
 ![Flow highlight](assets/diagram-flow.png)
 
-> Rendered from the bundled samples (sample labels are in Korean).
+| ERD + detail sidebar (columns & FK links) | Documentation wiki (`zzon-wiki`) |
+|---|---|
+| ![ERD](assets/diagram-erd.png) | ![Documentation wiki](assets/wiki-home.png) |
+
+> All rendered from the bundled samples/examples — zero-dependency single `.html` files opened in a browser (labels are in Korean).
 
 ## Features
 
 - **5 diagram kinds** — infra · data-flow · **sequence** · ERD · agent (`.claude`) topology (with a type catalog: context, multi-region HA, data pipeline, full-depth landscape …)
 - **Zero dependencies** — no libraries or CDN; a self-contained single `.html`
-- **Interactive** — click nodes · highlight flows · step badges · drill-down (⊕ double-click) · hover tooltips · pan/zoom · dark mode
+- **Interactive** — click nodes · highlight flows · step badges · drill-down (⊕ double-click) · hover tooltips · pan/zoom · dark mode · **SVG/PNG export** (pure vector)
 - **Unified docs** — bundle many diagrams into a left menu + overview
 - **Sequence diagrams (`zzon-seq`)** — traces code paths into actor lifelines over time: full/simplified toggle · per-step detail with source refs · step-through playback · alt/opt/loop/par fragments · SVG/PNG export
 - **Docs wiki (`zzon-wiki`)** — fills project documentation via code scan + questions, tracks progress and open questions as a wiki site; architecture pages embed the diagrams

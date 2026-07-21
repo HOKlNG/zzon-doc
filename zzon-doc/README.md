@@ -3,9 +3,10 @@
 문서·다이어그램 작성을 돕는 Claude Code 플러그인 묶음(suite).
 
 - **`/zzon-doc:zzon-doc`** — 코드를 분석해 아키텍처/인프라/ERD/Claude 에이전트 다이어그램을 그린다
-- **`/zzon-doc:zzon-wiki`** — 프로젝트 개발 문서 위키를 만들고, 코드 스캔 + 질문으로 채운다 (아키텍처 문서에 다이어그램 임베드)
+- **`/zzon-doc:zzon-seq`** — 코드를 추적해 액터 간 시간축 상호작용을 시퀀스 다이어그램으로 그린다
+- **`/zzon-doc:zzon-wiki`** — 프로젝트 개발 문서 위키를 만들고, 코드 스캔 + 질문으로 채운다 (문서에 다이어그램 임베드)
 
-Claude가 (1) 소스를 읽어 **DiagramSpec JSON**을 저작하고 (2) `render.mjs`로 **단일 self-contained `.html`** 을 렌더링한다.
+Claude가 (1) 소스를 읽어 스펙 JSON(**DiagramSpec**/**SeqSpec**)을 저작하고 (2) 렌더러로 **단일 self-contained `.html`** 을 렌더링한다.
 출력 `.html`은 서버·React·CDN·외부 라이브러리 **없이** 브라우저로 열면 인터랙티브하게 동작한다.
 
 ## 무엇을 그리나
@@ -13,7 +14,8 @@ Claude가 (1) 소스를 읽어 **DiagramSpec JSON**을 저작하고 (2) `render.
 | kind | 용도 |
 |---|---|
 | `infra` | 시스템 전체 인프라 (그룹 경계 + 플로우) |
-| `data-flow` | 특정 기능·프로세스의 경로 (시퀀스/플로차트 대체) |
+| `data-flow` | 구조(토폴로지) 위를 지나는 기능·프로세스 경로 (순번 배지) |
+| `sequence` | 액터 간 시간축 상호작용 — 요청/응답 왕복·활성 구간·alt/opt/loop/par (zzon-seq) |
 | `erd` | DB 테이블 관계 (FK 컬럼 앵커) |
 | `agent-topology` | `.claude` 에이전트/스킬/훅 구조 |
 
@@ -42,6 +44,16 @@ node skills/zzon-doc/scripts/build-docs.mjs ./zzon-doc --title "내 아키텍처
 생성된 `index.html` 하나만 브라우저로 열면 모든 다이어그램을 메뉴로 오가며 본다.
 역시 서버·라이브러리 0의 self-contained HTML이다.
 
+**시퀀스 다이어그램** — `kind:"sequence"` 스펙(SeqSpec)을 같은 `specs/`에 두면 build-docs가 자동으로 zzon-seq 렌더러로 라우팅한다. 단독 렌더:
+
+```
+/zzon-doc:zzon-seq 결제 흐름 시퀀스로 그려줘
+```
+
+```bash
+node skills/zzon-seq/scripts/render-seq.mjs <spec.json> [-o out.html]
+```
+
 **문서 위키** — 티어(라이트/표준/풀)를 합의하고 코드 스캔 + 질문으로 채운다. 재실행하면 빠진 문서·사람이 고친 문서(해시 감지)·열린 질문부터 이어간다:
 
 ```
@@ -64,8 +76,10 @@ node skills/zzon-wiki/scripts/build-wiki.mjs ./zzon-doc --status   # 상태 리�
 - **좌우 상호 배타(통합 문서)** — 우측 사이드바가 열리면 좌측 메뉴가 접히고, 좌측 메뉴를 다시 열면 우측이 닫힌다
 - **호버 툴팁** — 버튼·배지에 마우스를 올리면 설명(플로우 설명·단계 텍스트·버튼 기능)
 - **팬/줌** — 드래그로 이동, 휠로 확대/축소, `fit` 버튼으로 화면 맞춤
-- **다크/라이트** — 우상단 버튼으로 전환
+- **SVG/PNG 내보내기** — 우측 툴바 버튼. foreignObject 없는 순수 벡터 SVG(문서·Figma에 그대로)와 2배 해상도 PNG, 현재 테마 색으로 저장
+- **다크/라이트** — 우상단 버튼으로 전환 (`zzon-theme` 키를 시퀀스 뷰어와 공유)
 - **범례** — 좌하단 카테고리·엣지 종류
+- **시퀀스 뷰어(zzon-seq)** — 전체/간소화 토글 · 화살표 클릭 상세(설명·근거 코드 위치) · 액터 하이라이트 · 둘러보기(단계 재생 ←/→) · SVG/PNG 다운로드
 
 ## 구성
 
@@ -78,13 +92,21 @@ zzon-doc/
 │   ├── references/
 │   │   ├── document-types.md     # 유형 카탈로그 (4계열 + 추상화 사다리)
 │   │   ├── diagram-spec.md       # 스펙 명세 + 레이아웃 가이드
-│   │   └── sample-*.json         # 모범 답안 11종 (컨텍스트·인프라·MSA·멀티리전·
-│   │                             #   이벤트·파이프라인·ERD·원장·에이전트 …)
+│   │   └── sample-*.json         # 모범 답안 13종 (컨텍스트·컨테이너·컴포넌트·인프라·
+│   │                             #   EKS·MSA·멀티리전·이벤트·파이프라인·ERD·원장·에이전트 …)
 │   └── scripts/
 │       ├── render.mjs            # DiagramSpec JSON → 단일 .html (Node 20+ 내장만)
-│       ├── build-docs.mjs        # 여러 스펙 → 통합 문서 index.html (메뉴+뷰어)
+│       ├── build-docs.mjs        # 여러 스펙 → 통합 문서 index.html (kind:"sequence"는 zzon-seq로 라우팅)
 │       └── layout-lint.mjs       # 렌더 전 배치 검사 (그룹 겹침·삼킴 검출)
-└── skills/zzon-wiki/             # 스킬 2 — 프로젝트 문서 위키
+├── skills/zzon-seq/              # 스킬 2 — 시퀀스 다이어그램
+│   ├── SKILL.md                  # 판별(vs data-flow) → 코드 추적 → SeqSpec 저작 → 렌더
+│   ├── references/
+│   │   ├── seq-spec.md           # SeqSpec 명세 (actors/steps/fragments, essential 규칙)
+│   │   └── sample-seq-*.json     # 모범 답안 2종 (alt/else 결제 · loop/par 배치)
+│   └── scripts/
+│       ├── render-seq.mjs        # SeqSpec JSON → 단일 .html (검증 + 엔진 인라인)
+│       └── seq-engine.js         # 시퀀스 뷰어 엔진 (순수 JS 정본)
+└── skills/zzon-wiki/             # 스킬 3 — 프로젝트 문서 위키
     ├── SKILL.md                  # 스캔 → 티어 승인 → 섹션 루프(질문) → 빌드
     ├── references/
     │   ├── wiki-spec.md          # wiki.json 스키마 + md 규약 (정본)
@@ -100,4 +122,5 @@ zzon-doc/
 `render.mjs`의 렌더링 엔진은 라이브러리 의존 0의 순수 HTML/CSS/SVG/바닐라 JS다
 (레인 레이아웃, 라운드 직교 엣지 라우팅, 관통 회피, 그룹 언더레이, 팬/줌, 플로우 애니메이션을 직접 구현).
 엔진 코드는 `render.mjs` 안에 템플릿 문자열로 인라인되어 한 파일에 출력된다.
-**수정하지 마라** — 검증된 포팅본이다.
+시퀀스 엔진(`seq-engine.js`)도 같은 방식의 순수 JS 정본으로, `render-seq.mjs`가 출력에 인라인한다.
+**다이어그램을 그릴 때는 엔진을 수정하지 마라** — 엔진 개선은 별도 작업이며 반드시 브라우저 렌더로 재검증한다.

@@ -123,6 +123,13 @@ plugins-zzon-doc/
   - **라우팅 명문화**: zzon-doc SKILL.md kind 표 + document-types.md C계열 + zzon-wiki(doc-catalog usecase/event-flow)에 위임 기준 — "구조를 지나가는가→data-flow, 순서대로 주고받는가→시퀀스, 병행은 보완".
   - **엔진은 순수 JS로 이식**: FlowScope(TS)를 1회 트랜스파일해 seq-engine.js(1,553줄, 63KB)로 확정 — 레포에 빌드 도구 없이 기존 엔진들과 동일하게 직접 수정한다. 핵심 계약 7 참조.
   - 검증: playground/examples에 시퀀스 2장 혼합 빌드(12장) → 단독 열기·통합 index 배지/카드·iframe 임베드·postMessage 왕복(패널 열림→좌메뉴 접힘, 재오픈→패널 닫힘)·다크 전환 스크린샷 확인, pageerror 0.
+- **v0.8.0 — 임베드·사이드바 UX 개선 + 아키텍처 SVG/PNG 내보내기** (2026-07-22):
+  - **아키텍처 뷰어 SVG/PNG 내보내기**(render.mjs, 툴바 SVG/PNG 버튼): 노드가 HTML이라 **내보내기 전용 순수 SVG를 재구성**한다(foreignObject 금지 — Figma·편집기 호환). 그룹 언더레이·카드(아이콘·tech 칩·badge·설명)·ERD 테이블(컬럼·PK/FK 태그)은 좌표 기반으로 다시 그리고, 엣지 레이어는 라이브 SVG를 "기본 상태+라벨 항상"으로 재렌더해 복제 후 CSS 변수·color-mix를 `getComputedStyle`로 실값 해석(현재 테마 반영), 라벨 foreignObject는 필+텍스트로 치환. PNG는 그 SVG를 캔버스에 2배로 래스터라이즈. 검증 훅 `window.__zzonExportSvg`.
+  - **시퀀스 자동 fit-to-width**(seq-engine boot): 뷰포트보다 넓으면 자동 축소(줌 하한 0.5→0.3, 0.05 단위 내림) — 위키 440px 임베드에서 액터 3명만 보이던 잘림 해소.
+  - **시퀀스 드로어가 캔버스를 밈**: `#seq-stage.drawer-open #canvas{right:min(320px,88%)}` — 오버레이 가림 대신 리플로우.
+  - **아키텍처 사이드바 팬 시프트**(render.mjs setSideOpen): 열릴 때 transform.x −152px, 닫으면 복귀 — 전체화면에서 사이드바가 그림을 가리던 문제 해소.
+  - **위키 본문 반응형**: .page 860px→**1240px**(컨테이너 따라 신축 — 네비 접으면 넓어짐). 확장 figure 96vw·높이 calc(100vh−118px) + `scrollIntoView` — 임베드 사이드바가 사실상 "페이지 오른쪽 전체 높이" 패널이 됨(셸 이식 없이 동일 UX; 부족하면 셸 레벨 미러링이 다음 단계).
+  - 검증: 헤드리스 Chrome 스크린샷 4종(임베드 fit 45%·드로어 리플로우·플로우+시프트·위키 와이드) + 콘솔 에러 0 + validate 통과. README 미리보기 스크린샷 5장 갱신(assets/, 시퀀스·위키 신규).
 - 남은 엔진 백로그는 P2~P3(같은 레인 좌측 C자 우회·접근 세그먼트 회피·lint 엣지/라벨 검사·그룹 접기·시맨틱 줌) — 메모리 `zzon-engine-priorities` 참조.
 - 소유자 표준은 **메모리**에 기록됨(무의존/문서 디자인/레이아웃 품질) — 로컬, 레포 밖.
 - git: 첫 커밋(main) 존재. **GitHub push는 소유자가 직접 함.** 이후 변경분(통합 문서 등)은 아직 커밋 안 됨 — 소유자 검토 후 커밋.

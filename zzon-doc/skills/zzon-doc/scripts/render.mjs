@@ -401,6 +401,7 @@ body {
   box-shadow:0 1px 2px rgba(0,0,0,.04); transition:background .12s, color .12s, border-color .12s; }
 .dg-btn:hover { background:var(--muted); }
 .dg-btn.icon { width:28px; height:28px; padding:0; }
+.dg-btn.mini { width:28px; height:22px; padding:0; font-size:9px; font-weight:700; letter-spacing:.02em; }
 .dg-btn.active { border-color:transparent; color:#fff; background:var(--diagram-flow); }
 .dg-btn.active:hover { background:var(--diagram-flow); filter:brightness(1.05); }
 
@@ -613,6 +614,8 @@ const ENGINE_JS = String.raw`
     if (attrs) for (const k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
     return e;
   }
+  // 라벨 폭 추정 (한글 10px/자, 라틴 5.6px/자 + 좌우 패딩) — 디컨플릭트·내보내기 공용
+  function estLabelW(s) { let w = 16; for (const ch of String(s)) w += /[ᄀ-ᇿ㄰-㆏가-힣一-鿿]/.test(ch) ? 10 : 5.6; return w; }
 
   /* ===== layout.ts: buildLayout ===== */
   function buildLayout(spec) {
@@ -1147,12 +1150,11 @@ const ENGINE_JS = String.raw`
     // 라벨 디컨플릭트: 표시될 라벨의 예상 박스끼리 겹침을 검사해 세로로 밀어낸다
     const labelPos = new Map();
     if (showLabels) {
-      const est = (s) => { let w = 16; for (const ch of String(s)) w += /[ᄀ-ᇿ㄰-㆏가-힣一-鿿]/.test(ch) ? 10 : 5.6; return w; };
       const boxes = [];
       for (const { edge, geo } of ordered) {
         if (!edge.label) continue;
         if (flowSteps && flowSteps.has(edge.id)) continue; // 플로우 엣지는 배지가 대신 표시됨
-        boxes.push({ id: edge.id, x: geo.mid.x, y: geo.mid.y, w: est(edge.label), h: 18 });
+        boxes.push({ id: edge.id, x: geo.mid.x, y: geo.mid.y, w: estLabelW(edge.label), h: 18 });
       }
       boxes.sort((a, b) => a.y - b.y || a.x - b.x);
       for (let pass = 0; pass < 3; pass++) {
@@ -1520,6 +1522,225 @@ const ENGINE_JS = String.raw`
       b.classList.toggle("active", b.getAttribute("data-flow-id") === flowId));
   }
 
+  /* ---- SVG/PNG 내보내기 ----
+     노드는 HTML이라 그대로 저장할 수 없다 → 내보내기 전용 "순수 SVG"를 다시 그린다
+     (foreignObject 없이 — Figma·편집기·문서에 붙여도 깨지지 않는 진짜 벡터).
+     색은 현재 테마의 CSS 변수·color-mix를 브라우저로 해석해 실제 값으로 굽는다. */
+  const _colorCache = {};
+  function resolveColor(expr) {
+    if (!expr) return expr;
+    if (_colorCache[expr]) return _colorCache[expr];
+    const probe = el("span"); probe.style.display = "none"; probe.style.color = expr;
+    document.body.appendChild(probe);
+    const v = getComputedStyle(probe).color; probe.remove();
+    _colorCache[expr] = v; return v;
+  }
+  function exTxt(x, y, str, o) {
+    o = o || {};
+    const t = svgEl("text", { x, y, "text-anchor": o.anchor || "start",
+      "font-size": o.size || 12, "font-weight": o.weight || 400, fill: o.fill,
+      "font-family": o.mono
+        ? "ui-monospace,SFMono-Regular,Menlo,monospace"
+        : 'ui-sans-serif,system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif' });
+    t.textContent = str;
+    return t;
+  }
+  function exIcon(name, x, y, size, color) {
+    const g = svgEl("g", { transform: "translate(" + x + "," + y + ") scale(" + size / 24 + ")",
+      fill: "none", stroke: color, "stroke-width": 2,
+      "stroke-linecap": "round", "stroke-linejoin": "round" });
+    g.setAttribute("style", "color:" + color);
+    g.innerHTML = ICONS[name] || ICONS.Box;
+    return g;
+  }
+  function exPill(out, cx, cy, w, h, fill, stroke, dash) {
+    out.appendChild(svgEl("rect", { x: cx - w / 2, y: cy - h / 2, width: w, height: h,
+      rx: h / 2, fill, stroke, "stroke-width": 1, "stroke-dasharray": dash || null }));
+  }
+  function buildExportSvg() {
+    measure(); computeEdges();
+    const W = Math.ceil(contentSize.w), H = Math.ceil(contentSize.h);
+    const bg = resolveColor("var(--background)");
+    const cardBg = resolveColor("var(--card)");
+    const fg = resolveColor("var(--card-foreground)");
+    const mutedFg = resolveColor("var(--muted-foreground)");
+    const mutedBg = resolveColor("var(--muted)");
+    const borderC = resolveColor("var(--color-border)");
+    const out = svgEl("svg", { xmlns: SVGNS, width: W, height: H, viewBox: "0 0 " + W + " " + H });
+    out.appendChild(svgEl("rect", { x: 0, y: 0, width: W, height: H, fill: bg }));
+
+    // 1) 그룹 언더레이 (renderGroups 수식 재현)
+    const heightOf = new Map();
+    for (const g of layout.groups.slice().sort((a, b) => b.depth - a.depth)) {
+      const kids = layout.groups.filter(c => c.group.parentId === g.group.id);
+      heightOf.set(g.group.id, kids.length === 0 ? 0
+        : Math.max.apply(null, kids.map(c => heightOf.get(c.group.id) || 0)) + 1);
+    }
+    for (const g of layout.groups) {
+      const rects = g.memberNodeIds.map(id => nodeRects.get(id)).filter(Boolean);
+      const box = unionRect(rects, 16 + (heightOf.get(g.group.id) || 0) * 16);
+      if (!box) continue;
+      const style = GROUP_KIND_STYLE[g.group.kind] || GROUP_KIND_STYLE.layer;
+      const gc = resolveColor(style.color);
+      out.appendChild(svgEl("rect", { x: box.x, y: box.y, width: box.w, height: box.h, rx: 12,
+        fill: resolveColor("color-mix(in oklab, " + style.color + " " + style.fillAlpha + "%, transparent)"),
+        stroke: resolveColor("color-mix(in oklab, " + style.color + " " + (style.borderAlpha || 45) + "%, transparent)"),
+        "stroke-width": 1.5,
+        "stroke-dasharray": style.borderStyle === "dotted" ? "2 4" : (style.dash || null) }));
+      const label = g.group.label;
+      const tw = 12 + 4 + estLabelW(label) * 0.85;
+      out.appendChild(svgEl("rect", { x: box.x + 12, y: box.y - 10, width: tw + 12, height: 20, rx: 10,
+        fill: cardBg, stroke: resolveColor("color-mix(in oklab, " + style.color + " 40%, var(--color-border))"), "stroke-width": 1 }));
+      out.appendChild(exIcon(style.icon, box.x + 19, box.y - 6, 12, gc));
+      out.appendChild(exTxt(box.x + 35, box.y + 3.5, label, { size: 10, weight: 600, fill: gc }));
+    }
+
+    // 2) 노드
+    for (const ln of layout.lanes) for (const it of ln.items) {
+      const n = it.node, r = nodeRects.get(n.id);
+      if (!r) continue;
+      const color = resolveColor(catColor(n.category)), m = meta(n.category);
+      if (n.table) { // ERD 테이블
+        out.appendChild(svgEl("rect", { x: r.x, y: r.y, width: r.w, height: r.h, rx: 8,
+          fill: cardBg, stroke: resolveColor("color-mix(in oklab, " + catColor(n.category) + " 30%, var(--color-border))"), "stroke-width": 1 }));
+        const cols = n.table.columns || [];
+        const firstCol = cols.length ? colRects.get(n.id + "::" + cols[0].name) : null;
+        const headH = firstCol ? firstCol.y - r.y : 34;
+        const headFill = resolveColor("color-mix(in oklab, " + catColor(n.category) + " 9%, transparent)");
+        out.appendChild(svgEl("path", { d: "M " + (r.x) + " " + (r.y + headH) + " V " + (r.y + 8) +
+          " Q " + r.x + " " + r.y + " " + (r.x + 8) + " " + r.y + " H " + (r.x + r.w - 8) +
+          " Q " + (r.x + r.w) + " " + r.y + " " + (r.x + r.w) + " " + (r.y + 8) + " V " + (r.y + headH) + " Z", fill: headFill }));
+        out.appendChild(svgEl("line", { x1: r.x, y1: r.y + headH, x2: r.x + r.w, y2: r.y + headH, stroke: borderC }));
+        out.appendChild(exIcon("Table2", r.x + 12, r.y + headH / 2 - 8, 16, color));
+        out.appendChild(exTxt(r.x + 36, r.y + headH / 2 + 4, n.label, { size: 12, weight: 600, fill: fg, mono: true }));
+        out.appendChild(exTxt(r.x + r.w - 12, r.y + headH / 2 + 3.5, cols.length + " cols", { size: 9, fill: mutedFg, anchor: "end" }));
+        cols.forEach((c, i) => {
+          const cr = colRects.get(n.id + "::" + c.name);
+          if (!cr) return;
+          if (i % 2 === 1) out.appendChild(svgEl("rect", { x: r.x + 1, y: cr.y, width: r.w - 2, height: cr.h,
+            fill: resolveColor("color-mix(in oklab, var(--muted) 35%, transparent)") }));
+          const cy0 = cr.y + cr.h / 2;
+          if (c.pk) out.appendChild(exIcon("KeyRound", r.x + 12, cy0 - 6, 12, "#f59e0b"));
+          out.appendChild(exTxt(r.x + 32, cy0 + 3.5, c.name, { size: 11, weight: c.pk ? 600 : 400, fill: fg, mono: true }));
+          let rx = r.x + r.w - 12;
+          const tags = [];
+          if (c.nullable) tags.push("N");
+          if (c.unique) tags.push("UQ");
+          if (c.fk) tags.push("FK");
+          for (const tg of tags) {
+            const tw2 = tg.length * 6 + 8;
+            const isFk = tg === "FK";
+            out.appendChild(svgEl("rect", { x: rx - tw2, y: cy0 - 7, width: tw2, height: 14, rx: 4,
+              fill: isFk ? resolveColor("color-mix(in oklab,#0ea5e9 10%,transparent)") : "none",
+              stroke: isFk ? resolveColor("color-mix(in oklab,#0ea5e9 40%,transparent)") : borderC, "stroke-width": 1 }));
+            out.appendChild(exTxt(rx - tw2 / 2, cy0 + 3, tg, { size: 8.5, weight: 500, fill: isFk ? "#0284c7" : mutedFg, anchor: "middle" }));
+            rx -= tw2 + 3;
+          }
+          out.appendChild(exTxt(rx, cy0 + 3.5, c.type, { size: 10, fill: mutedFg, anchor: "end", mono: true }));
+        });
+      } else { // 카드 노드
+        out.appendChild(svgEl("rect", { x: r.x, y: r.y, width: r.w, height: r.h, rx: 8,
+          fill: cardBg, "stroke-width": 1,
+          stroke: m.dashed ? resolveColor("color-mix(in oklab, " + catColor(n.category) + " 50%, transparent)")
+                           : resolveColor("color-mix(in oklab, " + catColor(n.category) + " 28%, var(--color-border))"),
+          "stroke-dasharray": m.dashed ? "4 3" : null }));
+        out.appendChild(svgEl("rect", { x: r.x + 1, y: r.y + 1, width: 3, height: r.h - 2, fill: color, opacity: 0.85 }));
+        const tileX = r.x + 14, tileY = r.y + 10;
+        out.appendChild(svgEl("rect", { x: tileX, y: tileY, width: 32, height: 32, rx: 6,
+          fill: resolveColor("color-mix(in oklab, " + catColor(n.category) + " 13%, transparent)") }));
+        out.appendChild(exIcon(catIconName(n.category), tileX + 8, tileY + 8, 16, color));
+        const tx = tileX + 42;
+        out.appendChild(exTxt(tx, tileY + 13, n.label, { size: 12, weight: 600, fill: fg }));
+        const sub = n.tech || m.labelKo;
+        if (n.tech) {
+          const cw = estLabelW(n.tech) * 0.85 + 6;
+          out.appendChild(svgEl("rect", { x: tx, y: tileY + 18, width: cw, height: 14, rx: 4, fill: mutedBg }));
+          out.appendChild(exTxt(tx + cw / 2, tileY + 28.5, sub, { size: 10, weight: 500, fill: mutedFg, anchor: "middle" }));
+        } else {
+          out.appendChild(exTxt(tx, tileY + 28.5, sub, { size: 10, fill: mutedFg }));
+        }
+        if (n.badge) {
+          const bw = estLabelW(n.badge) * 0.8 + 6;
+          out.appendChild(svgEl("rect", { x: r.x + r.w - 6 - bw, y: r.y + 5, width: bw, height: 15, rx: 7.5,
+            fill: mutedBg, stroke: borderC, "stroke-width": 1 }));
+          out.appendChild(exTxt(r.x + r.w - 6 - bw / 2, r.y + 15.5, n.badge, { size: 9, weight: 600, fill: mutedFg, anchor: "middle" }));
+        }
+        if (SPEC.layout.nodeDescriptions && n.description) {
+          const budget = Math.max(4, Math.floor((r.w - 28) / 10));
+          const words = String(n.description);
+          for (let li = 0; li < 3; li++) {
+            let line = words.slice(li * budget, (li + 1) * budget);
+            if (!line) break;
+            if (li === 2 && words.length > 3 * budget) line = line.slice(0, budget - 1) + "…";
+            out.appendChild(exTxt(r.x + 14, tileY + 46 + li * 15, line, { size: 10.5, fill: mutedFg }));
+          }
+        }
+      }
+    }
+
+    // 3) 엣지 레이어 — 라이브 SVG를 "기본 상태 + 라벨 항상"으로 재렌더해 복제하고 색을 실값으로 굽는다
+    const saved = { selected, flowId, hovered, hoveredEdge, activeStep, labelMode };
+    selected = null; flowId = null; hovered = null; hoveredEdge = null; activeStep = null; labelMode = "always";
+    renderEdges();
+    const edgeClone = svg.cloneNode(true);
+    selected = saved.selected; flowId = saved.flowId; hovered = saved.hovered;
+    hoveredEdge = saved.hoveredEdge; activeStep = saved.activeStep; labelMode = saved.labelMode;
+    renderEdges();
+    edgeClone.removeAttribute("class");
+    edgeClone.querySelectorAll(".dg-edge-hit").forEach(p => p.remove());
+    edgeClone.querySelectorAll("*").forEach(elm => {
+      elm.removeAttribute("class");
+      for (const attr of ["stroke", "fill"]) {
+        const v = elm.getAttribute(attr);
+        if (v && (v.indexOf("var(") !== -1 || v.indexOf("color-mix") !== -1)) elm.setAttribute(attr, resolveColor(v));
+        else if (v === "context-stroke") elm.setAttribute(attr,
+          resolveColor("color-mix(in oklab, var(--color-muted-foreground) 45%, transparent)"));
+      }
+    });
+    edgeClone.querySelectorAll("foreignObject").forEach(fo => {
+      const x = Number(fo.getAttribute("x")), y = Number(fo.getAttribute("y"));
+      const label = fo.textContent || "";
+      const g = svgEl("g");
+      exPill(g, x, y, estLabelW(label), 18, cardBg, borderC);
+      g.appendChild(exTxt(x, y + 3.5, label, { size: 10, weight: 500, fill: mutedFg, anchor: "middle" }));
+      fo.parentNode.replaceChild(g, fo);
+    });
+    out.appendChild(edgeClone);
+
+    // 4) 제목
+    const KIND_KO = { "infra": "인프라", "data-flow": "데이터 흐름", "erd": "ERD", "agent-topology": "에이전트 구조" };
+    out.appendChild(exTxt(20, 30, (KIND_KO[SPEC.kind] || SPEC.kind) + " · " + SPEC.title, { size: 13, weight: 700, fill: fg }));
+    return out;
+  }
+  function downloadBlob(name, blob) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  }
+  function slugName() { return (SPEC.title || "diagram").replace(/[\\/:*?"<>|\s]+/g, "-"); }
+  function exportSvg() {
+    const xml = new XMLSerializer().serializeToString(buildExportSvg());
+    downloadBlob(slugName() + ".svg", new Blob([xml], { type: "image/svg+xml" }));
+  }
+  function exportPng() {
+    const node = buildExportSvg();
+    const W = Number(node.getAttribute("width")), H = Number(node.getAttribute("height"));
+    const xml = new XMLSerializer().serializeToString(node);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const scale = 2;
+      canvas.width = W * scale; canvas.height = H * scale;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(b => { if (b) downloadBlob(slugName() + ".png", b); }, "image/png");
+    };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(xml);
+  }
+  window.__zzonExportSvg = buildExportSvg; // 헤드리스 검증용 훅
+
   /* ---- 툴바 + 테마 토글 ---- */
   function renderToolbar() {
     const bar = el("div", "dg-ui dg-toolbar");
@@ -1537,6 +1758,13 @@ const ENGINE_JS = String.raw`
       renderEdges();
     });
     bar.appendChild(labelBtn);
+    const mkTxt = (label, title, fn) => {
+      const b = el("button", "dg-btn mini", label);
+      b.setAttribute("aria-label", title); attachTip(b, title);
+      b.addEventListener("click", fn); return b;
+    };
+    bar.appendChild(mkTxt("SVG", "SVG로 내보내기 (벡터 — 문서·Figma에 그대로)", exportSvg));
+    bar.appendChild(mkTxt("PNG", "PNG로 내보내기 (2배 해상도)", exportPng));
     const themeBtn = mk(document.documentElement.classList.contains("dark") ? "Sun" : "Moon", "테마 전환", () => {
       document.documentElement.classList.toggle("dark");
       themeBtn.innerHTML = uiIcon(document.documentElement.classList.contains("dark") ? "Sun" : "Moon", 14);
@@ -1613,6 +1841,9 @@ const ENGINE_JS = String.raw`
     sideOpen = open;
     sideEl.classList.toggle("open", open);
     root.classList.toggle("side-open", open);
+    // 사이드바(304px)가 그림을 가리지 않게 캔버스를 절반 폭만큼 밀고, 닫으면 되돌린다
+    transform.x += open ? -152 : 152;
+    applyTransform();
     postSideState(open);
   }
   function closeSide() { if (sideEl) setSideOpen(false); }

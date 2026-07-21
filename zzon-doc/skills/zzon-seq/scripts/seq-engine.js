@@ -947,7 +947,8 @@ code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, mo
 
 /* ── 캔버스 ── */
 #seq-stage { flex: 1; position: relative; min-height: 0; }
-#canvas { position: absolute; inset: 0; overflow: auto; }
+#canvas { position: absolute; inset: 0; overflow: auto; transition: right .2s ease; }
+#seq-stage.drawer-open #canvas { right: min(320px, 88%); }
 #diagram-w { position: relative; width: max-content; min-width: 100%; }
 .actor-layer {
   position: sticky; top: 0; z-index: 10;
@@ -1118,6 +1119,9 @@ code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, mo
     bindKeyboard();
     bindShellProtocol();
     renderFlow();
+    // 뷰포트보다 다이어그램이 넓으면 자동 fit-to-width — 임베드(작은 iframe)에서 처음부터 전체 폭이 보이게
+    const vw = $("#canvas").clientWidth;
+    if (vw > 0 && layout && layout.width > vw) setZoom(vw / layout.width);
   }
   function renderFlow() {
     layout = layoutFlow(spec, state.mode);
@@ -1260,6 +1264,7 @@ code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, mo
     const d = $("#drawer");
     if (!d.classList.contains("open")) {
       d.classList.add("open");
+      $("#seq-stage").classList.add("drawer-open"); // 캔버스를 드로어 폭만큼 줄인다 (가림 방지)
       postToShell({ type: "zzon:sidebar", open: true });
     }
   }
@@ -1267,6 +1272,7 @@ code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, mo
     const d = $("#drawer");
     if (d.classList.contains("open")) {
       d.classList.remove("open");
+      $("#seq-stage").classList.remove("drawer-open");
       postToShell({ type: "zzon:sidebar", open: false });
     }
   }
@@ -1448,7 +1454,8 @@ code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, mo
     });
   }
   function setZoom(z) {
-    state.zoom = Math.min(1.6, Math.max(0.5, Math.round(z * 10) / 10));
+    // 하한 0.3: 좁은 임베드에서 fit-to-width가 가능해야 한다 (0.05 단위 내림 — 폭 초과 방지)
+    state.zoom = Math.min(1.6, Math.max(0.3, Math.floor(z * 20) / 20));
     $("#diagram-w").style.zoom = String(state.zoom);
     $("#zoom-val").textContent = `${Math.round(state.zoom * 100)}%`;
   }
