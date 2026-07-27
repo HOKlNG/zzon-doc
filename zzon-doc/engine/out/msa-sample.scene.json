@@ -1,0 +1,392 @@
+{
+ "id": "msa-sample",
+ "title": "MSA Sample — Category Cards",
+ "width": 883.26,
+ "height": 336.45,
+ "groups": [
+  {
+   "kind": "group",
+   "path": "services",
+   "rect": {
+    "x": 316,
+    "y": 52,
+    "width": 248,
+    "height": 232.45
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "Domain Services",
+    "x": 324,
+    "y": 68,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  }
+ ],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "gateway",
+   "to": "services/order",
+   "points": [
+    {
+     "x": 252,
+     "y": 168.22
+    },
+    {
+     "x": 291,
+     "y": 168.22
+    },
+    {
+     "x": 291,
+     "y": 134.22
+    },
+    {
+     "x": 330,
+     "y": 134.22
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "http",
+   "label": {
+    "text": "REST",
+    "x": 297,
+    "y": 155.13,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "gateway",
+   "to": "services/payment",
+   "points": [
+    {
+     "x": 252,
+     "y": 168.22
+    },
+    {
+     "x": 291,
+     "y": 168.22
+    },
+    {
+     "x": 291,
+     "y": 244.45
+    },
+    {
+     "x": 330,
+     "y": 244.45
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "http"
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "services/payment",
+   "to": "pg-api",
+   "points": [
+    {
+     "x": 522,
+     "y": 244.45
+    },
+    {
+     "x": 583.63,
+     "y": 244.45
+    },
+    {
+     "x": 583.63,
+     "y": 168.22
+    },
+    {
+     "x": 631.26,
+     "y": 168.22
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "http",
+   "label": {
+    "text": "결제 승인",
+    "x": 536.84,
+    "y": 217.25,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "services/order",
+   "to": "orders-db",
+   "points": [
+    {
+     "x": 550,
+     "y": 134.22
+    },
+    {
+     "x": 597.63,
+     "y": 134.22
+    },
+    {
+     "x": 597.63,
+     "y": 278.45
+    },
+    {
+     "x": 645.26,
+     "y": 278.45
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "data"
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "services/order",
+   "to": "session-cache",
+   "points": [
+    {
+     "x": 550,
+     "y": 134.22
+    },
+    {
+     "x": 590.63,
+     "y": 134.22
+    },
+    {
+     "x": 590.63,
+     "y": 58
+    },
+    {
+     "x": 645.26,
+     "y": 58
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "data"
+  },
+  {
+   "kind": "edge",
+   "id": "e5",
+   "from": "services/payment",
+   "to": "orders-db",
+   "points": [
+    {
+     "x": 522,
+     "y": 244.45
+    },
+    {
+     "x": 583.63,
+     "y": 244.45
+    },
+    {
+     "x": 583.63,
+     "y": 278.45
+    },
+    {
+     "x": 645.26,
+     "y": 278.45
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "data"
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "gateway",
+   "rect": {
+    "x": 32,
+    "y": 128,
+    "width": 220,
+    "height": 80.45
+   },
+   "role": "card",
+   "category": "gateway",
+   "tech": "Kong 3.6",
+   "description": "모든 외부 트래픽의 단일 진입점. 인증 토큰 검증과 서비스별 라우팅을 담당한다.",
+   "label": {
+    "text": "API Gateway",
+    "x": 32,
+    "y": 128,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "orders-db",
+   "rect": {
+    "x": 645.26,
+    "y": 252.45,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "category": "db",
+   "tech": "PostgreSQL 16",
+   "label": {
+    "text": "Orders DB",
+    "x": 645.2569885253906,
+    "y": 252.447265625,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "pg-api",
+   "rect": {
+    "x": 631.26,
+    "y": 128,
+    "width": 220,
+    "height": 80.45
+   },
+   "role": "card",
+   "category": "external",
+   "description": "외부 결제 대행사 (Toss Payments). 장애 시 재시도 큐로 우회한다.",
+   "label": {
+    "text": "PG API",
+    "x": 631.2569885253906,
+    "y": 128,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "services/order",
+   "rect": {
+    "x": 330,
+    "y": 94,
+    "width": 220,
+    "height": 80.45
+   },
+   "role": "card",
+   "category": "service",
+   "tech": "NestJS 10",
+   "description": "주문 생성/조회 도메인. 결제 승인 후 주문 상태를 확정한다.",
+   "label": {
+    "text": "Order Service",
+    "x": 330,
+    "y": 94,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "services/payment",
+   "rect": {
+    "x": 330,
+    "y": 218.45,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "category": "service",
+   "tech": "Spring Boot 3",
+   "label": {
+    "text": "Payment Service",
+    "x": 330,
+    "y": 218.447265625,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "session-cache",
+   "rect": {
+    "x": 645.26,
+    "y": 32,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "category": "cache",
+   "tech": "Redis 7",
+   "label": {
+    "text": "Session Cache",
+    "x": 645.2569885253906,
+    "y": 32,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  }
+ ],
+ "markers": [],
+ "flows": [],
+ "icons": [
+  "x.lucide-boxes",
+  "x.lucide-database",
+  "x.lucide-door-open",
+  "x.lucide-external-link",
+  "x.lucide-memory-stick"
+ ],
+ "texts": [
+  "API Gateway",
+  "Domain Services",
+  "Kong 3.6",
+  "NestJS 10",
+  "Order Service",
+  "Orders DB",
+  "PG API",
+  "Payment Service",
+  "PostgreSQL 16",
+  "REST",
+  "Redis 7",
+  "Session Cache",
+  "Spring Boot 3",
+  "게이트웨이",
+  "결제 승인",
+  "데이터베이스",
+  "모든 외부 트래픽의 단일 진입점. 인증 토큰 검증과 서비스별 라우팅을 담당한다.",
+  "서비스",
+  "외부 결제 대행사 (Toss Payments). 장애 시 재시도 큐로 우회한다.",
+  "외부 서비스",
+  "주문 생성/조회 도메인. 결제 승인 후 주문 상태를 확정한다.",
+  "캐시"
+ ]
+}

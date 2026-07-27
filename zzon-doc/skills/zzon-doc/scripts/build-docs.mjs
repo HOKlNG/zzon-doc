@@ -25,6 +25,9 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const RENDER = join(HERE, "render.mjs");
 // kind:"sequence" 스펙은 형제 스킬 zzon-seq의 렌더러로 위임한다
 const RENDER_SEQ = join(HERE, "..", "..", "zzon-seq", "scripts", "render-seq.mjs");
+// renderer:"terra-form" 스펙은 플러그인 동봉 엔진(bun+TS)으로 위임한다
+const TERRA_ENGINE = join(HERE, "..", "..", "..", "engine");
+const TERRA_CLI = join(TERRA_ENGINE, "src", "cli", "index.ts");
 
 /* ── CLI ─────────────────────────────────────────────────────────────── */
 
@@ -103,6 +106,60 @@ function main() {
       spec = loadSpec(specPath);
     } catch (e) {
       failures.push({ slug, msg: `JSON 파싱 실패: ${e.message}` });
+      continue;
+    }
+    // terra-form/외부 렌더 스펙: 동봉 엔진(bun)으로 직접 렌더하고, bun이나
+    // 소스가 없으면 이미 놓인 diagrams/<slug>.html 을 패스스루로 편입한다.
+    if (spec.renderer === "terra-form" || spec.renderer === "external") {
+      const srcTs = typeof spec.source === "string" ? join(root, spec.source) : null;
+      if (spec.renderer === "terra-form" && srcTs && existsSync(srcTs) && existsSync(TERRA_CLI)) {
+        try {
+          execFileSync("bun", [TERRA_CLI, "render", srcTs, "--out", outDir], {
+            stdio: "pipe",
+            cwd: TERRA_ENGINE,
+          });
+        } catch (e) {
+          const out = (e.stdout?.toString() || "") + (e.stderr?.toString() || "");
+          failures.push({ slug, msg: `terra-form 렌더 실패: ${out.trim() || e.message}` });
+          continue;
+        }
+        // CLI는 소스 파일명 기준으로 산출한다 — slug와 다르면 맞춰 옮긴다
+        const produced = join(outDir, `${basename(srcTs).replace(/\.[tj]s$/, "")}.html`);
+        if (produced !== outHtml && existsSync(produced)) {
+          for (const ext of [".html", ".svg", ".scene.json"]) {
+            const from = produced.replace(/\.html$/, ext);
+            if (existsSync(from)) writeFileSync(outHtml.replace(/\.html$/, ext), readFileSync(from));
+          }
+        }
+      }
+      if (!existsSync(outHtml)) {
+        failures.push({ slug, msg: `외부 렌더 스펙인데 산출물이 없다: diagrams/${slug}.html — source 경로를 확인하거나 해당 스킬(예: terra-form)로 먼저 렌더해 넣어라.` });
+        continue;
+      }
+      // counts: 엔진이 남긴 scene.json에서 자동 산출(자가신고보다 정확), 실패 시 스펙 counts
+      let counts = { nodes: 0, edges: 0, flows: 0, groups: 0, ...(spec.counts || {}) };
+      const sceneJson = outHtml.replace(/\.html$/, ".scene.json");
+      if (existsSync(sceneJson)) {
+        try {
+          const sc = JSON.parse(readFileSync(sceneJson, "utf8"));
+          counts = {
+            nodes: (sc.nodes || []).length,
+            edges: (sc.edges || []).length,
+            flows: (sc.flows || []).length,
+            groups: (sc.groups || []).length + (sc.overlays || []).length,
+          };
+        } catch { /* 스펙 counts 유지 */ }
+      }
+      diagrams.push({
+        slug,
+        title: spec.title || slug,
+        kind: spec.kind || "infra",
+        section: typeof spec.section === "string" ? spec.section : null,
+        order: typeof spec.order === "number" ? spec.order : null,
+        summary: spec.description || "",
+        file: `diagrams/${slug}.html`,
+        counts,
+      });
       continue;
     }
     const isSeq = spec.kind === "sequence";

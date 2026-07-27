@@ -1,0 +1,4 @@
+node_modules/
+assets/aws-asset-package/
+*.zip
+.DS_Store

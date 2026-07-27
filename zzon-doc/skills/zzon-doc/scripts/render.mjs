@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// DEPRECATED: 신규 다이어그램은 동봉 엔진(engine/ — TS DSL + 자동배치)으로 저작한다.
+// 이 렌더러는 기존 DiagramSpec JSON 호환용으로만 유지된다 (SKILL.md 참조).
 /**
  * render.mjs — DiagramSpec JSON → 단일 self-contained .html
  *

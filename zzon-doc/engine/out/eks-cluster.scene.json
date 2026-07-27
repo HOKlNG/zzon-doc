@@ -1,0 +1,1673 @@
+{
+ "id": "eks-cluster",
+ "title": "Production EKS Cluster",
+ "width": 1552.47,
+ "height": 847.87,
+ "groups": [
+  {
+   "kind": "group",
+   "path": "aws-cloud",
+   "rect": {
+    "x": 320.12,
+    "y": 32,
+    "width": 1010.27,
+    "height": 657.41
+   },
+   "groupKind": "aws-cloud",
+   "badgeIcon": "group.aws-cloud",
+   "badgeRect": {
+    "x": 320.12109375,
+    "y": 32,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "AWS Cloud",
+    "x": 352.12109375,
+    "y": 48,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#242F3E"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region",
+   "rect": {
+    "x": 334.12,
+    "y": 74,
+    "width": 982.27,
+    "height": 601.41
+   },
+   "groupKind": "region",
+   "badgeIcon": "group.region",
+   "badgeRect": {
+    "x": 334.12109375,
+    "y": 74,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Region",
+    "x": 366.12109375,
+    "y": 90,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc",
+   "rect": {
+    "x": 573.46,
+    "y": 116,
+    "width": 728.93,
+    "height": 545.41
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 573.46484375,
+    "y": 116,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "VPC",
+    "x": 605.46484375,
+    "y": 132,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/@col-az-a",
+   "rect": {
+    "x": 583.46,
+    "y": 158,
+    "width": 197.54,
+    "height": 489.41
+   },
+   "groupKind": "availability-zone",
+   "label": {
+    "text": "Availability Zone A",
+    "x": 682.232421875,
+    "y": 174,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/@col-az-b",
+   "rect": {
+    "x": 787,
+    "y": 158,
+    "width": 256.15,
+    "height": 489.41
+   },
+   "groupKind": "availability-zone",
+   "label": {
+    "text": "Availability Zone B",
+    "x": 915.076171875,
+    "y": 174,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/@col-az-c",
+   "rect": {
+    "x": 1049.15,
+    "y": 158,
+    "width": 243.24,
+    "height": 489.41
+   },
+   "groupKind": "availability-zone",
+   "label": {
+    "text": "Availability Zone C",
+    "x": 1170.771484375,
+    "y": 174,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/az-a/intra",
+   "rect": {
+    "x": 587.46,
+    "y": 520.94,
+    "width": 189.54,
+    "height": 126.47
+   },
+   "groupKind": "private-subnet",
+   "badgeIcon": "group.private-subnet",
+   "badgeRect": {
+    "x": 587.46484375,
+    "y": 520.93671875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Intra subnet 1",
+    "x": 619.46484375,
+    "y": 536.93671875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/az-a/private",
+   "rect": {
+    "x": 587.46,
+    "y": 278,
+    "width": 189.54,
+    "height": 228.94
+   },
+   "groupKind": "private-subnet",
+   "badgeIcon": "group.private-subnet",
+   "badgeRect": {
+    "x": 587.46484375,
+    "y": 278,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Private subnet 1",
+    "x": 619.46484375,
+    "y": 294,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/az-a/public",
+   "rect": {
+    "x": 587.46,
+    "y": 184,
+    "width": 189.54,
+    "height": 80
+   },
+   "groupKind": "public-subnet",
+   "badgeIcon": "group.public-subnet",
+   "badgeRect": {
+    "x": 587.46484375,
+    "y": 184,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Public subnet",
+    "x": 619.46484375,
+    "y": 200,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7AA116"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/az-b/intra",
+   "rect": {
+    "x": 791,
+    "y": 520.94,
+    "width": 248.15,
+    "height": 126.47
+   },
+   "groupKind": "private-subnet",
+   "badgeIcon": "group.private-subnet",
+   "badgeRect": {
+    "x": 791,
+    "y": 520.93671875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Intra subnet 2",
+    "x": 823,
+    "y": 536.93671875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/az-b/private",
+   "rect": {
+    "x": 791,
+    "y": 278,
+    "width": 248.15,
+    "height": 228.94
+   },
+   "groupKind": "private-subnet",
+   "badgeIcon": "group.private-subnet",
+   "badgeRect": {
+    "x": 791,
+    "y": 278,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Private subnet 2",
+    "x": 823,
+    "y": 294,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/az-b/public",
+   "rect": {
+    "x": 791,
+    "y": 184,
+    "width": 248.15,
+    "height": 80
+   },
+   "groupKind": "public-subnet",
+   "badgeIcon": "group.public-subnet",
+   "badgeRect": {
+    "x": 791,
+    "y": 184,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Public subnet",
+    "x": 823,
+    "y": 200,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7AA116"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/az-c/intra",
+   "rect": {
+    "x": 1053.15,
+    "y": 520.94,
+    "width": 235.24,
+    "height": 126.47
+   },
+   "groupKind": "private-subnet",
+   "badgeIcon": "group.private-subnet",
+   "badgeRect": {
+    "x": 1053.15234375,
+    "y": 520.93671875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Intra subnet 3",
+    "x": 1085.15234375,
+    "y": 536.93671875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/az-c/private",
+   "rect": {
+    "x": 1053.15,
+    "y": 278,
+    "width": 235.24,
+    "height": 228.94
+   },
+   "groupKind": "private-subnet",
+   "badgeIcon": "group.private-subnet",
+   "badgeRect": {
+    "x": 1053.15234375,
+    "y": 278,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Private subnet 3",
+    "x": 1085.15234375,
+    "y": 294,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/region/vpc/az-c/public",
+   "rect": {
+    "x": 1053.15,
+    "y": 184,
+    "width": 235.24,
+    "height": 80
+   },
+   "groupKind": "public-subnet",
+   "badgeIcon": "group.public-subnet",
+   "badgeRect": {
+    "x": 1053.15234375,
+    "y": 184,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Public subnet",
+    "x": 1085.15234375,
+    "y": 200,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7AA116"
+   }
+  }
+ ],
+ "overlays": [
+  {
+   "kind": "overlay",
+   "path": "aws-cloud/region/vpc/critical-addons",
+   "rects": [
+    {
+     "x": 593.46,
+     "y": 402.47,
+     "width": 688.93,
+     "height": 98.47
+    }
+   ],
+   "stroke": "#ED7100",
+   "strokeDasharray": "6 4",
+   "fill": "none",
+   "label": {
+    "text": "Critical Addons — EKS MNG",
+    "x": 601.46484375,
+    "y": 413.468359375,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#ED7100"
+   }
+  },
+  {
+   "kind": "overlay",
+   "path": "aws-cloud/region/vpc/karpenter-pool",
+   "rects": [
+    {
+     "x": 593.46,
+     "y": 300,
+     "width": 688.93,
+     "height": 98.47
+    }
+   ],
+   "stroke": "#7AA116",
+   "strokeDasharray": "6 4",
+   "fill": "none",
+   "label": {
+    "text": "Karpenter NodePool",
+    "x": 601.46484375,
+    "y": 311,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#7AA116"
+   }
+  }
+ ],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "devops",
+   "to": "terraform",
+   "points": [
+    {
+     "x": 138.29,
+     "y": 303.47
+    },
+    {
+     "x": 166.29,
+     "y": 303.47
+    },
+    {
+     "x": 166.29,
+     "y": 360.7
+    },
+    {
+     "x": 194.29,
+     "y": 360.7
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "terraform",
+   "to": "aws-cloud/region/vpc",
+   "points": [
+    {
+     "x": 256.12,
+     "y": 360.7
+    },
+    {
+     "x": 531.46,
+     "y": 360.7
+    },
+    {
+     "x": 531.46,
+     "y": 384.7
+    },
+    {
+     "x": 573.46,
+     "y": 384.7
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "deploy",
+   "label": {
+    "text": "provision",
+    "x": 426.79,
+    "y": 352.05,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "users",
+   "to": "aws-cloud/region/nlb",
+   "points": [
+    {
+     "x": 111.14,
+     "y": 426.17
+    },
+    {
+     "x": 229.63,
+     "y": 426.17
+    },
+    {
+     "x": 229.63,
+     "y": 479.6
+    },
+    {
+     "x": 348.12,
+     "y": 479.6
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "label": {
+    "text": "HTTPS",
+    "x": 235.63,
+    "y": 456.8,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "aws-cloud/region/nlb",
+   "to": "aws-cloud/region/vpc/az-a/intra/eni-a",
+   "points": [
+    {
+     "x": 481.46,
+     "y": 479.6
+    },
+    {
+     "x": 489.46,
+     "y": 479.6
+    },
+    {
+     "x": 489.46,
+     "y": 598.17
+    },
+    {
+     "x": 601.46,
+     "y": 598.17
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "network"
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "aws-cloud/region/nlb",
+   "to": "aws-cloud/region/vpc/az-b/intra/eni-b",
+   "points": [
+    {
+     "x": 481.46,
+     "y": 479.6
+    },
+    {
+     "x": 503.46,
+     "y": 479.6
+    },
+    {
+     "x": 503.46,
+     "y": 553.69
+    },
+    {
+     "x": 748.41,
+     "y": 553.69
+    },
+    {
+     "x": 748.41,
+     "y": 598.17
+    },
+    {
+     "x": 805,
+     "y": 598.17
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "network"
+  },
+  {
+   "kind": "edge",
+   "id": "e5",
+   "from": "aws-cloud/region/nlb",
+   "to": "aws-cloud/region/vpc/az-c/intra/eni-c",
+   "points": [
+    {
+     "x": 481.46,
+     "y": 479.6
+    },
+    {
+     "x": 531.46,
+     "y": 479.6
+    },
+    {
+     "x": 531.46,
+     "y": 550.89
+    },
+    {
+     "x": 988.25,
+     "y": 550.89
+    },
+    {
+     "x": 988.25,
+     "y": 598.17
+    },
+    {
+     "x": 1067.15,
+     "y": 598.17
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "network"
+  },
+  {
+   "kind": "edge",
+   "id": "e6",
+   "from": "band-right/amg",
+   "to": "band-right/amp",
+   "points": [
+    {
+     "x": 1453.43,
+     "y": 277.47
+    },
+    {
+     "x": 1453.43,
+     "y": 325.47
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "monitoring"
+  },
+  {
+   "kind": "edge",
+   "id": "e7",
+   "from": "band-right/collector",
+   "to": "band-right/amp",
+   "points": [
+    {
+     "x": 1453.43,
+     "y": 460.41
+    },
+    {
+     "x": 1453.43,
+     "y": 412.41
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "monitoring"
+  },
+  {
+   "kind": "edge",
+   "id": "e8",
+   "from": "aws-cloud/region/eks-cluster",
+   "to": "aws-cloud/region/vpc/az-b/intra/eni-b",
+   "points": [
+    {
+     "x": 481.05,
+     "y": 297.8
+    },
+    {
+     "x": 517.46,
+     "y": 297.8
+    },
+    {
+     "x": 517.46,
+     "y": 552.29
+    },
+    {
+     "x": 762.41,
+     "y": 552.29
+    },
+    {
+     "x": 762.41,
+     "y": 598.17
+    },
+    {
+     "x": 805,
+     "y": 598.17
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "network"
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/eks-cluster",
+   "rect": {
+    "x": 348.54,
+    "y": 262.57,
+    "width": 132.51,
+    "height": 70.47
+   },
+   "icon": "eks",
+   "iconRect": {
+    "x": 390.79,
+    "y": 262.57,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Production EKS Cluster",
+    "x": 414.79296875,
+    "y": 327.74220052083336,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Production EKS Cluster"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/nlb",
+   "rect": {
+    "x": 348.12,
+    "y": 444.37,
+    "width": 133.34,
+    "height": 70.47
+   },
+   "icon": "nlb",
+   "iconRect": {
+    "x": 390.79,
+    "y": 444.37,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Network Load Balancer",
+    "x": 414.79296875,
+    "y": 509.5438932291667,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Network Load Balancer"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-a/intra/eni-a",
+   "rect": {
+    "x": 601.46,
+    "y": 562.94,
+    "width": 104.35,
+    "height": 70.47
+   },
+   "icon": "eni",
+   "iconRect": {
+    "x": 629.64,
+    "y": 562.94,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "EKS Managed ENI",
+    "x": 653.640625,
+    "y": 628.11140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "EKS Managed ENI"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-a/private/addon-a",
+   "rect": {
+    "x": 707,
+    "y": 320,
+    "width": 56,
+    "height": 70.47
+   },
+   "icon": "x.kubernetes",
+   "iconRect": {
+    "x": 711,
+    "y": 320,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "FluentBit",
+    "x": 735,
+    "y": 385.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "FluentBit"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-a/private/critical-a",
+   "rect": {
+    "x": 601.46,
+    "y": 422.47,
+    "width": 56,
+    "height": 70.47
+   },
+   "icon": "elastic-kubernetes-service",
+   "iconRect": {
+    "x": 605.46,
+    "y": 422.47,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "VPC CNI",
+    "x": 629.46484375,
+    "y": 487.643046875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "VPC CNI"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-a/private/nodes-a",
+   "rect": {
+    "x": 601.46,
+    "y": 320,
+    "width": 87.54,
+    "height": 70.47
+   },
+   "icon": "ec2.instances",
+   "iconRect": {
+    "x": 621.23,
+    "y": 320,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "c7g / m7g / r7g",
+    "x": 645.232421875,
+    "y": 385.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "c7g / m7g / r7g"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-b/intra/eni-b",
+   "rect": {
+    "x": 805,
+    "y": 562.94,
+    "width": 104.35,
+    "height": 70.47
+   },
+   "icon": "eni",
+   "iconRect": {
+    "x": 833.18,
+    "y": 562.94,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "EKS Managed ENI",
+    "x": 857.17578125,
+    "y": 628.11140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "EKS Managed ENI"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-b/private/addon-b",
+   "rect": {
+    "x": 910.54,
+    "y": 320,
+    "width": 114.62,
+    "height": 70.47
+   },
+   "icon": "x.external-secrets",
+   "iconRect": {
+    "x": 943.84,
+    "y": 320,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "ESO / Cert Manager",
+    "x": 967.84375,
+    "y": 385.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "ESO / Cert Manager"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-b/private/critical-b",
+   "rect": {
+    "x": 805,
+    "y": 422.47,
+    "width": 61.24,
+    "height": 70.47
+   },
+   "icon": "x.karpenter",
+   "iconRect": {
+    "x": 811.62,
+    "y": 422.47,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Karpenter",
+    "x": 835.619140625,
+    "y": 487.643046875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Karpenter"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-b/private/nodes-b",
+   "rect": {
+    "x": 805,
+    "y": 320,
+    "width": 87.54,
+    "height": 70.47
+   },
+   "icon": "ec2.instances",
+   "iconRect": {
+    "x": 824.77,
+    "y": 320,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "c7g / m7g / r7g",
+    "x": 848.767578125,
+    "y": 385.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "c7g / m7g / r7g"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-c/intra/eni-c",
+   "rect": {
+    "x": 1067.15,
+    "y": 562.94,
+    "width": 104.35,
+    "height": 70.47
+   },
+   "icon": "eni",
+   "iconRect": {
+    "x": 1095.33,
+    "y": 562.94,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "EKS Managed ENI",
+    "x": 1119.328125,
+    "y": 628.11140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "EKS Managed ENI"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-c/private/addon-c",
+   "rect": {
+    "x": 1172.69,
+    "y": 320,
+    "width": 101.7,
+    "height": 70.47
+   },
+   "icon": "x.kubernetes",
+   "iconRect": {
+    "x": 1199.54,
+    "y": 320,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Grafana Operator",
+    "x": 1223.5390625,
+    "y": 385.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Grafana Operator"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-c/private/critical-c",
+   "rect": {
+    "x": 1067.15,
+    "y": 422.47,
+    "width": 106.81,
+    "height": 70.47
+   },
+   "icon": "elastic-load-balancing",
+   "iconRect": {
+    "x": 1096.56,
+    "y": 422.47,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "AWS LB Controller",
+    "x": 1120.55859375,
+    "y": 487.643046875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "AWS LB Controller"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/az-c/private/nodes-c",
+   "rect": {
+    "x": 1067.15,
+    "y": 320,
+    "width": 87.54,
+    "height": 70.47
+   },
+   "icon": "ec2.instances",
+   "iconRect": {
+    "x": 1086.92,
+    "y": 320,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "c7g / m7g / r7g",
+    "x": 1110.919921875,
+    "y": 385.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "c7g / m7g / r7g"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/ebs",
+   "rect": {
+    "x": 551.46,
+    "y": 483.17,
+    "width": 44,
+    "height": 58.47
+   },
+   "icon": "elastic-block-store",
+   "iconRect": {
+    "x": 555.46,
+    "y": 483.17,
+    "width": 36,
+    "height": 36
+   },
+   "role": "rail-item",
+   "label": {
+    "text": "EBS",
+    "x": 573.46484375,
+    "y": 536.3455859375,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "EBS"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/ec2",
+   "rect": {
+    "x": 551.46,
+    "y": 400.7,
+    "width": 44,
+    "height": 58.47
+   },
+   "icon": "ec2",
+   "iconRect": {
+    "x": 555.46,
+    "y": 400.7,
+    "width": 36,
+    "height": 36
+   },
+   "role": "rail-item",
+   "label": {
+    "text": "EC2",
+    "x": 573.46484375,
+    "y": 453.8772265625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "EC2"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/ecr",
+   "rect": {
+    "x": 551.46,
+    "y": 235.77,
+    "width": 44,
+    "height": 58.47
+   },
+   "icon": "ecr",
+   "iconRect": {
+    "x": 555.46,
+    "y": 235.77,
+    "width": 36,
+    "height": 36
+   },
+   "role": "rail-item",
+   "label": {
+    "text": "ECR",
+    "x": 573.46484375,
+    "y": 288.9405078125,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "ECR"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/region/vpc/eks",
+   "rect": {
+    "x": 551.46,
+    "y": 318.23,
+    "width": 44,
+    "height": 58.47
+   },
+   "icon": "eks",
+   "iconRect": {
+    "x": 555.46,
+    "y": 318.23,
+    "width": 36,
+    "height": 36
+   },
+   "role": "rail-item",
+   "label": {
+    "text": "EKS",
+    "x": 573.46484375,
+    "y": 371.40886718750005,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "EKS"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-bottom/role-admin",
+   "rect": {
+    "x": 703.65,
+    "y": 745.41,
+    "width": 68.5,
+    "height": 70.47
+   },
+   "icon": "iam-role",
+   "iconRect": {
+    "x": 713.91,
+    "y": 745.41,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Admin Role",
+    "x": 737.90625,
+    "y": 810.579765625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Admin Role"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-bottom/role-cluster-admin",
+   "rect": {
+    "x": 545.71,
+    "y": 745.41,
+    "width": 109.94,
+    "height": 70.47
+   },
+   "icon": "iam-role",
+   "iconRect": {
+    "x": 576.68,
+    "y": 745.41,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Cluster Admin Role",
+    "x": 600.68359375,
+    "y": 810.579765625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Cluster Admin Role"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-bottom/role-editor",
+   "rect": {
+    "x": 820.16,
+    "y": 745.41,
+    "width": 65.96,
+    "height": 70.47
+   },
+   "icon": "iam-role",
+   "iconRect": {
+    "x": 829.14,
+    "y": 745.41,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Editor Role",
+    "x": 853.138671875,
+    "y": 810.579765625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Editor Role"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-bottom/role-reader",
+   "rect": {
+    "x": 934.12,
+    "y": 745.41,
+    "width": 72.64,
+    "height": 70.47
+   },
+   "icon": "iam-role",
+   "iconRect": {
+    "x": 946.44,
+    "y": 745.41,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Reader Role",
+    "x": 970.439453125,
+    "y": 810.579765625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Reader Role"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-right/amg",
+   "rect": {
+    "x": 1400.8,
+    "y": 190.53,
+    "width": 105.25,
+    "height": 86.94
+   },
+   "icon": "amg",
+   "iconRect": {
+    "x": 1429.43,
+    "y": 190.53,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Amazon Managed Grafana",
+    "x": 1453.431640625,
+    "y": 255.70632812500003,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Amazon Managed",
+     "Grafana"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-right/amp",
+   "rect": {
+    "x": 1386.39,
+    "y": 325.47,
+    "width": 134.08,
+    "height": 86.94
+   },
+   "icon": "amp",
+   "iconRect": {
+    "x": 1429.43,
+    "y": 325.47,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Amazon Managed Service for Prometheus",
+    "x": 1453.431640625,
+    "y": 390.64304687500004,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Amazon Managed",
+     "Service for Prometheus"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-right/collector",
+   "rect": {
+    "x": 1397.1,
+    "y": 460.41,
+    "width": 112.67,
+    "height": 70.47
+   },
+   "icon": "cloudwatch",
+   "iconRect": {
+    "x": 1429.43,
+    "y": 460.41,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Agentless Collector",
+    "x": 1453.431640625,
+    "y": 525.579765625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Agentless Collector"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "devops",
+   "rect": {
+    "x": 32,
+    "y": 262,
+    "width": 106.29,
+    "height": 82.94
+   },
+   "icon": "users",
+   "iconRect": {
+    "x": 63.14,
+    "y": 262,
+    "width": 44,
+    "height": 44
+   },
+   "role": "actor",
+   "label": {
+    "text": "DevOps / Platform Engineers",
+    "x": 85.142578125,
+    "y": 323.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "DevOps / Platform",
+     "Engineers"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "terraform",
+   "rect": {
+    "x": 194.29,
+    "y": 325.47,
+    "width": 61.84,
+    "height": 70.47
+   },
+   "icon": "res.source-code",
+   "iconRect": {
+    "x": 201.2,
+    "y": 325.47,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Terraform",
+    "x": 225.203125,
+    "y": 390.64304687500004,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Terraform"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "users",
+   "rect": {
+    "x": 59.14,
+    "y": 392.94,
+    "width": 52,
+    "height": 66.47
+   },
+   "icon": "res.users",
+   "iconRect": {
+    "x": 63.14,
+    "y": 392.94,
+    "width": 44,
+    "height": 44
+   },
+   "role": "actor",
+   "label": {
+    "text": "Users",
+    "x": 85.142578125,
+    "y": 454.11140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Users"
+    ]
+   }
+  }
+ ],
+ "markers": [
+  {
+   "kind": "marker",
+   "n": 1,
+   "at": {
+    "x": 32,
+    "y": 262
+   }
+  },
+  {
+   "kind": "marker",
+   "n": 2,
+   "at": {
+    "x": 194.29,
+    "y": 325.47
+   }
+  },
+  {
+   "kind": "marker",
+   "n": 3,
+   "at": {
+    "x": 573.46,
+    "y": 116
+   }
+  },
+  {
+   "kind": "marker",
+   "n": 5,
+   "at": {
+    "x": 348.54,
+    "y": 262.57
+   }
+  },
+  {
+   "kind": "marker",
+   "n": 8,
+   "at": {
+    "x": 59.14,
+    "y": 392.94
+   }
+  }
+ ],
+ "flows": [],
+ "icons": [
+  "amg",
+  "amp",
+  "cloudwatch",
+  "ec2",
+  "ec2.instances",
+  "ecr",
+  "eks",
+  "elastic-block-store",
+  "elastic-kubernetes-service",
+  "elastic-load-balancing",
+  "eni",
+  "group.aws-cloud",
+  "group.private-subnet",
+  "group.public-subnet",
+  "group.region",
+  "group.vpc",
+  "iam-role",
+  "nlb",
+  "res.source-code",
+  "res.users",
+  "users",
+  "x.external-secrets",
+  "x.karpenter",
+  "x.kubernetes"
+ ],
+ "texts": [
+  "1",
+  "2",
+  "3",
+  "5",
+  "8",
+  "AWS Cloud",
+  "AWS LB Controller",
+  "Admin Role",
+  "Agentless Collector",
+  "Amazon Managed Grafana",
+  "Amazon Managed Service for Prometheus",
+  "Availability Zone A",
+  "Availability Zone B",
+  "Availability Zone C",
+  "Cluster Admin Role",
+  "Critical Addons — EKS MNG",
+  "DevOps / Platform Engineers",
+  "EBS",
+  "EC2",
+  "ECR",
+  "EKS",
+  "EKS Managed ENI",
+  "ESO / Cert Manager",
+  "Editor Role",
+  "FluentBit",
+  "Grafana Operator",
+  "HTTPS",
+  "Intra subnet 1",
+  "Intra subnet 2",
+  "Intra subnet 3",
+  "Karpenter",
+  "Karpenter NodePool",
+  "Network Load Balancer",
+  "Private subnet 1",
+  "Private subnet 2",
+  "Private subnet 3",
+  "Production EKS Cluster",
+  "Public subnet",
+  "Reader Role",
+  "Region",
+  "Terraform",
+  "Users",
+  "VPC",
+  "VPC CNI",
+  "c7g / m7g / r7g",
+  "provision"
+ ]
+}

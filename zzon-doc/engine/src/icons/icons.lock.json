@@ -1,0 +1,11 @@
+{
+  "source": {
+    "package": "Icon-package_04302026",
+    "url": "https://d1.awsstatic.com/onedam/marketing-channels/website/aws/en_US/architecture/approved/architecture-icons/Icon-package_04302026.4705b90f5aa45b019271a2699e9ce9b97b941ee1.zip",
+    "sha256": "699fe7a2481aa712b6b74faff0aaab6382d3bb7243bba3abd3ba909d6bf7b912"
+  },
+  "counts": {
+    "total": 838
+  },
+  "generatedBy": "scripts/build-icons.ts"
+}
