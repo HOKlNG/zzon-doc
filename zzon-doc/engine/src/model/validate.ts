@@ -36,6 +36,11 @@ export function validate(model: DiagramModel): ValidationResult {
   const warn = (message: string, site?: string) =>
     issues.push({ severity: "warning", message, site });
 
+  // vocabulary tracking: category-card visuals vs icon visuals (AWS/lucide).
+  // Table nodes are exempt; actors, band members, and rail items all count.
+  const cardVocab: { path: string; site?: string }[] = [];
+  const iconVocab: { path: string; site?: string }[] = [];
+
   function register(path: string, entity: Element | ActorEl | RailItem | BandEl, parent: string | null, site?: string) {
     if (byPath.has(path)) {
       err(`duplicate path "${path}" — sibling ids must be unique`, site);
@@ -52,6 +57,16 @@ export function validate(model: DiagramModel): ValidationResult {
     }
     for (const badge of el.badges ?? []) {
       if (!iconExists(badge)) err(`unknown badge icon "${String(badge)}" on ${el.path}`, el.site);
+    }
+    if (el.type === "node") {
+      // mirror the renderer's precedence: table > category (card) > icon
+      if (el.table) {
+        // ERD table nodes are vocabulary-exempt
+      } else if (el.category) {
+        cardVocab.push({ path: el.path, site: el.site });
+      } else if (el.icon !== undefined) {
+        iconVocab.push({ path: el.path, site: el.site });
+      }
     }
     if (el.type === "group") visitGroup(el);
   }
@@ -87,6 +102,7 @@ export function validate(model: DiagramModel): ValidationResult {
       for (const item of rail.items) {
         register(item.path, item, group.path, item.site);
         if (!iconExists(item.icon)) err(`unknown icon "${String(item.icon)}" on rail item ${item.path}`, item.site);
+        iconVocab.push({ path: item.path, site: item.site });
       }
     }
     if (group.hints?.pin) warn(`group ${group.path} uses pin — layout cannot guarantee no overlaps`, group.site);
@@ -96,10 +112,31 @@ export function validate(model: DiagramModel): ValidationResult {
   for (const actor of model.actors) {
     register(actor.path, actor, null, actor.site);
     if (!iconExists(actor.icon)) err(`unknown icon "${String(actor.icon)}" on actor ${actor.path}`, actor.site);
+    iconVocab.push({ path: actor.path, site: actor.site });
   }
   for (const band of model.bands) {
     register(band.path, band, null, band.site);
     for (const child of band.children) visitElement(child, band.path);
+  }
+
+  // ---- vocabulary mixing: card nodes and icon nodes may not coexist unless
+  // the diagram opts out explicitly (table nodes never count either way)
+  if (cardVocab.length > 0 && iconVocab.length > 0 && !model.allowMixedVocabulary) {
+    const [minority, minorityName] =
+      cardVocab.length <= iconVocab.length
+        ? ([cardVocab, "category-card"] as const)
+        : ([iconVocab, "icon"] as const);
+    const listed = minority
+      .slice(0, 5)
+      .map((v) => (v.site ? `${v.path} (${v.site})` : v.path))
+      .join(", ");
+    const more = minority.length > 5 ? ` … +${minority.length - 5} more` : "";
+    err(
+      `diagram mixes node vocabularies: ${cardVocab.length} category-card node(s) vs ${iconVocab.length} icon node(s). ` +
+        `Minority ${minorityName} nodes: ${listed}${more}. ` +
+        `Use a single vocabulary, or opt out with diagram(id, { allowMixedVocabulary: true })`,
+      minority[0]?.site,
+    );
   }
 
   /**

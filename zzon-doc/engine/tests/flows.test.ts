@@ -1,18 +1,14 @@
 /**
- * Narrative-flow tests: resolveFlows badge placement / validation / text
- * registration on a synthetic routed scene, plus the render hook contracts
- * (SVG badges, HTML toolbar+strip, CSS/JS blocks) the integrator relies on.
+ * Narrative-flow tests (canvas half): resolveFlows badge placement /
+ * validation / text registration on a synthetic routed scene, plus the SVG
+ * badge layers and the canvas-side FLOW_BADGE_CSS. The flow chrome
+ * (buttons/strips/step focusing) moved to the viewer frame — the canvas only
+ * reflects highlight("flow"|"step") commands.
  */
 import { describe, expect, test } from "bun:test";
 import type { Scene, SceneEdge, SceneNode } from "../src/layout/scene.ts";
 import type { FlowDef } from "../src/model/types.ts";
-import {
-  FLOW_CSS,
-  FLOW_JS,
-  renderFlowBadgesSvg,
-  renderFlowUiHtml,
-  resolveFlows,
-} from "../src/render/flows.ts";
+import { FLOW_BADGE_CSS, renderFlowBadgesSvg, resolveFlows } from "../src/render/flows.ts";
 
 // ------------------------------------------------------------ fixture
 
@@ -141,8 +137,21 @@ describe("resolveFlows", () => {
     ).toThrow('flow "f" step 1');
   });
 
-  test("titles, step texts, and badge labels registered in scene.texts, deduped", () => {
-    for (const t of ["Checkout", "Refund", "Add to cart", "Pay", "Confirm", "1·3", "2", "1"]) {
+  test("titles, descriptions, step texts, and badge labels in scene.texts, deduped", () => {
+    // descriptions render in the FRAME's flow buttons — their glyphs must
+    // survive subsetting, so resolveFlows registers them too
+    for (const t of [
+      "Checkout",
+      "Refund",
+      "Happy path",
+      'Refund & <admin> "path"',
+      "Add to cart",
+      "Pay",
+      "Confirm",
+      "1·3",
+      "2",
+      "1",
+    ]) {
       expect(scene.texts).toContain(t);
     }
     expect(new Set(scene.texts).size).toBe(scene.texts.length);
@@ -185,47 +194,19 @@ describe("renderFlowBadgesSvg", () => {
   });
 });
 
-describe("renderFlowUiHtml", () => {
-  const html = renderFlowUiHtml(resolvedScene());
-
-  test("one button per flow with data-flow + description tooltip", () => {
-    expect(html).toContain('class="flow-btn" data-flow="checkout" title="Happy path">Checkout</button>');
-    expect(html).toContain('data-flow="refund"');
+describe("FLOW_BADGE_CSS", () => {
+  test("hides badge layers by default and defines dim/fade/highlight", () => {
+    expect(FLOW_BADGE_CSS).toContain(".flow-badges{display:none}");
+    expect(FLOW_BADGE_CSS).toContain(".flow-badges.active{display:initial}");
+    expect(FLOW_BADGE_CSS).toContain(".flow-dim{opacity:.25}");
+    expect(FLOW_BADGE_CSS).toContain(".flow-fade{opacity:.5}");
+    expect(FLOW_BADGE_CSS).toContain(".edge.flow-hl path");
+    expect(FLOW_BADGE_CSS).toContain("prefers-reduced-motion");
   });
 
-  test("user strings are escaped", () => {
-    expect(html).toContain("Refund &amp; &lt;admin&gt; &quot;path&quot;");
-    expect(html).not.toContain("<admin>");
-  });
-
-  test("hidden narration strip per flow with numbered step items", () => {
-    expect(html).toContain('<ol class="flow-strip" data-flow="checkout" hidden>');
-    expect(html).toContain('<li data-step="1"><span class="n">1</span>Add to cart</li>');
-    expect(html).toContain('<li data-step="1"><span class="n">1</span>Request refund</li>');
-  });
-
-  test("empty flows -> empty string", () => {
-    expect(renderFlowUiHtml(makeScene())).toBe("");
-  });
-});
-
-describe("FLOW_CSS / FLOW_JS", () => {
-  test("CSS hides badge layers by default and defines dim/fade/highlight", () => {
-    expect(FLOW_CSS).toContain(".flow-badges{display:none}");
-    expect(FLOW_CSS).toContain(".flow-badges.active{display:initial}");
-    expect(FLOW_CSS).toContain(".flow-dim{opacity:.25}");
-    expect(FLOW_CSS).toContain(".flow-fade{opacity:.5}");
-    expect(FLOW_CSS).toContain(".edge.flow-hl path");
-    expect(FLOW_CSS).toContain("prefers-reduced-motion");
-  });
-
-  test("JS wires the emitted hooks and Escape, embedding-safe", () => {
-    for (const hook of ["ia-flows", "flow-btn", "flow-badge", "data-steps", "data-edge-id", "Escape"]) {
-      expect(FLOW_JS).toContain(hook);
+  test("holds NO chrome selectors (buttons/strips are frame-owned now)", () => {
+    for (const chrome of ["#ia-flows", ".flow-btn", ".flow-strip"]) {
+      expect(FLOW_BADGE_CSS).not.toContain(chrome);
     }
-    // embedded verbatim inside a template literal + <script> tag by html.ts
-    expect(FLOW_JS).not.toContain("</script>");
-    expect(FLOW_JS).not.toContain("`");
-    expect(FLOW_JS).not.toContain("${");
   });
 });

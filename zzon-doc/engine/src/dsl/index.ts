@@ -407,6 +407,8 @@ export interface DiagramOpts {
   title?: string;
   aspectRatio?: number;
   docKind?: "infra" | "data-flow" | "erd" | "agent-topology";
+  /** allow mixing category-card and icon node vocabularies in one diagram */
+  allowMixedVocabulary?: boolean;
 }
 
 export function diagram(
@@ -421,6 +423,7 @@ export function diagram(
     title: opts.title,
     docKind: opts.docKind,
     aspectRatio: opts.aspectRatio ?? 1.6,
+    allowMixedVocabulary: opts.allowMixedVocabulary,
     children: [],
     actors: [],
     bands: [],

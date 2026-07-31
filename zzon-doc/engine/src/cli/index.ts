@@ -34,13 +34,19 @@ if (!existsSync(file)) {
 const outDir = resolve(flag("out") ?? "out");
 const name = basename(file).replace(/\.[tj]s$/, "");
 
-async function renderOnce(): Promise<void> {
+async function renderOnce(withPng = false): Promise<void> {
   const { loadDiagram, renderAll } = await import("../pipeline.ts");
+  const { renderHtml } = await import("../render/html.ts");
   const model = await loadDiagram(file);
   const t0 = performance.now();
-  const r = await renderAll(model);
+  // payload.assets names the sibling files this command actually writes
+  // (frame export-button download fallback, contract §6)
+  const r = await renderAll(model, {
+    assets: { svgFile: `${name}.svg`, ...(withPng ? { pngFile: `${name}.png` } : {}) },
+  });
+  const html = await renderHtml(r.payload, r.canvas);
   mkdirSync(outDir, { recursive: true });
-  writeFileSync(join(outDir, `${name}.html`), r.html);
+  writeFileSync(join(outDir, `${name}.html`), html);
   writeFileSync(join(outDir, `${name}.svg`), r.staticSvg);
   writeFileSync(join(outDir, `${name}.scene.json`), r.sceneJson);
   console.log(
@@ -51,7 +57,7 @@ async function renderOnce(): Promise<void> {
 }
 
 async function exportPng(): Promise<void> {
-  await renderOnce();
+  await renderOnce(true);
   const { Resvg } = await import("@resvg/resvg-js");
   const { fontFilePath } = await import("../text/metrics.ts");
   const svg = await Bun.file(join(outDir, `${name}.svg`)).text();

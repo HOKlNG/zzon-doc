@@ -1,15 +1,34 @@
 /**
- * Auto legend (ported from the legacy renderer's bottom-left legend): lists
- * ONLY what the scene actually uses — card categories (color dot + Korean
- * name), edge layers (line swatch in the layer's first-edge style), and group
- * kinds (border-style swatch). Collapsible with zero state via <details>.
+ * Legend DATA emitter (viewer-frame contract §1 `legend`).
  *
- * Pure string producer — html.ts appends renderLegendHtml() to the shell and
- * LEGEND_CSS to the stylesheet; nothing here touches the DOM or the Scene.
+ * The frame never imports canvas style constants (CARD_CATEGORY_META,
+ * GROUP_STYLES, …) — the canvas resolves "what the scene actually uses +
+ * the final color" here and ships it as plain data; the frame only draws.
+ *
+ * Entry order mirrors the legacy auto-legend: used card categories
+ * (first-use order), then edge layers (swatch = the layer's first edge
+ * style), then group kinds. Colors are literal (light palette — same
+ * known gap as the light-fixed static SVG export).
  */
 import type { Scene, SceneEdge } from "../layout/scene.ts";
 import { GROUP_STYLES, type GroupKind } from "./group-styles.ts";
 import { CARD_CATEGORY_META } from "./card.ts";
+import { CATEGORY_COLORS_LIGHT } from "./categories.gen.ts";
+
+// ------------------------------------------------------------ contract types
+
+export interface LegendSwatch {
+  type: "dot" | "line" | "border";
+  color: string;
+  /** stroke-dasharray value, only for dashed line/border swatches */
+  dash?: string;
+}
+
+export interface LegendEntry {
+  group: "category" | "edge" | "groupKind";
+  label: string;
+  swatch: LegendSwatch;
+}
 
 // ------------------------------------------------------------ label + style tables
 
@@ -37,46 +56,27 @@ const EDGE_DASH: Record<SceneEdge["style"]["preset"], string | undefined> = {
   dashed: "6 4",
 };
 
-const HTML_ESCAPES: Record<string, string> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-};
-
-/** local escaper — svg.ts's is reserved for the shared renderer modules */
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => HTML_ESCAPES[c] ?? c);
-}
-
-// ------------------------------------------------------------ markup
-
-const item = (swatch: string, label: string): string =>
-  `<span class="item">${swatch}${escapeHtml(label)}</span>`;
-
-const SEP = `<span class="sep"></span>`;
+// ------------------------------------------------------------ emitter
 
 /**
- * Bottom-left collapsible legend for one finished Scene. Returns "" when the
- * scene uses no categories, edge layers, or groups (nothing to explain).
- * Category dots reference the same `--cat-*` variables cardCssVars() emits.
+ * Resolved legend entries for one finished Scene: ONLY what the scene uses.
+ * Returns [] when the scene has no categories, edge layers, or groups.
  */
-export function renderLegendHtml(scene: Scene): string {
-  const sections: string[][] = [];
+export function legendEntries(scene: Scene): LegendEntry[] {
+  const entries: LegendEntry[] = [];
 
   // -- used card categories, first-use order (unknowns fall back to "other")
   const cats: string[] = [];
   for (const n of scene.nodes) {
     if (n.category && !cats.includes(n.category)) cats.push(n.category);
   }
-  if (cats.length > 0) {
-    sections.push(
-      cats.map((c) => {
-        const m = CARD_CATEGORY_META[c] ?? CARD_CATEGORY_META["other"]!;
-        return item(`<span class="dot" style="background:var(--cat-${m.colorGroup})"></span>`, m.labelKo);
-      }),
-    );
+  for (const c of cats) {
+    const m = CARD_CATEGORY_META[c] ?? CARD_CATEGORY_META["other"]!;
+    entries.push({
+      group: "category",
+      label: m.labelKo,
+      swatch: { type: "dot", color: CATEGORY_COLORS_LIGHT[m.colorGroup] },
+    });
   }
 
   // -- edge layers present, first-use order; swatch mirrors the layer's first edge
@@ -84,59 +84,32 @@ export function renderLegendHtml(scene: Scene): string {
   for (const e of scene.edges) {
     if (e.layer && !layerEdges.has(e.layer)) layerEdges.set(e.layer, e);
   }
-  if (layerEdges.size > 0) {
-    sections.push(
-      [...layerEdges.entries()].map(([layer, e]) => {
-        const dash = EDGE_DASH[e.style.preset];
-        const line =
-          `<svg width="18" height="6"><line x1="0" y1="3" x2="18" y2="3"` +
-          ` stroke="${e.style.color}" stroke-width="1.5"${dash ? ` stroke-dasharray="${dash}"` : ""}/></svg>`;
-        return item(line, layer);
-      }),
-    );
+  for (const [layer, e] of layerEdges) {
+    const dash = EDGE_DASH[e.style.preset];
+    entries.push({
+      group: "edge",
+      label: layer,
+      swatch: { type: "line", color: e.style.color, ...(dash ? { dash } : {}) },
+    });
   }
 
-  // -- group kinds present, first-use order; border-style swatch from GROUP_STYLES
+  // -- group kinds present, first-use order; border swatch from GROUP_STYLES
   const kinds: GroupKind[] = [];
   for (const g of scene.groups) {
     if (!kinds.includes(g.groupKind)) kinds.push(g.groupKind);
   }
-  if (kinds.length > 0) {
-    sections.push(
-      kinds.map((k) => {
-        const s = GROUP_STYLES[k];
-        const rect =
-          `<svg width="16" height="10"><rect x="1" y="1" width="14" height="8" rx="2"` +
-          ` fill="${s.fill ?? "none"}" stroke="${s.stroke}" stroke-width="1.2"` +
-          `${s.strokeDasharray ? ` stroke-dasharray="3 2"` : ""}/></svg>`;
-        return item(rect, GROUP_KIND_LABEL_KO[k]);
-      }),
-    );
+  for (const k of kinds) {
+    const s = GROUP_STYLES[k];
+    entries.push({
+      group: "groupKind",
+      label: GROUP_KIND_LABEL_KO[k],
+      swatch: {
+        type: "border",
+        color: s.stroke,
+        ...(s.strokeDasharray ? { dash: s.strokeDasharray } : {}),
+      },
+    });
   }
 
-  if (sections.length === 0) return "";
-  const body = sections.map((s) => s.join("")).join(SEP);
-  return (
-    `<details class="ia-legend" open><summary>범례</summary>` +
-    `<div class="ia-legend-items">${body}</div></details>`
-  );
+  return entries;
 }
-
-// ------------------------------------------------------------ styles
-
-/** Appended once to the interactive HTML stylesheet (html.ts). */
-export const LEGEND_CSS = `
-.ia-legend{position:absolute;left:12px;bottom:12px;z-index:30;max-width:60%;
-  border:1px solid var(--border,#e2e8f0);border-radius:8px;
-  background:var(--card,#ffffff);padding:6px 12px 8px;
-  box-shadow:0 1px 3px rgba(0,0,0,.06);}
-.ia-legend summary{cursor:pointer;font-size:11px;font-weight:600;
-  color:var(--muted-foreground,#64748b);user-select:none;list-style:none;}
-.ia-legend summary::-webkit-details-marker{display:none;}
-.ia-legend[open] summary{margin-bottom:6px;}
-.ia-legend-items{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;}
-.ia-legend .item{display:inline-flex;align-items:center;gap:4px;font-size:11px;
-  color:var(--muted-foreground,#64748b);}
-.ia-legend .dot{width:8px;height:8px;border-radius:9999px;display:inline-block;}
-.ia-legend .sep{width:1px;height:12px;background:var(--border,#e2e8f0);}
-`;

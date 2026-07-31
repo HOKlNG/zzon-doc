@@ -1,15 +1,27 @@
 /**
- * Renderer 2-variant tests (DESIGN §8) against the hand-placed fixture scene.
+ * Renderer tests against the hand-placed fixture scene: the two SVG variants
+ * plus the canvas adapter bundle (viewer-frame contract §2/§3). The full
+ * framed HTML is exercised only when the frame module exists (F1 artifact —
+ * the engine must stay green while the frame is built in parallel).
  */
 import { describe, expect, test } from "bun:test";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { makeRenderScene, renderScene } from "./fixtures/render-scene.ts";
 import { renderInteractiveSvg } from "../src/render/svg.ts";
 import { renderStaticSvg } from "../src/render/static-svg.ts";
+import { buildCanvas } from "../src/render/adapter.ts";
+import { buildPayload } from "../src/render/payload.ts";
 import { renderHtml } from "../src/render/html.ts";
-import { INTERACTION_JS } from "../src/render/interactions.ts";
+import { CANVAS_JS } from "../src/render/interactions.ts";
 import { THEMES } from "../src/render/theme.ts";
 
 const count = (hay: string, needle: string): number => hay.split(needle).length - 1;
+
+const FRAME_PATH = fileURLToPath(
+  new URL("../../skills/zzon-doc/scripts/viewer-frame.js", import.meta.url),
+);
+const frameExists = existsSync(FRAME_PATH);
 
 describe("renderInteractiveSvg", () => {
   const svg = renderInteractiveSvg(renderScene);
@@ -40,7 +52,7 @@ describe("renderInteractiveSvg", () => {
     expect(svg).toContain('marker-start="url(#arw-ED7100)"'); // arrowhead "both"
   });
 
-  test("layer classes for the HTML toggles", () => {
+  test("layer classes stay on edges", () => {
     expect(count(svg, "layer-network")).toBe(2);
     expect(count(svg, "layer-deploy")).toBe(1);
   });
@@ -120,25 +132,89 @@ describe("renderStaticSvg", () => {
   });
 });
 
-describe("renderHtml", () => {
-  test("embeds woff2 data URIs + INTERACTION_JS, byte-stable", async () => {
-    const a = await renderHtml(renderScene);
-    const b = await renderHtml(renderScene);
-    expect(a).toContain("data:font/woff2;base64,");
-    expect(a).toContain(INTERACTION_JS);
-    expect(a).toContain("<title>Render Fixture</title>");
-    expect(a).toBe(b);
+describe("buildCanvas (adapter bundle)", () => {
+  test("markup is the interactive SVG, js is the adapter runtime", async () => {
+    const canvas = await buildCanvas(renderScene);
+    expect(canvas.markup).toBe(renderInteractiveSvg(renderScene));
+    expect(canvas.js).toBe(CANVAS_JS);
   }, 30_000);
 
-  test("Korean glyphs survive subsetting (payload shrinks without them)", async () => {
-    const grabFont = (html: string): string => {
-      const m = html.match(/data:font\/woff2;base64,([A-Za-z0-9+/=]+)/);
+  test("css: embedded woff2 subset + canvas var namespaces, light and dark", async () => {
+    const { css } = await buildCanvas(renderScene);
+    expect(count(css, "data:font/woff2;base64,")).toBe(2); // regular + semibold
+    for (const ns of ["--ia-canvas:", "--cat-backend:", "--table-head:", "--flow:"]) {
+      expect(css).toContain(ns);
+    }
+    expect(css).toContain(':root[data-theme="dark"]');
+    expect(css).toContain("@media (prefers-color-scheme:dark)");
+    // canvas-side flow badge rules ride along (split from the old FLOW_CSS)
+    expect(css).toContain(".flow-badges{display:none}");
+    // sonar selection ring + reduced-motion opt-out
+    expect(css).toContain("ia-sonar");
+    expect(css).toContain("prefers-reduced-motion");
+    // no frame-chrome selectors in canvas css
+    expect(css).not.toContain("--frame-");
+    expect(css).not.toContain("#ia-toolbar");
+  }, 30_000);
+
+  test("adapter runtime registers with the frame and stays embedding-safe", () => {
+    expect(CANVAS_JS).toContain("window.__zzonFrame");
+    expect(CANVAS_JS).toContain("register(adapter)");
+    for (const member of [
+      "highlight:",
+      "setLabelMode:",
+      "fit:",
+      "reset:",
+      "canvasShift:",
+      "refresh:",
+      '"export":',
+      "toolbarExtras:",
+      "onNodeSelected",
+      "onNodeActivated",
+      "onStepClicked",
+      "onHover",
+    ]) {
+      expect(CANVAS_JS).toContain(member);
+    }
+    expect(CANVAS_JS).not.toContain("</" + "script>");
+    expect(CANVAS_JS).not.toContain("`");
+    expect(CANVAS_JS).not.toContain("${");
+  });
+
+  test("byte-stable for identical scenes", async () => {
+    const a = await buildCanvas(renderScene);
+    const b = await buildCanvas(renderScene);
+    expect(a.css).toBe(b.css);
+    expect(a.markup).toBe(b.markup);
+  }, 30_000);
+
+  test("Korean glyphs survive subsetting (font shrinks without them)", async () => {
+    const grabFont = (css: string): string => {
+      const m = css.match(/data:font\/woff2;base64,([A-Za-z0-9+/=]+)/);
       if (!m?.[1]) throw new Error("no embedded woff2 found");
       return m[1];
     };
-    const withKorean = grabFont(await renderHtml(renderScene));
-    const withoutKorean = grabFont(await renderHtml(makeRenderScene({ omitKorean: true })));
+    const withKorean = grabFont((await buildCanvas(renderScene)).css);
+    const withoutKorean = grabFont((await buildCanvas(makeRenderScene({ omitKorean: true }))).css);
     expect(withKorean).not.toBe(withoutKorean);
     expect(withKorean.length).toBeGreaterThan(withoutKorean.length);
+  }, 30_000);
+});
+
+describe("renderHtml (frame packaging)", () => {
+  test.skipIf(frameExists)("missing frame module fails loudly", async () => {
+    const payload = buildPayload(renderScene);
+    const canvas = await buildCanvas(renderScene);
+    await expect(renderHtml(payload, canvas)).rejects.toThrow("viewer-frame");
+  }, 30_000);
+
+  test.skipIf(!frameExists)("frame wraps the canvas: chrome + svg in one file", async () => {
+    const payload = buildPayload(renderScene);
+    const canvas = await buildCanvas(renderScene);
+    const html = await renderHtml(payload, canvas);
+    expect(html).toContain(canvas.markup); // our SVG, verbatim
+    expect(html).toContain('class="ia-svg"');
+    expect(html).toContain("data:font/woff2;base64,"); // canvas css inlined
+    expect(html).toContain("__zzonFrame"); // adapter registration wired
   }, 30_000);
 });

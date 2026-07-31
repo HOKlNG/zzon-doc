@@ -244,6 +244,12 @@ export interface DiagramModel {
   docKind?: "infra" | "data-flow" | "erd" | "agent-topology";
   /** target aspect ratio for the overall canvas */
   aspectRatio: number;
+  /**
+   * Opt out of the vocabulary-mixing validation error: by default a diagram
+   * may not mix category-card nodes with icon nodes (AWS/lucide `icon:`) —
+   * actors, band members, and rail items count; table nodes are exempt.
+   */
+  allowMixedVocabulary?: boolean;
   children: Element[];
   actors: ActorEl[];
   bands: BandEl[];

@@ -1,0 +1,420 @@
+{
+ "id": "flow-sample",
+ "title": "주문 처리 데이터 플로우",
+ "docKind": "data-flow",
+ "width": 1337.54,
+ "height": 152.9,
+ "groups": [],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "client",
+   "to": "api",
+   "points": [
+    {
+     "x": 224,
+     "y": 65.36
+    },
+    {
+     "x": 288,
+     "y": 65.36
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "sync",
+   "label": {
+    "text": "주문 제출",
+    "x": 256,
+    "y": 56.71,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "api",
+   "to": "queue",
+   "points": [
+    {
+     "x": 508,
+     "y": 65.36
+    },
+    {
+     "x": 540.35,
+     "y": 65.36
+    },
+    {
+     "x": 540.35,
+     "y": 87.54
+    },
+    {
+     "x": 572.69,
+     "y": 87.54
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "async",
+   "label": {
+    "text": "이벤트 발행",
+    "x": 537.54,
+    "y": 56.71,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "queue",
+   "to": "worker",
+   "points": [
+    {
+     "x": 764.69,
+     "y": 87.54
+    },
+    {
+     "x": 828.69,
+     "y": 87.54
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "async",
+   "label": {
+    "text": "소비",
+    "x": 796.69,
+    "y": 78.89,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "worker",
+   "to": "orders-db",
+   "points": [
+    {
+     "x": 1048.69,
+     "y": 87.54
+    },
+    {
+     "x": 1081.11,
+     "y": 87.54
+    },
+    {
+     "x": 1081.11,
+     "y": 65.36
+    },
+    {
+     "x": 1113.54,
+     "y": 65.36
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "data",
+   "label": {
+    "text": "저장",
+    "x": 1087.11,
+    "y": 80.36,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "api",
+   "to": "orders-db",
+   "points": [
+    {
+     "x": 508,
+     "y": 65.36
+    },
+    {
+     "x": 540.35,
+     "y": 65.36
+    },
+    {
+     "x": 540.35,
+     "y": 46.18
+    },
+    {
+     "x": 1081.11,
+     "y": 46.18
+    },
+    {
+     "x": 1081.11,
+     "y": 65.36
+    },
+    {
+     "x": 1113.54,
+     "y": 65.36
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "data",
+   "label": {
+    "text": "상태 조회",
+    "x": 810.77,
+    "y": 37.53,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "api",
+   "rect": {
+    "x": 288,
+    "y": 32,
+    "width": 220,
+    "height": 66.72
+   },
+   "role": "card",
+   "category": "gateway",
+   "tech": "NestJS 10",
+   "description": "주문 접수와 상태 조회를 처리하는 단일 진입점.",
+   "label": {
+    "text": "주문 API",
+    "x": 288,
+    "y": 32,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "client",
+   "rect": {
+    "x": 32,
+    "y": 39.36,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "category": "frontend",
+   "tech": "Next.js 14",
+   "label": {
+    "text": "웹 클라이언트",
+    "x": 32,
+    "y": 39.36181640625,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "orders-db",
+   "rect": {
+    "x": 1113.54,
+    "y": 39.36,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "category": "db",
+   "tech": "PostgreSQL 16",
+   "label": {
+    "text": "주문 DB",
+    "x": 1113.535909016927,
+    "y": 39.36181640625,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "queue",
+   "rect": {
+    "x": 572.69,
+    "y": 61.54,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "category": "queue",
+   "tech": "SQS",
+   "label": {
+    "text": "주문 큐",
+    "x": 572.6912689208984,
+    "y": 61.542724609375,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "worker",
+   "rect": {
+    "x": 828.69,
+    "y": 54.18,
+    "width": 220,
+    "height": 66.72
+   },
+   "role": "card",
+   "category": "worker",
+   "description": "큐 이벤트를 소비해 주문 레코드를 확정한다.",
+   "label": {
+    "text": "정산 워커",
+    "x": 828.6912689208984,
+    "y": 54.180908203125,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  }
+ ],
+ "markers": [],
+ "flows": [
+  {
+   "id": "order",
+   "title": "주문 접수",
+   "description": "클라이언트 제출부터 워커 저장까지의 해피 패스",
+   "steps": [
+    {
+     "edgeId": "e0",
+     "text": "클라이언트가 주문을 제출한다",
+     "badge": {
+      "x": 256,
+      "y": 65.36
+     },
+     "n": 1
+    },
+    {
+     "edgeId": "e1",
+     "text": "API가 주문 이벤트를 큐에 발행한다",
+     "badge": {
+      "x": 540.35,
+      "y": 76.45
+     },
+     "n": 2
+    },
+    {
+     "edgeId": "e2",
+     "text": "워커가 이벤트를 소비한다",
+     "badge": {
+      "x": 796.69,
+      "y": 87.54
+     },
+     "n": 3
+    },
+    {
+     "edgeId": "e3",
+     "text": "주문 레코드를 저장한다",
+     "badge": {
+      "x": 1081.11,
+      "y": 76.44
+     },
+     "n": 4
+    }
+   ]
+  },
+  {
+   "id": "status",
+   "title": "상태 조회",
+   "description": "폴링 조회 경로 — 제출 엣지를 공유한다",
+   "steps": [
+    {
+     "edgeId": "e0",
+     "text": "클라이언트가 주문 상태를 폴링한다",
+     "badge": {
+      "x": 263.68,
+      "y": 65.36
+     },
+     "n": 1
+    },
+    {
+     "edgeId": "e4",
+     "text": "API가 DB에서 주문 상태를 읽는다",
+     "badge": {
+      "x": 810.77,
+      "y": 46.18
+     },
+     "n": 2
+    }
+   ]
+  }
+ ],
+ "icons": [
+  "x.lucide-cog",
+  "x.lucide-database",
+  "x.lucide-door-open",
+  "x.lucide-list-ordered",
+  "x.lucide-monitor"
+ ],
+ "texts": [
+  "1",
+  "2",
+  "3",
+  "4",
+  "API가 DB에서 주문 상태를 읽는다",
+  "API가 주문 이벤트를 큐에 발행한다",
+  "NestJS 10",
+  "Next.js 14",
+  "PostgreSQL 16",
+  "SQS",
+  "게이트웨이",
+  "데이터베이스",
+  "상태 조회",
+  "소비",
+  "워커",
+  "워커가 이벤트를 소비한다",
+  "웹 클라이언트",
+  "이벤트 발행",
+  "저장",
+  "정산 워커",
+  "주문 API",
+  "주문 DB",
+  "주문 레코드를 저장한다",
+  "주문 접수",
+  "주문 접수와 상태 조회를 처리하는 단일 진입점.",
+  "주문 제출",
+  "주문 큐",
+  "큐",
+  "큐 이벤트를 소비해 주문 레코드를 확정한다.",
+  "클라이언트 제출부터 워커 저장까지의 해피 패스",
+  "클라이언트가 주문 상태를 폴링한다",
+  "클라이언트가 주문을 제출한다",
+  "폴링 조회 경로 — 제출 엣지를 공유한다",
+  "프론트엔드"
+ ]
+}

@@ -1,7 +1,8 @@
 /**
- * Category card + auto legend tests: metrics-driven sizing, the two render
- * variants, the --cat-* variable block, legend used-only filtering, and the
- * msa-sample example validating clean with zero icons.
+ * Category card + legend-data tests: metrics-driven sizing, the two render
+ * variants, the --cat-* variable block, legendEntries used-only filtering
+ * (contract §1 data — the frame draws it), and the msa-sample example
+ * validating clean with zero icons.
  */
 import { describe, expect, test } from "bun:test";
 import type { Scene, SceneNode } from "../src/layout/scene.ts";
@@ -13,7 +14,7 @@ import {
   renderCardSvg,
   sizeCard,
 } from "../src/render/card.ts";
-import { LEGEND_CSS, renderLegendHtml } from "../src/render/legend.ts";
+import { legendEntries } from "../src/render/legend.ts";
 import { CATEGORY_COLORS_DARK, CATEGORY_COLORS_LIGHT } from "../src/render/categories.gen.ts";
 import { validate, formatIssues } from "../src/model/validate.ts";
 import msaSample from "../examples/msa-sample.ts";
@@ -150,7 +151,7 @@ describe("cardCssVars", () => {
   });
 });
 
-describe("renderLegendHtml", () => {
+describe("legendEntries", () => {
   const scene: Scene = {
     id: "legend-fixture",
     width: 400,
@@ -189,35 +190,43 @@ describe("renderLegendHtml", () => {
     icons: [],
     texts: [],
   };
-  const html = renderLegendHtml(scene);
+  const entries = legendEntries(scene);
+  const labels = entries.map((e) => e.label);
 
-  test("lists only used categories with dots + labelKo", () => {
-    expect(html).toContain("게이트웨이");
-    expect(html).toContain("서비스");
-    expect(html).toContain("데이터베이스");
-    expect(html).toContain("var(--cat-edge)"); // gateway color group
-    expect(html).not.toContain("캐시"); // cache unused
-    expect(html).not.toContain("프론트엔드");
+  test("emits DATA, not HTML — resolved literal colors, no markup/vars", () => {
+    const json = JSON.stringify(entries);
+    expect(json).not.toContain("<");
+    expect(json).not.toContain("var(--");
+    for (const e of entries) expect(e.swatch.color).toMatch(/^#|^rgba?\(/);
   });
 
-  test("lists edge layers and group kinds present", () => {
-    expect(html).toContain(">http<");
-    expect(html).toContain(">data<");
-    expect(html).toContain(`stroke-dasharray="2 3"`); // dotted data layer swatch
-    expect(html).toContain("그룹"); // generic group kind
-    expect(html).not.toContain("VPC");
+  test("lists only used categories as dot entries with labelKo", () => {
+    const cats = entries.filter((e) => e.group === "category");
+    expect(cats.map((e) => e.label)).toEqual(["게이트웨이", "서비스", "데이터베이스"]);
+    expect(cats[0]!.swatch).toEqual({ type: "dot", color: CATEGORY_COLORS_LIGHT.edge }); // gateway
+    expect(cats[2]!.swatch.color).toBe(CATEGORY_COLORS_LIGHT.data); // db
+    expect(labels).not.toContain("캐시"); // cache unused
+    expect(labels).not.toContain("프론트엔드");
   });
 
-  test("collapsible without JS via <details>, empty scene yields empty string", () => {
-    expect(html.startsWith("<details")).toBe(true);
-    expect(html).toContain("<summary>범례</summary>");
-    const empty = renderLegendHtml({ ...scene, nodes: [], edges: [], groups: [] });
-    expect(empty).toBe("");
+  test("lists edge layers as line entries mirroring the first edge's style", () => {
+    const lines = entries.filter((e) => e.group === "edge");
+    expect(lines.map((e) => e.label)).toEqual(["http", "data"]);
+    expect(lines[0]!.swatch).toEqual({ type: "line", color: "#545B64" }); // default: no dash
+    expect(lines[1]!.swatch).toEqual({ type: "line", color: "#545B64", dash: "2 3" }); // dotted
   });
 
-  test("legend CSS anchors bottom-left", () => {
-    expect(LEGEND_CSS).toContain("left:12px");
-    expect(LEGEND_CSS).toContain("bottom:12px");
+  test("lists group kinds as border entries with Korean labels", () => {
+    const borders = entries.filter((e) => e.group === "groupKind");
+    expect(borders).toEqual([
+      { group: "groupKind", label: "그룹", swatch: { type: "border", color: "#7D8998", dash: "4 3" } },
+    ]);
+    expect(labels).not.toContain("VPC");
+  });
+
+  test("category entries come first (legacy legend order), empty scene -> []", () => {
+    expect(entries.map((e) => e.group)).toEqual(["category", "category", "category", "edge", "edge", "groupKind"]);
+    expect(legendEntries({ ...scene, nodes: [], edges: [], groups: [] })).toEqual([]);
   });
 });
 
