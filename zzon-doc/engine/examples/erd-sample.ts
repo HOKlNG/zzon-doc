@@ -1,5 +1,5 @@
 /**
- * erd-sample — linkonn 코어 테이블 ERD (users / links / tags / link_tags).
+ * erd-sample — 제네릭 북마크 서비스 ERD 예제 (users / links / tags / link_tags).
  *
  * ERD 규칙: docKind "erd", 모든 노드는 table (아이콘 없음 — 허용됨),
  * FK 엣지는 sourceColumn/targetColumn으로 컬럼 행에 앵커되고 양끝에
@@ -7,7 +7,7 @@
  */
 import { diagram } from "../src/dsl/index.ts";
 
-export default diagram("erd-sample", { aspectRatio: 2.6, title: "linkonn — ERD (core tables)", docKind: "erd" }, (d) => {
+export default diagram("erd-sample", { aspectRatio: 2.6, title: "Bookmark Service — ERD (core tables)", docKind: "erd" }, (d) => {
   const users = d.node("users", {
     label: "users",
     description: "가입 사용자 계정",

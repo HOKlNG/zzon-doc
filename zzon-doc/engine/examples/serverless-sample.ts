@@ -1,14 +1,14 @@
 /**
- * linkonn (dev) — serverless content-ingestion service, drawn from
- * ~/Documents/src/linkonn/infra (envs/dev + modules, 2026-07 상태).
+ * serverless-sample — 제네릭 서버리스 콘텐츠 파이프라인 예제 (API GW + Lambda 3종
+ * + SQS/EventBridge + 외부 관리형 SaaS). 실제 프로젝트와 무관한 익명 예제다.
  *
  * 구성: API GW → api Lambda; SQS 2개(scrape/ai-process, DLQ+알람) → scraper
- * Lambda; EventBridge 크론 4개 → digest Lambda; DB/Redis는 Supabase/Upstash로
+ * Lambda; EventBridge 크론 4개 → digest Lambda; DB/Redis는 외부 DB/Upstash로
  * 외부화(SSM 경유), 이메일은 SES SMTP. VPC는 프로비저닝돼 있으나 컴퓨트 미배치.
  */
 import { diagram } from "../src/dsl/index.ts";
 
-export default diagram("linkonn-dev", { title: "linkonn — dev (ap-northeast-2)" }, (d) => {
+export default diagram("serverless-sample", { title: "Serverless Pipeline — dev (ap-northeast-2)" }, (d) => {
   // ── actors ──
   const mobile = d.actor("mobile", { icon: "res.mobile-client", label: "모바일 사용자", side: "left" });
   const deployer = d.actor("deployer", { icon: "res.user", label: "개발자 (deployer)", side: "left" });
@@ -49,7 +49,7 @@ export default diagram("linkonn-dev", { title: "linkonn — dev (ap-northeast-2)
   const ssm = region.node("ssm", {
     icon: "res.credentials",
     label: "SSM Parameter Store",
-    sublabel: "Supabase·Redis URL / SMTP / OpenAI 키",
+    sublabel: "DB·Redis URL / SMTP / API 키",
   });
 
   const obs = region.group("obs", { kind: "generic", label: "Observability" });
@@ -61,9 +61,9 @@ export default diagram("linkonn-dev", { title: "linkonn — dev (ap-northeast-2)
 
   // ── external SaaS (오른쪽 밴드) ──
   d.band("right", (b) => {
-    b.node("supabase", { icon: "res.database", label: "Supabase", sublabel: "PostgreSQL (pooler)" });
-    b.node("upstash", { icon: "res.data-stream", label: "Upstash Redis" });
-    b.node("openai", { icon: "res.globe", label: "OpenAI API" });
+    b.node("supabase", { icon: "res.database", label: "관리형 PostgreSQL", sublabel: "외부 SaaS" });
+    b.node("upstash", { icon: "res.data-stream", label: "관리형 Redis (SaaS)" });
+    b.node("openai", { icon: "res.globe", label: "LLM API" });
     b.node("google", { icon: "res.authenticated-user", label: "Google OAuth" });
     b.node("inbox", { icon: "res.email", label: "사용자 메일함" });
   });

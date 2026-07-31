@@ -24,7 +24,7 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 | 유형 | 저작 |
 |---|---|
 | A 개요(컨텍스트·랜드스케이프), B 구조 중 C4/MSA/도메인 | **카테고리 카드 노드**(`category:`/`tech:`/`description:`, AWS 아이콘 금지 관례) — 참고: `engine/examples/msa-sample.ts` |
-| B 구조 중 클라우드/멀티리전/EKS/계정위계/네트워크 | **AWS 아이콘 + grid/overlay/band** — 참고: `engine/examples/linkonn-dev.ts`, `eks-cluster.ts`, `multi-account-lz.ts`, `multi-region-cicd.ts`. tf가 있으면 terra-form 스킬 절차로 |
+| B 구조 중 클라우드/멀티리전/EKS/계정위계/네트워크 | **AWS 아이콘 + grid/overlay/band** — 참고: `engine/examples/serverless-sample.ts`, `eks-cluster.ts`, `multi-account-lz.ts`, `multi-region-cicd.ts`. tf가 있으면 terra-form 스킬 절차로 |
 | C 흐름(기능·이벤트·CI/CD) | 구조 + **`d.flow()`**(엣지 순번+내레이션, 뷰어에서 클릭 하이라이트), `docKind:"data-flow"` |
 | D ERD | **`table:` 노드** + `sourceColumn/targetColumn` + 카디널리티, `docKind:"erd"` — 참고: `engine/examples/erd-sample.ts` |
 | 시퀀스 | zzon-seq로 위임 |

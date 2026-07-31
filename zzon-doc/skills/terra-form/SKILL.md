@@ -33,7 +33,7 @@ argument-hint: '[tf 경로 — 비우면 ./infra 탐색]'
 ## 2. DSL 저작 — 계약
 
 - **파일 위치**: 대상 프로젝트의 `zzon-doc/terra/<slug>.ts` (다이어그램 소스도 그 프로젝트가 버전 관리한다).
-- **API 정본은 엔진의 `examples/*.ts` 4종** — 반드시 하나를 먼저 읽는다 (`linkonn-dev.ts`가 서버리스, `eks-cluster.ts`가 격자+overlay, `multi-account-lz.ts`가 멀티계정, `multi-region-cicd.ts`가 멀티리전).
+- **API 정본은 엔진의 `examples/*.ts` 4종** — 반드시 하나를 먼저 읽는다 (`serverless-sample.ts`가 서버리스, `eks-cluster.ts`가 격자+overlay, `multi-account-lz.ts`가 멀티계정, `multi-region-cicd.ts`가 멀티리전).
 - 계층: `d.group(kind:"aws-cloud")` ▸ `region` ▸ 리소스. VPC의 AZ×티어는 `grid()`+`cell()`, 격자를 가로지르는 논리 그룹(ASG·노드풀)은 `overlay()`.
 - 액터는 `d.actor(side:)`, 외부 SaaS·부속 행은 `d.band("right"|"bottom")` — 외부 관리형(DB SaaS 등)은 오른쪽 밴드가 관례.
 - 엣지는 **`layer:` 필수**(request/pipeline/deploy/monitor…) — HTML 레이어 토글의 단위다.
