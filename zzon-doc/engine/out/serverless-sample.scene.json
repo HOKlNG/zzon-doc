@@ -1,0 +1,1947 @@
+{
+ "id": "serverless-sample",
+ "title": "Serverless Pipeline — dev (ap-northeast-2)",
+ "width": 1196.01,
+ "height": 888.41,
+ "groups": [
+  {
+   "kind": "group",
+   "path": "aws",
+   "rect": {
+    "x": 185.45,
+    "y": 32,
+    "width": 812.23,
+    "height": 824.41
+   },
+   "groupKind": "aws-cloud",
+   "badgeIcon": "group.aws-cloud",
+   "badgeRect": {
+    "x": 185.44921875,
+    "y": 32,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "AWS Cloud",
+    "x": 217.44921875,
+    "y": 48,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#242F3E"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws/region",
+   "rect": {
+    "x": 199.45,
+    "y": 74,
+    "width": 784.23,
+    "height": 768.41
+   },
+   "groupKind": "region",
+   "badgeIcon": "group.region",
+   "badgeRect": {
+    "x": 199.44921875,
+    "y": 74,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "ap-northeast-2 (Seoul)",
+    "x": 231.44921875,
+    "y": 90,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#00A4A6"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws/region/lambdas",
+   "rect": {
+    "x": 524.37,
+    "y": 473.07,
+    "width": 224.96,
+    "height": 244.38
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "Lambda (컨테이너 이미지)",
+    "x": 532.3702178955078,
+    "y": 489.06542968750006,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws/region/obs",
+   "rect": {
+    "x": 213.45,
+    "y": 116,
+    "width": 271.92,
+    "height": 140.19
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "Observability",
+    "x": 221.44921875,
+    "y": 132,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws/region/sqs",
+   "rect": {
+    "x": 222.13,
+    "y": 688.22,
+    "width": 254.56,
+    "height": 140.19
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "SQS",
+    "x": 230.130859375,
+    "y": 704.2152343750001,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws/region/vpc",
+   "rect": {
+    "x": 506.31,
+    "y": 116,
+    "width": 261.07,
+    "height": 153.92
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 506.31308898925784,
+    "y": 116,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "VPC 10.0.0.0/16 — 컴퓨트 미배치",
+    "x": 538.3130889892578,
+    "y": 132,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  }
+ ],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "mobile",
+   "to": "aws/region/apigw",
+   "points": [
+    {
+     "x": 117.34,
+     "y": 386.97
+    },
+    {
+     "x": 208.21,
+     "y": 386.97
+    },
+    {
+     "x": 208.21,
+     "y": 460.2
+    },
+    {
+     "x": 301.57,
+     "y": 460.2
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "request",
+   "label": {
+    "text": "HTTPS",
+    "x": 214.21,
+    "y": 428.74,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "aws/region/apigw",
+   "to": "aws/region/lambdas/api",
+   "points": [
+    {
+     "x": 397.25,
+     "y": 460.2
+    },
+    {
+     "x": 453.92,
+     "y": 460.2
+    },
+    {
+     "x": 453.92,
+     "y": 661.35
+    },
+    {
+     "x": 546.5,
+     "y": 661.35
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "request"
+  },
+  {
+   "kind": "edge",
+   "id": "e10",
+   "from": "aws/region/sqs/scrape",
+   "to": "aws/region/lambdas/scraper",
+   "points": [
+    {
+     "x": 317.13,
+     "y": 772.31
+    },
+    {
+     "x": 339.13,
+     "y": 772.31
+    },
+    {
+     "x": 339.13,
+     "y": 675.35
+    },
+    {
+     "x": 467.92,
+     "y": 675.35
+    },
+    {
+     "x": 467.92,
+     "y": 557.16
+    },
+    {
+     "x": 538.37,
+     "y": 557.16
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "pipeline",
+   "label": {
+    "text": "trigger",
+    "x": 438.37,
+    "y": 666.7,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e11",
+   "from": "aws/region/lambdas/scraper",
+   "to": "aws/region/sqs/ai-process",
+   "points": [
+    {
+     "x": 578.3,
+     "y": 599.26
+    },
+    {
+     "x": 578.3,
+     "y": 610.66
+    },
+    {
+     "x": 495.92,
+     "y": 610.66
+    },
+    {
+     "x": 495.92,
+     "y": 703.35
+    },
+    {
+     "x": 411.91,
+     "y": 703.35
+    },
+    {
+     "x": 411.91,
+     "y": 730.22
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "pipeline",
+   "label": {
+    "text": "AI 처리 발행",
+    "x": 436.59,
+    "y": 645.68,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e12",
+   "from": "aws/region/sqs/ai-process",
+   "to": "aws/region/lambdas/scraper",
+   "points": [
+    {
+     "x": 411.91,
+     "y": 730.22
+    },
+    {
+     "x": 411.91,
+     "y": 689.35
+    },
+    {
+     "x": 481.92,
+     "y": 689.35
+    },
+    {
+     "x": 481.92,
+     "y": 609.26
+    },
+    {
+     "x": 578.3,
+     "y": 609.26
+    },
+    {
+     "x": 578.3,
+     "y": 599.26
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "pipeline",
+   "label": {
+    "text": "trigger",
+    "x": 487.92,
+    "y": 679.25,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e13",
+   "from": "aws/region/lambdas/scraper",
+   "to": "band-right/openai",
+   "points": [
+    {
+     "x": 618.23,
+     "y": 557.16
+    },
+    {
+     "x": 1008.56,
+     "y": 557.16
+    },
+    {
+     "x": 1008.56,
+     "y": 451.07
+    },
+    {
+     "x": 1080.84,
+     "y": 451.07
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "pipeline",
+   "label": {
+    "text": "요약·태깅",
+    "x": 902.58,
+    "y": 548.51,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e14",
+   "from": "aws/region/lambdas/scraper",
+   "to": "band-right/supabase",
+   "points": [
+    {
+     "x": 618.23,
+     "y": 557.16
+    },
+    {
+     "x": 994.56,
+     "y": 557.16
+    },
+    {
+     "x": 994.56,
+     "y": 207.27
+    },
+    {
+     "x": 1055.64,
+     "y": 207.27
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "pipeline"
+  },
+  {
+   "kind": "edge",
+   "id": "e15",
+   "from": "aws/region/lambdas/scraper",
+   "to": "aws/region/s3",
+   "points": [
+    {
+     "x": 618.23,
+     "y": 557.16
+    },
+    {
+     "x": 743.73,
+     "y": 557.16
+    },
+    {
+     "x": 743.73,
+     "y": 488.2
+    },
+    {
+     "x": 875.5,
+     "y": 488.2
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "pipeline"
+  },
+  {
+   "kind": "edge",
+   "id": "e16",
+   "from": "aws/region/lambdas/digest",
+   "to": "aws/region/ses",
+   "points": [
+    {
+     "x": 735.33,
+     "y": 661.35
+    },
+    {
+     "x": 743.73,
+     "y": 661.35
+    },
+    {
+     "x": 743.73,
+     "y": 751.45
+    },
+    {
+     "x": 877.85,
+     "y": 751.45
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "email",
+   "label": {
+    "text": "다이제스트 발송",
+    "x": 761.54,
+    "y": 742.8,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e17",
+   "from": "aws/region/ses",
+   "to": "band-right/inbox",
+   "points": [
+    {
+     "x": 933.85,
+     "y": 751.45
+    },
+    {
+     "x": 1003.04,
+     "y": 751.45
+    },
+    {
+     "x": 1003.04,
+     "y": 688
+    },
+    {
+     "x": 1072.22,
+     "y": 688
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "email"
+  },
+  {
+   "kind": "edge",
+   "id": "e18",
+   "from": "aws/region/lambdas",
+   "to": "aws/region/ssm",
+   "points": [
+    {
+     "x": 749.33,
+     "y": 616.4
+    },
+    {
+     "x": 842.02,
+     "y": 616.4
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "config",
+   "label": {
+    "text": "시크릿 로드",
+    "x": 795.68,
+    "y": 607.75,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e19",
+   "from": "aws/region/obs/cw",
+   "to": "aws/region/obs/sns",
+   "points": [
+    {
+     "x": 343.27,
+     "y": 200.1
+    },
+    {
+     "x": 407.27,
+     "y": 200.1
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "monitor",
+   "label": {
+    "text": "알람",
+    "x": 375.27,
+    "y": 191.45,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "aws/region/lambdas/api",
+   "to": "aws/region/cognito",
+   "points": [
+    {
+     "x": 610.09,
+     "y": 661.35
+    },
+    {
+     "x": 634.09,
+     "y": 661.35
+    },
+    {
+     "x": 634.09,
+     "y": 366.87
+    },
+    {
+     "x": 844.51,
+     "y": 366.87
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "request",
+   "bundle": "bundle:out:aws/region/lambdas/api:E",
+   "label": {
+    "text": "JWT 검증",
+    "x": 765.18,
+    "y": 358.22,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e20",
+   "from": "aws/region/obs/sns",
+   "to": "band-right/inbox",
+   "points": [
+    {
+     "x": 471.37,
+     "y": 200.1
+    },
+    {
+     "x": 495.84,
+     "y": 200.1
+    },
+    {
+     "x": 495.84,
+     "y": 385.49
+    },
+    {
+     "x": 746.53,
+     "y": 385.49
+    },
+    {
+     "x": 746.53,
+     "y": 688
+    },
+    {
+     "x": 1072.22,
+     "y": 688
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "monitor"
+  },
+  {
+   "kind": "edge",
+   "id": "e21",
+   "from": "deployer",
+   "to": "aws/region/ecr",
+   "points": [
+    {
+     "x": 129.45,
+     "y": 501.44
+    },
+    {
+     "x": 222.21,
+     "y": 501.44
+    },
+    {
+     "x": 222.21,
+     "y": 332.01
+    },
+    {
+     "x": 300.35,
+     "y": 332.01
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "deploy",
+   "label": {
+    "text": "docker push",
+    "x": 228.21,
+    "y": 455.17,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e22",
+   "from": "aws/region/ecr",
+   "to": "aws/region/lambdas",
+   "points": [
+    {
+     "x": 398.47,
+     "y": 332.01
+    },
+    {
+     "x": 524.37,
+     "y": 332.01
+    },
+    {
+     "x": 524.37,
+     "y": 485.07
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "deploy",
+   "label": {
+    "text": "이미지",
+    "x": 530.37,
+    "y": 349.5,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "aws/region/cognito",
+   "to": "band-right/google",
+   "points": [
+    {
+     "x": 967.19,
+     "y": 366.87
+    },
+    {
+     "x": 1022.56,
+     "y": 366.87
+    },
+    {
+     "x": 1022.56,
+     "y": 569.53
+    },
+    {
+     "x": 1067.21,
+     "y": 569.53
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "request",
+   "label": {
+    "text": "OAuth",
+    "x": 1028.56,
+    "y": 466.75,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "aws/region/lambdas/api",
+   "to": "band-right/supabase",
+   "points": [
+    {
+     "x": 610.09,
+     "y": 661.35
+    },
+    {
+     "x": 634.09,
+     "y": 661.35
+    },
+    {
+     "x": 634.09,
+     "y": 290.35
+    },
+    {
+     "x": 852.73,
+     "y": 290.35
+    },
+    {
+     "x": 852.73,
+     "y": 207.27
+    },
+    {
+     "x": 1055.64,
+     "y": 207.27
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "request",
+   "bundle": "bundle:out:aws/region/lambdas/api:E"
+  },
+  {
+   "kind": "edge",
+   "id": "e5",
+   "from": "aws/region/lambdas/api",
+   "to": "band-right/upstash",
+   "points": [
+    {
+     "x": 610.09,
+     "y": 661.35
+    },
+    {
+     "x": 634.09,
+     "y": 661.35
+    },
+    {
+     "x": 634.09,
+     "y": 430.97
+    },
+    {
+     "x": 1008.56,
+     "y": 430.97
+    },
+    {
+     "x": 1008.56,
+     "y": 332.6
+    },
+    {
+     "x": 1053.68,
+     "y": 332.6
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "request",
+   "bundle": "bundle:out:aws/region/lambdas/api:E"
+  },
+  {
+   "kind": "edge",
+   "id": "e6",
+   "from": "aws/region/lambdas/api",
+   "to": "aws/region/lambdas/digest",
+   "points": [
+    {
+     "x": 610.09,
+     "y": 661.35
+    },
+    {
+     "x": 634.09,
+     "y": 661.35
+    },
+    {
+     "x": 665.96,
+     "y": 661.35
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "request",
+   "bundle": "bundle:out:aws/region/lambdas/api:E",
+   "label": {
+    "text": "admin poll",
+    "x": 657.58,
+    "y": 652.7,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e7",
+   "from": "aws/region/cron",
+   "to": "aws/region/lambdas/digest",
+   "points": [
+    {
+     "x": 411.02,
+     "y": 595.26
+    },
+    {
+     "x": 481.92,
+     "y": 595.26
+    },
+    {
+     "x": 481.92,
+     "y": 607.86
+    },
+    {
+     "x": 648.09,
+     "y": 607.86
+    },
+    {
+     "x": 648.09,
+     "y": 661.35
+    },
+    {
+     "x": 665.96,
+     "y": 661.35
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "pipeline"
+  },
+  {
+   "kind": "edge",
+   "id": "e8",
+   "from": "aws/region/lambdas/api",
+   "to": "aws/region/sqs/scrape",
+   "points": [
+    {
+     "x": 546.5,
+     "y": 661.35
+    },
+    {
+     "x": 325.13,
+     "y": 661.35
+    },
+    {
+     "x": 325.13,
+     "y": 772.31
+    },
+    {
+     "x": 317.13,
+     "y": 772.31
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "pipeline",
+   "label": {
+    "text": "수집 요청",
+    "x": 376.34,
+    "y": 677.82,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e9",
+   "from": "aws/region/lambdas/digest",
+   "to": "aws/region/sqs/scrape",
+   "points": [
+    {
+     "x": 665.96,
+     "y": 661.35
+    },
+    {
+     "x": 638.02,
+     "y": 661.35
+    },
+    {
+     "x": 638.02,
+     "y": 717.35
+    },
+    {
+     "x": 353.13,
+     "y": 717.35
+    },
+    {
+     "x": 353.13,
+     "y": 772.31
+    },
+    {
+     "x": 317.13,
+     "y": 772.31
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "layer": "pipeline",
+   "label": {
+    "text": "RSS 폴링 발행",
+    "x": 492.07,
+    "y": 708.7,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#545B64"
+   }
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "aws/region/apigw",
+   "rect": {
+    "x": 301.57,
+    "y": 418.11,
+    "width": 95.68,
+    "height": 84.19
+   },
+   "icon": "api-gateway",
+   "iconRect": {
+    "x": 325.41,
+    "y": 418.11,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "API Gateway",
+    "x": 349.41015625,
+    "y": 483.2823046875001,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "API Gateway"
+    ]
+   },
+   "sublabel": {
+    "text": "HTTP API · $default",
+    "x": 349.41015625,
+    "y": 497.55488281250007,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "HTTP API · $default"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/cognito",
+   "rect": {
+    "x": 844.51,
+    "y": 324.78,
+    "width": 122.68,
+    "height": 84.19
+   },
+   "icon": "cognito",
+   "iconRect": {
+    "x": 881.85,
+    "y": 324.78,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Cognito User Pool",
+    "x": 905.8482507324218,
+    "y": 389.9521289062501,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Cognito User Pool"
+    ]
+   },
+   "sublabel": {
+    "text": "Google IdP · Mobile Client",
+    "x": 905.8482507324218,
+    "y": 404.2247070312501,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Google IdP · Mobile Client"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/cron",
+   "rect": {
+    "x": 287.8,
+    "y": 546.3,
+    "width": 123.21,
+    "height": 97.92
+   },
+   "icon": "eventbridge.scheduler",
+   "iconRect": {
+    "x": 325.41,
+    "y": 546.3,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "EventBridge 크론 ×4",
+    "x": 349.41015625,
+    "y": 611.474296875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "EventBridge 크론 ×4"
+    ]
+   },
+   "sublabel": {
+    "text": "digest·source-poll 매시간 / FOMO 일·주간",
+    "x": 349.41015625,
+    "y": 625.746875,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "digest·source-poll 매시간 /",
+     "FOMO 일·주간"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/ecr",
+   "rect": {
+    "x": 300.35,
+    "y": 289.92,
+    "width": 98.12,
+    "height": 84.19
+   },
+   "icon": "ecr",
+   "iconRect": {
+    "x": 325.41,
+    "y": 289.92,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "ECR ×3",
+    "x": 349.41015625,
+    "y": 355.09031250000004,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "ECR ×3"
+    ]
+   },
+   "sublabel": {
+    "text": "api · scraper · digest",
+    "x": 349.41015625,
+    "y": 369.36289062500003,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "api · scraper · digest"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/lambdas/api",
+   "rect": {
+    "x": 546.5,
+    "y": 619.26,
+    "width": 63.59,
+    "height": 84.19
+   },
+   "icon": "lambda",
+   "iconRect": {
+    "x": 554.3,
+    "y": 619.26,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "api",
+    "x": 578.2979522705078,
+    "y": 684.432109375,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "api"
+    ]
+   },
+   "sublabel": {
+    "text": "512MB · 30s",
+    "x": 578.2979522705078,
+    "y": 698.7046875,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "512MB · 30s"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/lambdas/digest",
+   "rect": {
+    "x": 665.96,
+    "y": 619.26,
+    "width": 69.37,
+    "height": 84.19
+   },
+   "icon": "lambda",
+   "iconRect": {
+    "x": 676.64,
+    "y": 619.26,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "digest",
+    "x": 700.6421905517578,
+    "y": 684.432109375,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "digest"
+    ]
+   },
+   "sublabel": {
+    "text": "512MB · 240s",
+    "x": 700.6421905517578,
+    "y": 698.7046875,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "512MB · 240s"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/lambdas/scraper",
+   "rect": {
+    "x": 538.37,
+    "y": 515.07,
+    "width": 79.86,
+    "height": 84.19
+   },
+   "icon": "lambda",
+   "iconRect": {
+    "x": 554.3,
+    "y": 515.07,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "scraper",
+    "x": 578.2979522705078,
+    "y": 580.2401171875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "scraper"
+    ]
+   },
+   "sublabel": {
+    "text": "1GB · Puppeteer",
+    "x": 578.2979522705078,
+    "y": 594.5126953125,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "1GB · Puppeteer"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/obs/cw",
+   "rect": {
+    "x": 227.45,
+    "y": 158,
+    "width": 115.82,
+    "height": 84.19
+   },
+   "icon": "cloudwatch",
+   "iconRect": {
+    "x": 261.36,
+    "y": 158,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "CloudWatch 알람 ×4",
+    "x": 285.361328125,
+    "y": 223.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "CloudWatch 알람 ×4"
+    ]
+   },
+   "sublabel": {
+    "text": "duration·errors·DLQ",
+    "x": 285.361328125,
+    "y": 237.447265625,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "duration·errors·DLQ"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/obs/sns",
+   "rect": {
+    "x": 407.27,
+    "y": 164.86,
+    "width": 64.1,
+    "height": 70.47
+   },
+   "icon": "simple-notification-service",
+   "iconRect": {
+    "x": 415.32,
+    "y": 164.86,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "SNS alerts",
+    "x": 439.322265625,
+    "y": 230.03650390625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "SNS alerts"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/s3",
+   "rect": {
+    "x": 875.5,
+    "y": 452.97,
+    "width": 60.7,
+    "height": 70.47
+   },
+   "icon": "s3",
+   "iconRect": {
+    "x": 881.85,
+    "y": 452.97,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "S3 assets",
+    "x": 905.8482507324218,
+    "y": 518.1441210937501,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "S3 assets"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/ses",
+   "rect": {
+    "x": 877.85,
+    "y": 709.35,
+    "width": 56,
+    "height": 84.19
+   },
+   "icon": "simple-email-service",
+   "iconRect": {
+    "x": 881.85,
+    "y": 709.35,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "SES",
+    "x": 905.8482507324218,
+    "y": 774.5281054687501,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "SES"
+    ]
+   },
+   "sublabel": {
+    "text": "SMTP 587",
+    "x": 905.8482507324218,
+    "y": 788.8006835937501,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "SMTP 587"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/sqs/ai-process",
+   "rect": {
+    "x": 361.13,
+    "y": 730.22,
+    "width": 101.56,
+    "height": 84.19
+   },
+   "icon": "sqs",
+   "iconRect": {
+    "x": 387.91,
+    "y": 730.22,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "ai-process queue",
+    "x": 411.908203125,
+    "y": 795.3899218750001,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "ai-process queue"
+    ]
+   },
+   "sublabel": {
+    "text": "+DLQ · 알람",
+    "x": 411.908203125,
+    "y": 809.6625000000001,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "+DLQ · 알람"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/sqs/scrape",
+   "rect": {
+    "x": 236.13,
+    "y": 730.22,
+    "width": 81,
+    "height": 84.19
+   },
+   "icon": "sqs",
+   "iconRect": {
+    "x": 252.63,
+    "y": 730.22,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "scrape queue",
+    "x": 276.62890625,
+    "y": 795.3899218750001,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "scrape queue"
+    ]
+   },
+   "sublabel": {
+    "text": "+DLQ · 알람",
+    "x": 276.62890625,
+    "y": 809.6625000000001,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "+DLQ · 알람"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/ssm",
+   "rect": {
+    "x": 842.02,
+    "y": 567.44,
+    "width": 127.66,
+    "height": 97.92
+   },
+   "icon": "res.credentials",
+   "iconRect": {
+    "x": 881.85,
+    "y": 567.44,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "SSM Parameter Store",
+    "x": 905.8482507324218,
+    "y": 632.61248046875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "SSM Parameter Store"
+    ]
+   },
+   "sublabel": {
+    "text": "DB·Redis URL / SMTP / API 키",
+    "x": 905.8482507324218,
+    "y": 646.88505859375,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "DB·Redis URL / SMTP / API",
+     "키"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws/region/vpc/igw",
+   "rect": {
+    "x": 520.31,
+    "y": 158,
+    "width": 131.47,
+    "height": 97.92
+   },
+   "icon": "igw",
+   "iconRect": {
+    "x": 562.05,
+    "y": 158,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "IGW",
+    "x": 586.0489288330078,
+    "y": 223.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "IGW"
+    ]
+   },
+   "sublabel": {
+    "text": "public·private ×2 AZ, NAT는 prd만",
+    "x": 586.0489288330078,
+    "y": 237.447265625,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "public·private ×2 AZ, NAT는",
+     "prd만"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-right/google",
+   "rect": {
+    "x": 1067.21,
+    "y": 534.3,
+    "width": 83.26,
+    "height": 70.47
+   },
+   "icon": "res.authenticated-user",
+   "iconRect": {
+    "x": 1084.84,
+    "y": 534.3,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Google OAuth",
+    "x": 1108.8414147949218,
+    "y": 599.474296875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Google OAuth"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-right/inbox",
+   "rect": {
+    "x": 1072.22,
+    "y": 652.77,
+    "width": 73.24,
+    "height": 70.47
+   },
+   "icon": "res.email",
+   "iconRect": {
+    "x": 1084.84,
+    "y": 652.77,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "사용자 메일함",
+    "x": 1108.8414147949218,
+    "y": 717.94265625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "사용자 메일함"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-right/openai",
+   "rect": {
+    "x": 1080.84,
+    "y": 415.83,
+    "width": 56,
+    "height": 70.47
+   },
+   "icon": "res.globe",
+   "iconRect": {
+    "x": 1084.84,
+    "y": 415.83,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "LLM API",
+    "x": 1108.8414147949218,
+    "y": 481.0059375000001,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "LLM API"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-right/supabase",
+   "rect": {
+    "x": 1055.64,
+    "y": 165.17,
+    "width": 106.4,
+    "height": 84.19
+   },
+   "icon": "res.database",
+   "iconRect": {
+    "x": 1084.84,
+    "y": 165.17,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "관리형 PostgreSQL",
+    "x": 1108.8414147949218,
+    "y": 230.34558593750006,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "관리형 PostgreSQL"
+    ]
+   },
+   "sublabel": {
+    "text": "외부 SaaS",
+    "x": 1108.8414147949218,
+    "y": 244.61816406250006,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "외부 SaaS"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "band-right/upstash",
+   "rect": {
+    "x": 1053.68,
+    "y": 297.36,
+    "width": 110.33,
+    "height": 70.47
+   },
+   "icon": "res.data-stream",
+   "iconRect": {
+    "x": 1084.84,
+    "y": 297.36,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "관리형 Redis (SaaS)",
+    "x": 1108.8414147949218,
+    "y": 362.5375781250001,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "관리형 Redis (SaaS)"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "deployer",
+   "rect": {
+    "x": 32,
+    "y": 468.2,
+    "width": 97.45,
+    "height": 66.47
+   },
+   "icon": "res.user",
+   "iconRect": {
+    "x": 58.72,
+    "y": 468.2,
+    "width": 44,
+    "height": 44
+   },
+   "role": "actor",
+   "label": {
+    "text": "개발자 (deployer)",
+    "x": 80.724609375,
+    "y": 529.37830078125,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "개발자 (deployer)"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "mobile",
+   "rect": {
+    "x": 44.11,
+    "y": 353.74,
+    "width": 73.24,
+    "height": 66.47
+   },
+   "icon": "res.mobile-client",
+   "iconRect": {
+    "x": 58.72,
+    "y": 353.74,
+    "width": 44,
+    "height": 44
+   },
+   "role": "actor",
+   "label": {
+    "text": "모바일 사용자",
+    "x": 80.724609375,
+    "y": 414.90994140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "모바일 사용자"
+    ]
+   }
+  }
+ ],
+ "markers": [
+  {
+   "kind": "marker",
+   "n": 1,
+   "at": {
+    "x": 44.11,
+    "y": 353.74
+   }
+  },
+  {
+   "kind": "marker",
+   "n": 2,
+   "at": {
+    "x": 236.13,
+    "y": 730.22
+   }
+  },
+  {
+   "kind": "marker",
+   "n": 3,
+   "at": {
+    "x": 538.37,
+    "y": 515.07
+   }
+  },
+  {
+   "kind": "marker",
+   "n": 4,
+   "at": {
+    "x": 361.13,
+    "y": 730.22
+   }
+  },
+  {
+   "kind": "marker",
+   "n": 5,
+   "at": {
+    "x": 735.33,
+    "y": 619.26
+   }
+  }
+ ],
+ "flows": [],
+ "icons": [
+  "api-gateway",
+  "cloudwatch",
+  "cognito",
+  "ecr",
+  "eventbridge.scheduler",
+  "group.aws-cloud",
+  "group.region",
+  "group.vpc",
+  "igw",
+  "lambda",
+  "res.authenticated-user",
+  "res.credentials",
+  "res.data-stream",
+  "res.database",
+  "res.email",
+  "res.globe",
+  "res.mobile-client",
+  "res.user",
+  "s3",
+  "simple-email-service",
+  "simple-notification-service",
+  "sqs"
+ ],
+ "texts": [
+  "+DLQ · 알람",
+  "1",
+  "1GB · Puppeteer",
+  "2",
+  "3",
+  "4",
+  "5",
+  "512MB · 240s",
+  "512MB · 30s",
+  "AI 처리 발행",
+  "API Gateway",
+  "AWS Cloud",
+  "CloudWatch 알람 ×4",
+  "Cognito User Pool",
+  "DB·Redis URL / SMTP / API 키",
+  "ECR ×3",
+  "EventBridge 크론 ×4",
+  "Google IdP · Mobile Client",
+  "Google OAuth",
+  "HTTP API · $default",
+  "HTTPS",
+  "IGW",
+  "JWT 검증",
+  "LLM API",
+  "Lambda (컨테이너 이미지)",
+  "OAuth",
+  "Observability",
+  "RSS 폴링 발행",
+  "S3 assets",
+  "SES",
+  "SMTP 587",
+  "SNS alerts",
+  "SQS",
+  "SSM Parameter Store",
+  "VPC 10.0.0.0/16 — 컴퓨트 미배치",
+  "admin poll",
+  "ai-process queue",
+  "ap-northeast-2 (Seoul)",
+  "api",
+  "api · scraper · digest",
+  "digest",
+  "digest·source-poll 매시간 / FOMO 일·주간",
+  "docker push",
+  "duration·errors·DLQ",
+  "public·private ×2 AZ, NAT는 prd만",
+  "scrape queue",
+  "scraper",
+  "trigger",
+  "개발자 (deployer)",
+  "관리형 PostgreSQL",
+  "관리형 Redis (SaaS)",
+  "다이제스트 발송",
+  "모바일 사용자",
+  "사용자 메일함",
+  "수집 요청",
+  "시크릿 로드",
+  "알람",
+  "외부 SaaS",
+  "요약·태깅",
+  "이미지"
+ ]
+}

@@ -1,0 +1,319 @@
+{
+ "id": "erd-sample",
+ "title": "linkonn — ERD (core tables)",
+ "docKind": "erd",
+ "width": 916.43,
+ "height": 362,
+ "groups": [],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "links",
+   "to": "users",
+   "points": [
+    {
+     "x": 580.43,
+     "y": 233
+    },
+    {
+     "x": 612.43,
+     "y": 233
+    },
+    {
+     "x": 612.43,
+     "y": 220
+    },
+    {
+     "x": 644.43,
+     "y": 220
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "sourceCardinality": "0..N",
+   "targetCardinality": "0..1"
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "link_tags",
+   "to": "links",
+   "points": [
+    {
+     "x": 272,
+     "y": 160.5
+    },
+    {
+     "x": 306.21,
+     "y": 160.5
+    },
+    {
+     "x": 306.21,
+     "y": 207
+    },
+    {
+     "x": 340.43,
+     "y": 207
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "sourceCardinality": "N",
+   "targetCardinality": "1"
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "link_tags",
+   "to": "tags",
+   "points": [
+    {
+     "x": 272,
+     "y": 186.5
+    },
+    {
+     "x": 272,
+     "y": 75
+    },
+    {
+     "x": 340.43,
+     "y": 75
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#545B64",
+    "arrowhead": "end"
+   },
+   "sourceCardinality": "1..N",
+   "targetCardinality": "1"
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "link_tags",
+   "rect": {
+    "x": 32,
+    "y": 117.5,
+    "width": 240,
+    "height": 88
+   },
+   "role": "table",
+   "table": {
+    "headerHeight": 30,
+    "rowHeight": 26,
+    "columns": [
+     {
+      "name": "link_id",
+      "type": "uuid",
+      "pk": true,
+      "fk": {
+       "table": "links",
+       "column": "id"
+      },
+      "y": 160.5
+     },
+     {
+      "name": "tag_id",
+      "type": "uuid",
+      "pk": true,
+      "fk": {
+       "table": "tags",
+       "column": "id"
+      },
+      "y": 186.5
+     }
+    ]
+   },
+   "label": {
+    "text": "link_tags",
+    "x": 32,
+    "y": 117.5,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   },
+   "description": "링크·태그 M:N 조인 테이블"
+  },
+  {
+   "kind": "node",
+   "path": "links",
+   "rect": {
+    "x": 340.43,
+    "y": 164,
+    "width": 240,
+    "height": 166
+   },
+   "role": "table",
+   "table": {
+    "headerHeight": 30,
+    "rowHeight": 26,
+    "columns": [
+     {
+      "name": "id",
+      "type": "uuid",
+      "pk": true,
+      "y": 207
+     },
+     {
+      "name": "user_id",
+      "type": "uuid",
+      "fk": {
+       "table": "users",
+       "column": "id"
+      },
+      "nullable": true,
+      "y": 233
+     },
+     {
+      "name": "url",
+      "type": "text",
+      "y": 259
+     },
+     {
+      "name": "title",
+      "type": "text",
+      "nullable": true,
+      "y": 285
+     },
+     {
+      "name": "created_at",
+      "type": "timestamptz",
+      "y": 311
+     }
+    ]
+   },
+   "label": {
+    "text": "links",
+    "x": 340.42708333333326,
+    "y": 164,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   },
+   "description": "사용자가 수집한 링크"
+  },
+  {
+   "kind": "node",
+   "path": "tags",
+   "rect": {
+    "x": 340.43,
+    "y": 32,
+    "width": 240,
+    "height": 88
+   },
+   "role": "table",
+   "table": {
+    "headerHeight": 30,
+    "rowHeight": 26,
+    "columns": [
+     {
+      "name": "id",
+      "type": "uuid",
+      "pk": true,
+      "y": 75
+     },
+     {
+      "name": "name",
+      "type": "text",
+      "unique": true,
+      "y": 101
+     }
+    ]
+   },
+   "label": {
+    "text": "tags",
+    "x": 340.42708333333326,
+    "y": 32,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   },
+   "description": "링크 분류 태그"
+  },
+  {
+   "kind": "node",
+   "path": "users",
+   "rect": {
+    "x": 644.43,
+    "y": 177,
+    "width": 240,
+    "height": 140
+   },
+   "role": "table",
+   "table": {
+    "headerHeight": 30,
+    "rowHeight": 26,
+    "columns": [
+     {
+      "name": "id",
+      "type": "uuid",
+      "pk": true,
+      "y": 220
+     },
+     {
+      "name": "email",
+      "type": "text",
+      "unique": true,
+      "y": 246
+     },
+     {
+      "name": "display_name",
+      "type": "text",
+      "nullable": true,
+      "y": 272
+     },
+     {
+      "name": "created_at",
+      "type": "timestamptz",
+      "y": 298
+     }
+    ]
+   },
+   "label": {
+    "text": "users",
+    "x": 644.4270833333333,
+    "y": 177,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   },
+   "description": "가입 사용자 계정"
+  }
+ ],
+ "markers": [],
+ "flows": [],
+ "icons": [],
+ "texts": [
+  "created_at",
+  "display_name",
+  "email",
+  "id",
+  "link_id",
+  "link_tags",
+  "links",
+  "name",
+  "tag_id",
+  "tags",
+  "text",
+  "timestamptz",
+  "title",
+  "url",
+  "user_id",
+  "users",
+  "uuid",
+  "가입 사용자 계정",
+  "링크 분류 태그",
+  "링크·태그 M:N 조인 테이블",
+  "사용자가 수집한 링크"
+ ]
+}

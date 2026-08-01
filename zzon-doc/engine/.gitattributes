@@ -1,0 +1,7 @@
+# Rendered artifacts are committed for clone-and-view, but the reviewable
+# artifact is the canonical scene JSON — suppress generated noise in PR diffs.
+out/*.html linguist-generated -diff
+out/*.svg linguist-generated -diff
+out/*.png binary
+src/icons/svg/*.svg linguist-generated
+src/icons/manifest.gen.ts linguist-generated
