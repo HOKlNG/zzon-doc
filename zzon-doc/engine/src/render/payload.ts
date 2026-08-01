@@ -132,6 +132,8 @@ export function buildPayload(
     id: scene.id,
     title: scene.title ?? scene.id,
     kind: scene.docKind ?? model?.docKind ?? "infra",
+    // diagram-level description travels model -> payload (scenes don't carry it)
+    ...defined("description", model?.description),
     counts: {
       nodes: scene.nodes.length,
       edges: scene.edges.length,

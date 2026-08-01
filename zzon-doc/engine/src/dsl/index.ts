@@ -405,6 +405,8 @@ export class DiagramBuilder extends ContainerBuilder {
 
 export interface DiagramOpts {
   title?: string;
+  /** diagram-level description — surfaces as the viewer titlebar tooltip */
+  description?: string;
   aspectRatio?: number;
   docKind?: "infra" | "data-flow" | "erd" | "agent-topology";
   /** allow mixing category-card and icon node vocabularies in one diagram */
@@ -421,6 +423,7 @@ export function diagram(
   const model: DiagramModel = {
     id,
     title: opts.title,
+    description: opts.description,
     docKind: opts.docKind,
     aspectRatio: opts.aspectRatio ?? 1.6,
     allowMixedVocabulary: opts.allowMixedVocabulary,

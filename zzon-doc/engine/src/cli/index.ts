@@ -2,9 +2,13 @@
 /**
  * infra-architect CLI.
  *
- *   bun ia render <diagram.ts> [--out out]      -> .html + .svg + .scene.json
- *   bun ia export <diagram.ts> [--png] [--out]  -> PNG via resvg (vendored fonts)
- *   bun ia watch  <diagram.ts> [--port 4499]    -> dev server + auto reload
+ *   bun ia render <diagram.ts|.json> [--out out]      -> .html + .svg + .scene.json
+ *   bun ia export <diagram.ts|.json> [--png] [--out]  -> PNG via resvg (vendored fonts)
+ *   bun ia watch  <diagram.ts|.json> [--port 4499]    -> dev server + auto reload
+ *
+ * .json input is a legacy DiagramSpec: converted internally via
+ * src/compat/diagramspec.ts, same outputs, slug = json basename.
+ * kind "sequence" is rejected (zzon-seq renders sequence diagrams).
  *
  * Watch mode re-runs the render in a CHILD process per change (fresh ESM
  * module graph; a crashing diagram.ts cannot take the watcher down).
@@ -21,7 +25,7 @@ function flag(name: string): string | undefined {
 }
 
 function usage(): never {
-  console.error("usage: bun ia <render|export|watch> <diagram.ts> [--out dir] [--png] [--port n]");
+  console.error("usage: bun ia <render|export|watch> <diagram.ts|.json> [--out dir] [--png] [--port n]");
   process.exit(2);
 }
 
@@ -32,12 +36,26 @@ if (!existsSync(file)) {
   process.exit(2);
 }
 const outDir = resolve(flag("out") ?? "out");
-const name = basename(file).replace(/\.[tj]s$/, "");
+const name = basename(file).replace(/\.([tj]s|json)$/, "");
+
+/** load the model: .json = legacy DiagramSpec (converted), else diagram module */
+async function loadModel(): Promise<import("../model/types.ts").DiagramModel> {
+  if (file.endsWith(".json")) {
+    const { convertDiagramSpec } = await import("../compat/diagramspec.ts");
+    const spec: unknown = JSON.parse(await Bun.file(file).text());
+    const { model, warnings, notes } = convertDiagramSpec(spec, { id: name });
+    for (const n of notes) console.error(`note: ${n}`);
+    for (const w of warnings) console.error(`⚠ ${w}`);
+    return model;
+  }
+  const { loadDiagram } = await import("../pipeline.ts");
+  return loadDiagram(file);
+}
 
 async function renderOnce(withPng = false): Promise<void> {
-  const { loadDiagram, renderAll } = await import("../pipeline.ts");
+  const { renderAll } = await import("../pipeline.ts");
   const { renderHtml } = await import("../render/html.ts");
-  const model = await loadDiagram(file);
+  const model = await loadModel();
   const t0 = performance.now();
   // payload.assets names the sibling files this command actually writes
   // (frame export-button download fallback, contract §6)

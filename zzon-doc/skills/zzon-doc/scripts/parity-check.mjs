@@ -7,6 +7,12 @@
  * 자동 검출(기능 소실 게이트). 시각 품질·인터랙션 손맛은 수동 대조가 정본이며,
  * 이 스크립트는 그 전제 조건을 기계로 못박는다.
  *
+ * 두 가지 대조 모드:
+ *   A) 같은 입력(SAME-INPUT): 동일한 레거시 DiagramSpec JSON을 render.mjs와
+ *      엔진 CLI(변환 내장) 양쪽으로 렌더해 기능 매트릭스를 돌리고,
+ *      스펙의 node/edge/flow 개수가 엔진 scene.json과 일치하는지까지 못박는다.
+ *   B) 근사쌍: 레거시 샘플 ↔ 비슷한 엔진 예제(.ts) — 기능 커버리지 대조(기존 방식).
+ *
  *   사용법: node parity-check.mjs   (플러그인 어디서 실행해도 됨, bun 필요)
  */
 import { execFileSync } from "node:child_process";
@@ -44,6 +50,10 @@ const FEATURES = [
 const t = mkdtempSync(join(tmpdir(), "parity-"));
 const clean = () => rmSync(t, { recursive: true, force: true });
 
+function loadSpec(path) {
+  const raw = JSON.parse(readFileSync(path, "utf8"));
+  return raw && raw.spec ? raw.spec : raw; // { spec: {...} } 래퍼 허용
+}
 function legacyRender(sample) {
   const out = join(t, `legacy-${sample}.html`);
   execFileSync(process.execPath, [RENDER, join(REFS, `${sample}.json`), "-o", out], { stdio: "pipe" });
@@ -53,8 +63,38 @@ function engineRender(example) {
   execFileSync("bun", [join(ENGINE, "src", "cli", "index.ts"), "render", join(ENGINE, "examples", `${example}.ts`), "--out", t], { stdio: "pipe", cwd: ENGINE });
   return readFileSync(join(t, `${example}.html`), "utf8");
 }
+/** 같은입력 모드: 레거시 JSON을 엔진 CLI로 렌더 (계약상 slug = json 파일명) */
+function engineRenderJson(sample) {
+  execFileSync("bun", [join(ENGINE, "src", "cli", "index.ts"), "render", join(REFS, `${sample}.json`), "--out", t], { stdio: "pipe", cwd: ENGINE });
+  return {
+    html: readFileSync(join(t, `${sample}.html`), "utf8"),
+    scene: JSON.parse(readFileSync(join(t, `${sample}.scene.json`), "utf8")),
+  };
+}
 
-/** 대조쌍: (레거시 샘플, 신형 예제, 플로우 유무) — 내용 1:1이 아니라 "기능 커버리지" 대조다 */
+/** 기능 매트릭스를 돌리고 소실 건수를 돌려준다 */
+function checkFeatures(legacy, fresh, flows) {
+  let lostCount = 0;
+  for (const [name, re, cond, mode] of FEATURES) {
+    const applyLegacy = cond !== "flows" || flows.legacyFlows;
+    const applyNew = cond !== "flows" || flows.newFlows;
+    const inLegacy = applyLegacy ? re.test(legacy) : null;
+    const inNew = applyNew ? re.test(fresh) : null;
+    // 게이트 조건: 레거시에 있던 기능이 신형(적용 대상일 때)에 없으면 실패.
+    const lost = mode !== "new-only-fix" && inLegacy === true && applyNew && inNew === false;
+    const missingFix = mode === "new-only-fix" && inNew === false;
+    const mark = lost || missingFix ? "✗" : "✓";
+    if (lost || missingFix) lostCount++;
+    const fmt = (v, applied) => (applied ? (v ? "있음" : "없음") : "해당없음");
+    console.log(`  ${mark} ${name.padEnd(20)} 구:${fmt(inLegacy, applyLegacy)}  신:${fmt(inNew, applyNew)}`);
+  }
+  return lostCount;
+}
+
+/** A) 같은입력 대조 대상: 동일 JSON을 양쪽으로 렌더한다 (kind:"sequence"는 엔진 대상 아님) */
+const SAME_INPUT = ["sample-context", "sample-erd", "sample-msa-infra", "sample-event-flow"];
+
+/** B) 근사쌍: (레거시 샘플, 신형 예제, 플로우 유무) — 내용 1:1이 아니라 "기능 커버리지" 대조다 */
 const PAIRS = [
   ["sample-msa-infra", "msa-sample", { legacyFlows: true, newFlows: false }],
   ["sample-erd", "erd-sample", { legacyFlows: false, newFlows: false }],
@@ -63,29 +103,44 @@ const PAIRS = [
 
 let failures = 0;
 try {
+  // A) 같은입력 게이트: 기능 소실 + node/edge/flow 개수 불일치 모두 실패
+  for (const sample of SAME_INPUT) {
+    const spec = loadSpec(join(REFS, `${sample}.json`));
+    const hasFlows = Array.isArray(spec.flows) && spec.flows.length > 0;
+    const legacy = legacyRender(sample);
+    console.log(`\n■ [같은입력] ${sample}.json — render.mjs(구) ↔ 엔진 CLI(신)`);
+    let fresh;
+    try {
+      fresh = engineRenderJson(sample);
+    } catch (e) {
+      const out = (e.stdout?.toString() || "") + (e.stderr?.toString() || "");
+      console.log(`  ✗ 엔진 CLI가 이 .json을 렌더하지 못했다: ${(out.trim() || e.message).split("\n")[0]}`);
+      failures++;
+      continue;
+    }
+    failures += checkFeatures(legacy, fresh.html, { legacyFlows: hasFlows, newFlows: hasFlows });
+    // 개수 대조: 레거시 스펙 ↔ 엔진 scene.json — 변환이 요소를 흘리면 여기서 걸린다
+    for (const key of ["nodes", "edges", "flows"]) {
+      const inSpec = Array.isArray(spec[key]) ? spec[key].length : 0;
+      const inScene = Array.isArray(fresh.scene[key]) ? fresh.scene[key].length : 0;
+      const ok = inSpec === inScene;
+      if (!ok) failures++;
+      console.log(`  ${ok ? "✓" : "✗"} count:${key.padEnd(6)} 스펙:${inSpec}  scene.json:${inScene}`);
+    }
+  }
+
+  // B) 근사쌍 게이트 (기존 방식 유지)
   for (const [legacySample, engineExample, flows] of PAIRS) {
     const legacy = legacyRender(legacySample);
     const fresh = engineRender(engineExample);
     console.log(`\n■ ${legacySample}(구) ↔ ${engineExample}(신)`);
-    for (const [name, re, cond, mode] of FEATURES) {
-      const applyLegacy = cond !== "flows" || flows.legacyFlows;
-      const applyNew = cond !== "flows" || flows.newFlows;
-      const inLegacy = applyLegacy ? re.test(legacy) : null;
-      const inNew = applyNew ? re.test(fresh) : null;
-      // 게이트 조건: 레거시에 있던 기능이 신형(적용 대상일 때)에 없으면 실패.
-      const lost = mode !== "new-only-fix" && inLegacy === true && applyNew && inNew === false;
-      const missingFix = mode === "new-only-fix" && inNew === false;
-      const mark = lost || missingFix ? "✗" : "✓";
-      if (lost || missingFix) failures++;
-      const fmt = (v, applied) => (applied ? (v ? "있음" : "없음") : "해당없음");
-      console.log(`  ${mark} ${name.padEnd(20)} 구:${fmt(inLegacy, applyLegacy)}  신:${fmt(inNew, applyNew)}`);
-    }
+    failures += checkFeatures(legacy, fresh, flows);
   }
 } finally {
   clean();
 }
 
 console.log(failures === 0
-  ? "\n게이트 통과 — 레거시 뷰어 기능이 신형 프레임에서 소실되지 않았다."
-  : `\n게이트 실패 ${failures}건 — 위 ✗ 항목이 신형에서 소실됐다.`);
+  ? "\n게이트 통과 — 레거시 뷰어 기능이 신형 프레임에서 소실되지 않았고, 같은입력 개수도 일치한다."
+  : `\n게이트 실패 ${failures}건 — 위 ✗ 항목(기능 소실 또는 같은입력 개수/렌더 불일치)을 고쳐라.`);
 process.exit(failures === 0 ? 0 : 1);

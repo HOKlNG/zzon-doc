@@ -2,7 +2,7 @@
 /**
  * build-docs.mjs — 여러 DiagramSpec을 모아 "문서 사이트" 하나로 묶는다.
  *
- * <docsDir>/specs/*.json 을 전부 render.mjs(엔진)로 렌더해
+ * <docsDir>/specs/*.json 을 동봉 엔진 CLI(bun, DiagramSpec JSON 변환 내장)로 렌더해
  * <docsDir>/diagrams/<slug>.html 로 떨군 뒤,
  * 좌측 메뉴(접기) + 전체보기(홈) + 뷰어가 들어있는 self-contained <docsDir>/index.html 을 생성한다.
  *
@@ -11,7 +11,10 @@
  *
  * 규칙(소유자 표준):
  * - 라이브러리/프레임워크/CDN 0. 순수 HTML/CSS/바닐라 JS + Node 내장만. 출력도 self-contained.
- * - render.mjs(검증된 엔진)는 손대지 않고 자식 프로세스로만 호출한다.
+ * - 렌더러는 손대지 않고 자식 프로세스로만 호출한다. 기본 경로는 동봉 엔진 CLI(bun)이고
+ *   kind:"sequence"만 zzon-seq(render-seq.mjs)로 위임한다.
+ * - 탈출구: 환경변수 ZZON_LEGACY_RENDER=1 또는 스펙의 "renderer":"legacy" → 레거시 render.mjs.
+ *   bun이 PATH에 없거나 엔진 폴더가 없으면 경고 한 번 찍고 레거시로 폴백한다(빌드는 계속, exit 0).
  * - 디자인은 shadcn 풍(중립 팔레트·옅은 보더/그림자·여백)을 CSS로만 흉내. 아이콘은 엔진과 같은 lucide만 인라인.
  * - 각 다이어그램은 독립 .html 그대로 두고 iframe으로 끼워 보여준다(전체화면 지원).
  */
@@ -55,7 +58,10 @@ function usage() {
   index.html     출력 — 통합 메뉴 + 전체보기 + 뷰어 (이 파일을 브라우저로 연다)
   manifest.json  출력 — 생성된 카탈로그
 
-메뉴 그룹: spec.section 이 있으면 그걸로, 없으면 kind(infra/data-flow/erd/agent-topology)로 묶는다.`);
+메뉴 그룹: spec.section 이 있으면 그걸로, 없으면 kind(infra/data-flow/erd/agent-topology)로 묶는다.
+
+렌더 경로: 기본은 동봉 엔진 CLI(bun, DiagramSpec JSON 변환 내장). kind:"sequence"는 zzon-seq.
+탈출구:   ZZON_LEGACY_RENDER=1 또는 스펙 "renderer":"legacy" → 레거시 render.mjs.`);
 }
 
 /* ── 스펙 로딩 ───────────────────────────────────────────────────────── */
@@ -65,6 +71,45 @@ const KIND_ORDER = ["infra", "data-flow", "sequence", "erd", "agent-topology"];
 function loadSpec(path) {
   const raw = JSON.parse(readFileSync(path, "utf8"));
   return raw && raw.spec ? raw.spec : raw; // { spec: {...} } 래퍼 허용
+}
+
+/* ── 엔진 가용성 + scene.json counts ─────────────────────────────────── */
+
+let engineOk = null; // null = 미확인 (경고는 딱 한 번만 찍는다)
+function engineAvailable() {
+  if (engineOk !== null) return engineOk;
+  let why = null;
+  if (!existsSync(TERRA_CLI)) {
+    why = `엔진 폴더가 없다: ${TERRA_ENGINE}`;
+  } else {
+    try {
+      execFileSync("bun", ["--version"], { stdio: "pipe" });
+    } catch {
+      why = "bun이 PATH에 없다";
+    }
+  }
+  engineOk = why === null;
+  if (!engineOk) {
+    console.warn(`⚠ ${why} — 이번 빌드는 레거시 render.mjs로 폴백한다 (엔진 경로: cd engine && bun install).`);
+  }
+  return engineOk;
+}
+
+/** 엔진이 남긴 <slug>.scene.json에서 counts를 산출한다 (없거나 깨졌으면 null). */
+function sceneCounts(outHtml) {
+  const sceneJson = outHtml.replace(/\.html$/, ".scene.json");
+  if (!existsSync(sceneJson)) return null;
+  try {
+    const sc = JSON.parse(readFileSync(sceneJson, "utf8"));
+    return {
+      nodes: (sc.nodes || []).length,
+      edges: (sc.edges || []).length,
+      flows: (sc.flows || []).length,
+      groups: (sc.groups || []).length + (sc.overlays || []).length,
+    };
+  } catch {
+    return null;
+  }
 }
 
 /* ── 메인 ────────────────────────────────────────────────────────────── */
@@ -96,6 +141,7 @@ function main() {
 
   const diagrams = [];
   const failures = [];
+  const engineFallbacks = []; // 엔진 렌더 실패 → 레거시 폴백으로 살린 스펙들 (빌드 성공, exit 0 유지)
 
   for (const file of specFiles) {
     const specPath = join(specsDir, file);
@@ -167,13 +213,41 @@ function main() {
       failures.push({ slug, msg: `kind:"sequence" 스펙인데 zzon-seq 스킬이 없다: ${RENDER_SEQ}` });
       continue;
     }
-    try {
-      execFileSync(process.execPath, [isSeq ? RENDER_SEQ : RENDER, specPath, "-o", outHtml], { stdio: "pipe" });
-    } catch (e) {
-      const out = (e.stdout?.toString() || "") + (e.stderr?.toString() || "");
-      failures.push({ slug, msg: out.trim() || e.message });
-      continue;
+    // 기본 경로: sequence가 아니면 동봉 엔진 CLI가 DiagramSpec JSON을 직접 렌더한다(변환 내장,
+    // slug = json 파일명). 탈출구: ZZON_LEGACY_RENDER=1 또는 "renderer":"legacy" → render.mjs.
+    const wantLegacy = process.env.ZZON_LEGACY_RENDER === "1" || spec.renderer === "legacy";
+    let renderedByEngine = false;
+    if (!isSeq && !wantLegacy && engineAvailable()) {
+      try {
+        execFileSync("bun", [TERRA_CLI, "render", specPath, "--out", outDir], {
+          stdio: "pipe",
+          cwd: TERRA_ENGINE,
+        });
+        renderedByEngine = existsSync(outHtml);
+        if (!renderedByEngine) {
+          engineFallbacks.push({ slug, msg: `엔진이 diagrams/${slug}.html 을 만들지 않았다` });
+        }
+      } catch (e) {
+        // 방어: 엔진이 이 JSON을 (아직) 못 받으면 레거시로 폴백하고 빌드는 계속한다.
+        const out = (e.stdout?.toString() || "") + (e.stderr?.toString() || "");
+        engineFallbacks.push({ slug, msg: (out.trim() || e.message).split("\n")[0] });
+      }
     }
+    if (!renderedByEngine) {
+      try {
+        execFileSync(process.execPath, [isSeq ? RENDER_SEQ : RENDER, specPath, "-o", outHtml], { stdio: "pipe" });
+      } catch (e) {
+        const out = (e.stdout?.toString() || "") + (e.stderr?.toString() || "");
+        failures.push({ slug, msg: out.trim() || e.message });
+        continue;
+      }
+    }
+    const specCounts = {
+      nodes: Array.isArray(spec.nodes) ? spec.nodes.length : 0,
+      edges: Array.isArray(spec.edges) ? spec.edges.length : 0,
+      flows: Array.isArray(spec.flows) ? spec.flows.length : 0,
+      groups: Array.isArray(spec.groups) ? spec.groups.length : 0,
+    };
     const counts = isSeq
       ? (() => {
           const msgs = (spec.steps || []).filter((s) => s && s.type === "message").length;
@@ -183,12 +257,8 @@ function main() {
             actors: (spec.actors || []).length, messages: msgs,
           };
         })()
-      : {
-          nodes: Array.isArray(spec.nodes) ? spec.nodes.length : 0,
-          edges: Array.isArray(spec.edges) ? spec.edges.length : 0,
-          flows: Array.isArray(spec.flows) ? spec.flows.length : 0,
-          groups: Array.isArray(spec.groups) ? spec.groups.length : 0,
-        };
+      // 엔진 렌더면 counts는 산출된 scene.json이 정본(자가신고보다 정확), 실패 시 스펙 counts
+      : (renderedByEngine && sceneCounts(outHtml)) || specCounts;
     diagrams.push({
       slug,
       title: spec.title || slug,
@@ -225,6 +295,10 @@ function main() {
 
   const total = diagrams.reduce((a, d) => a + d.counts.nodes, 0);
   console.log(`  다이어그램 ${diagrams.length}개 · 총 노드 ${total}개`);
+  if (engineFallbacks.length) {
+    console.log(`\n⚠ 엔진 렌더 실패 → 레거시 render.mjs 폴백 ${engineFallbacks.length}건 (빌드는 성공):`);
+    for (const f of engineFallbacks) console.log(`  - ${f.slug}: ${f.msg}`);
+  }
   if (failures.length) {
     console.log(`\n⚠ 렌더 실패 ${failures.length}건 (인덱스에서 제외됨):`);
     for (const f of failures) console.log(`  - ${f.slug}\n    ${f.msg.replace(/\n/g, "\n    ")}`);

@@ -240,6 +240,8 @@ export interface ElementHints {
 export interface DiagramModel {
   id: string;
   title?: string;
+  /** diagram-level description — titlebar tooltip in the viewer frame */
+  description?: string;
   /** manifest kind for the docs site (default "infra") */
   docKind?: "infra" | "data-flow" | "erd" | "agent-topology";
   /** target aspect ratio for the overall canvas */

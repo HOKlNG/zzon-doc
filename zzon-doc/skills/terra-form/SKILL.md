@@ -91,6 +91,7 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-doc/scripts/build-docs.mjs <project>/zzon
 ```
 
 `wiki.json`이 있으면(zzon-wiki 사용 중) `build-wiki.mjs`도 실행하고, 위키 문서 본문에는 `@diagram(<slug>)` 한 줄만 쓴다.
+참고: `renderer` 없는 일반 DiagramSpec JSON 스펙도 이제 같은 엔진이 렌더한다(변환 내장) — 통합 문서의 뷰어 프레임이 전부 동일해진다.
 
 ## 출력 .html에서 되는 것 (사용자에게 안내)
 

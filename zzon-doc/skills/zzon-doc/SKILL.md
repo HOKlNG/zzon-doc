@@ -51,6 +51,7 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-doc/scripts/build-docs.mjs <docsDir> --ti
 ```
 
 counts는 scene.json에서 자동 산출된다. `wiki.json`이 있으면 build-wiki도 이어서 실행.
+기존 DiagramSpec JSON(`specs/*.json`)도 엔진이 그대로 렌더한다(변환 내장) — 레거시 render.mjs는 `ZZON_LEGACY_RENDER=1`(또는 스펙 `"renderer":"legacy"`) 탈출구로만 쓴다.
 
 **품질 게이트(필수)** — 렌더 후 불변식 0 확인, PNG 육안 확인:
 

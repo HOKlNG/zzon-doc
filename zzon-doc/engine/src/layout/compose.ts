@@ -136,7 +136,9 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
           rect,
           role: "table",
           table: makeSceneTable(sized, oy),
-          label: el.label ? makeLabel(el.label, ox, oy, 12, { weight: "semibold", align: "start" }) : undefined,
+          label: el.label
+            ? makeLabel(el.label, ox + 28, oy + 20, 12, { weight: "semibold", align: "start" })
+            : undefined,
           description: el.description,
           href: el.href,
           meta: el.meta,
@@ -168,7 +170,11 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
           tech: el.tech,
           description: el.description,
           href: el.href,
-          label: el.label ? makeLabel(el.label, ox, oy, 12, { weight: "semibold", align: "start" }) : undefined,
+          // 렌더러가 내부 배치하므로 좌표는 bbox 근사용 — 반드시 rect 안쪽이어야
+          // 라우팅·불변식의 라벨 영역이 실제와 일치한다
+          label: el.label
+            ? makeLabel(el.label, ox + 52, oy + 24, 12, { weight: "semibold", align: "start" })
+            : undefined,
           meta: el.meta,
         });
       },
@@ -251,7 +257,7 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
       const strategy = el.layout === "auto" ? autoStrategy(projected) : el.layout;
       const placed =
         strategy === "layered"
-          ? await placeLayered(boxes, projected)
+          ? await placeLayered(boxes, projected, "RIGHT", model.aspectRatio)
           : await placePack(boxes, model.aspectRatio);
       contentW = placed.width;
       contentH = placed.height;
@@ -361,7 +367,7 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
   const coreEdges = projectEdges(model.children, model.edges);
   const corePlaced =
     autoStrategy(coreEdges) === "layered"
-      ? await placeLayered(coreBoxes, coreEdges)
+      ? await placeLayered(coreBoxes, coreEdges, "RIGHT", model.aspectRatio)
       : await placePack(coreBoxes, model.aspectRatio);
 
   // actors by side
