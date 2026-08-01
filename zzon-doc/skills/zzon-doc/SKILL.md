@@ -11,7 +11,7 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 
 > 엔진은 진짜 자동 배치(ELK+격자+직교 라우팅)라 **lane/order 수동 조정과 layout-lint가 없다** —
 > 대신 렌더 후 불변식 검사(겹침·관통·라벨 충돌 0)를 통과시킨다.
-> 시간축 왕복(요청/응답·alt/loop)은 여전히 **zzon-seq** 스킬이다. AWS Terraform 인프라는 **terra-form** 스킬이 전문이다.
+> 시간축 왕복(요청/응답·alt/loop)은 여전히 **zzon-seq** 스킬이다. Terraform 클라우드 인프라(프로바이더 무관)는 **terra-form** 스킬이 전문이다.
 
 ## 1. 범위를 먼저 잡는다 (가장 중요 — 기존 게이트 유지)
 
@@ -24,7 +24,7 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 | 유형 | 저작 |
 |---|---|
 | A 개요(컨텍스트·랜드스케이프), B 구조 중 C4/MSA/도메인 | **카테고리 카드 노드**(`category:`/`tech:`/`description:`, AWS 아이콘 금지 관례) — 참고: `engine/examples/msa-sample.ts` |
-| B 구조 중 클라우드/멀티리전/EKS/계정위계/네트워크 | **AWS 아이콘 + grid/overlay/band** — 참고: `engine/examples/serverless-sample.ts`, `eks-cluster.ts`, `multi-account-lz.ts`, `multi-region-cicd.ts`. tf가 있으면 terra-form 스킬 절차로 |
+| B 구조 중 클라우드/멀티리전/EKS/계정위계/네트워크 | **AWS 아이콘 + grid/overlay/band** — 참고: `engine/examples/serverless-sample.ts`, `eks-cluster.ts`, `multi-account-lz.ts`, `multi-region-cicd.ts`. tf가 있으면(클라우드 무관) terra-form 스킬 절차로 |
 | C 흐름(기능·이벤트·CI/CD) | 구조 + **`d.flow()`**(엣지 순번+내레이션, 뷰어에서 클릭 하이라이트), `docKind:"data-flow"` |
 | D ERD | **`table:` 노드** + `sourceColumn/targetColumn` + 카디널리티, `docKind:"erd"` — 참고: `engine/examples/erd-sample.ts` |
 | 시퀀스 | zzon-seq로 위임 |

@@ -16,7 +16,7 @@
 
 구조·데이터 다이어그램(infra/data-flow/erd/agent-topology)이 **내장 TS 엔진**으로
 렌더된다: 진짜 자동 배치(ELK+감기, lane/order 수동 조정·layout-lint 불필요),
-직교 라우팅, 겹침·관통 불변식, AWS 공식 아이콘 838종 + 격자/overlay(terra-form 스킬).
+직교 라우팅, 겹침·관통 불변식, Terraform 클라우드 인프라는 terra-form 스킬(AWS 공식 아이콘 838종+격자/overlay 내장, 타 클라우드는 카드+확장 아이콘).
 뷰어 프레임은 기존 UX 그대로(사이드바·플로우·범례·테마 — 이제 테마가 유지된다).
 기존 DiagramSpec JSON은 변환이 내장돼 그대로 렌더되고, `zzon-seq`는 독립 유지.
 레거시 렌더러는 `ZZON_LEGACY_RENDER=1` 또는 스펙에 `"renderer":"legacy"`로 사용 가능.

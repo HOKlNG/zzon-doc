@@ -1,16 +1,26 @@
 ---
 name: terra-form
-description: Terraform이 있는 AWS 인프라를 공식 AWS 아이콘·AZ×티어 격자·스팬 overlay로 그린다. infra-architect 엔진(TS DSL → 자동배치 → 셀프컨테인드 HTML)으로 렌더하고, zzon-doc 통합 문서/zzon-wiki manifest에 정식 편입한다. "tf 인프라 그려줘", "테라폼 구조 시각화", zzon-wiki의 인프라/배포 문서에 사용한다.
+description: Terraform이 있는 클라우드 인프라(AWS·GCP·Azure 등)를 그린다. AWS는 공식 아이콘 838종·AZ×티어 격자·스팬 overlay, 타 클라우드는 카테고리 카드+확장 아이콘으로. 내장 엔진(TS DSL → 자동배치 → 셀프컨테인드 HTML)으로 렌더하고 zzon-doc 통합 문서/zzon-wiki manifest에 정식 편입한다. "tf 인프라 그려줘", "테라폼 구조 시각화", zzon-wiki의 인프라/배포 문서에 사용한다.
 argument-hint: '[tf 경로 — 비우면 ./infra 탐색]'
 ---
 
-# Terraform → AWS 인프라 다이어그램
+# Terraform → 클라우드 인프라 다이어그램
 
-`*.tf`를 읽어 infra-architect 엔진의 **TS DSL**을 저작하고 렌더한다. 산출물은
-공식 AWS 아이콘 838종·격자·overlay·직교 라우팅이 적용된 단일 `.html`(+`.png`/`.svg`)이다.
+`*.tf`를 읽어 내장 엔진의 **TS DSL**을 저작하고 렌더한다. 산출물은
+자동배치·직교 라우팅이 적용된 단일 `.html`(+`.png`/`.svg`)이다.
 
-> **역할 분담**: `*.tf`가 있는 AWS 인프라 → 이 스킬. tf가 없거나 AWS가 아니면 → zzon-doc `infra` kind.
+> **역할 분담**: `*.tf`가 있는 클라우드 인프라(프로바이더 무관) → 이 스킬. tf가 없으면 → zzon-doc `infra` kind.
 > 같은 프로젝트에서 zzon-doc 개요(컨텍스트)와 terra-form 인프라 상세가 공존하는 게 정상이다.
+
+## 프로바이더별 어휘 (스캔 단계에서 provider 블록으로 감지)
+
+| 프로바이더 | 노드 어휘 | 그룹 |
+|---|---|---|
+| `aws` | 공식 AWS 아이콘 838종 (`grep manifest.gen.ts`) | vpc/region/subnet/account + AZ×티어 `grid()`·`overlay()` |
+| `google`·`azurerm` 등 | **카테고리 카드**(category/tech) + 필요 시 `assets/extra-icons/`에 공식 아이콘 추가(`x.*`) | `generic` 그룹 + 라벨 (VNet·리소스그룹 등은 라벨로 표기) |
+
+한 다이어그램 안에서 어휘를 섞지 않는다(validator가 막는다 — `allowMixedVocabulary`는 멀티클라우드 하이브리드 다이어그램처럼 의도가 명확할 때만).
+GCP/Azure 공식 아이콘 팩 파이프라인은 로드맵 — 추가 시 이 표만 갱신하면 된다.
 
 ## 0. 엔진 위치
 
@@ -24,7 +34,7 @@ argument-hint: '[tf 경로 — 비우면 ./infra 탐색]'
 1. **스캔**: `envs/*/main.tf`(모듈 조합 = 그림의 그룹 구조) → 각 모듈의 resource 종류·수를 센다.
    env 간 변수 불일치(stale env — 모듈이 안 받는 변수를 넘기는 등)를 발견하면 **그리기 전에 보고한다.**
 2. **제안은 반드시 이 형태로** — 리소스 ~20개 이하 & 목적 자명이면 기본값 명시 후 바로 진행, 그 외엔 한 묶음(최대 4문)으로 묻는다:
-   - **환경/스코프**: dev / prd / 특정 모듈만 (env가 갈리면 그림이 다르다 — 현행 env를 근거와 함께 추천)
+   - **환경/스코프**: dev / prd / 특정 모듈만 (env가 갈리면 그림이 다르다 — 현행 env를 근거와 함께 추천). 멀티 프로바이더면 어느 클라우드를 그릴지도 함께
    - **상세 수준**: 개요(서비스 단위) / 표준(리소스 단위) / 상세(서브넷·IAM까지)
    - **강조 관점**: 요청 흐름 / 데이터 파이프라인 / 네트워크 경계 / CI·CD / 보안 → 엣지 `layer` 구성이 된다
    - **생략 규칙**: IAM·로그·모니터링 생략 여부 — "전부 표시"는 명시적 동의를 받는다
