@@ -12,6 +12,16 @@
 
 > **Claude Code 플러그인(스킬 3종)** — 코드베이스를 분석해 인터랙티브 아키텍처 다이어그램을 그리고(`zzon-doc`), 주요 기능의 시간축 상호작용을 시퀀스 다이어그램으로 그리며(`zzon-seq`), 프로젝트 개발 문서 위키를 질문 기반으로 채워 준다(`zzon-wiki`). 결과물은 의존성 0짜리 `.html` — 브라우저로 열어서 보기만 하면 된다.
 
+## v0.8.1 — 통합 다이어그램 엔진
+
+구조·데이터 다이어그램(infra/data-flow/erd/agent-topology)이 **내장 TS 엔진**으로
+렌더된다: 진짜 자동 배치(ELK+감기, lane/order 수동 조정·layout-lint 불필요),
+직교 라우팅, 겹침·관통 불변식, AWS 공식 아이콘 838종 + 격자/overlay(terra-form 스킬).
+뷰어 프레임은 기존 UX 그대로(사이드바·플로우·범례·테마 — 이제 테마가 유지된다).
+기존 DiagramSpec JSON은 변환이 내장돼 그대로 렌더되고, `zzon-seq`는 독립 유지.
+레거시 렌더러는 `ZZON_LEGACY_RENDER=1` 또는 스펙에 `"renderer":"legacy"`로 사용 가능.
+엔진 준비: `cd zzon-doc/engine && bun install` (bun 없으면 자동으로 레거시 폴백).
+
 ## 미리보기
 
 | 통합 문서 (메뉴 + 전체보기) | 시퀀스 다이어그램 (zzon-seq) |

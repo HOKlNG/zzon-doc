@@ -1,7 +1,7 @@
 {
   "name": "zzon-doc",
-  "version": "0.8.0",
-  "description": "코드를 분석해 아키텍처/인프라/ERD/에이전트 다이어그램(zzon-doc)과 시퀀스 다이어그램(zzon-seq)을 인터랙티브 단일 .html로 렌더링하고, 프로젝트 개발 문서 위키를 질문 기반으로 채워 self-contained 문서 사이트로 만든다(zzon-wiki). 서버·라이브러리·CDN 의존 0.",
+  "version": "0.8.1",
+  "description": "코드를 분석해 아키텍처/인프라/ERD/에이전트 다이어그램(zzon-doc — 내장 자동배치 엔진: ELK+직교 라우팅+겹침 불변식, AWS 아이콘 838종)과 시퀀스 다이어그램(zzon-seq)을 인터랙티브 단일 .html로 렌더링하고, 프로젝트 문서 위키를 질문 기반으로 채운다(zzon-wiki). Terraform AWS 인프라 특화 스킬(terra-form) 포함. 기존 DiagramSpec JSON은 변환 내장으로 그대로 렌더.",
   "author": {
     "name": "zzon"
   },
