@@ -31,7 +31,8 @@ argument-hint: '[그릴 프로세스 — 예: 결제 흐름 / 링크 저장 파�
 
 1. **코드를 실제로 추적한다** — 라우트 → 핸들러 → 서비스 → 큐/DB → 컨슈머. 읽은 것만 쓰고
    추측으로 채우지 마라. 각 message에 `sourceRef`(`path:line`)를 단다.
-2. `references/seq-spec.md`의 스키마로 `<출력폴더>/specs/<slug>.json`을 쓴다. slug는
+2. `references/seq-spec.md`의 스키마로 `<출력폴더>/specs/<slug>.json`을 쓴다(출력폴더
+   기본값은 `docs/zzon-doc/` — 구버전 루트 `zzon-doc/`가 이미 있으면 그걸 유지). slug는
    `seq-` 접두를 권장한다(예: `seq-booking-pay`) — 기존 data-flow slug와 구분된다.
 3. **essential 마킹**: 메시지의 30~40%에 `essential:true`. essential만 읽어도 이야기가
    끝까지 이해되게 고른다(간소화 보기가 이것으로 만들어진다).
@@ -40,7 +41,7 @@ argument-hint: '[그릴 프로세스 — 예: 결제 흐름 / 링크 저장 파�
 ## 3. 렌더한다
 
 - **통합 문서에 포함(기본)** — 다른 다이어그램과 같은 specs/ 폴더에 두고:
-  `node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-doc/scripts/build-docs.mjs ./zzon-doc --title "<제목>"`
+  `node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-doc/scripts/build-docs.mjs ./docs/zzon-doc --title "<제목>"`
   build-docs가 kind를 보고 render-seq로 라우팅해 `diagrams/<slug>.html` + manifest에 올린다.
 - **단일 장만** — `node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-seq/scripts/render-seq.mjs <spec.json> [-o out.html]`
 - 검증 실패는 'path: 메시지'로 전부 출력된다 — 스펙을 고쳐 재실행한다.

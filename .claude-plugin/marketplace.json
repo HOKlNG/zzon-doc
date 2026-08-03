@@ -4,14 +4,14 @@
     "name": "zzon"
   },
   "metadata": {
-    "description": "코드를 분석해 인터랙티브 아키텍처·시퀀스 다이어그램을 그리고, 프로젝트 개발 문서 위키를 질문 기반으로 채우는 Claude Code 플러그인 모음. 모두 의존성 0짜리 단일 .html로 출력.",
-    "version": "0.8.0"
+    "description": "코드를 분석해 인터랙티브 아키텍처·시퀀스 다이어그램을 그리고(Terraform 클라우드 인프라는 AWS 공식 아이콘), 프로젝트 개발 문서 위키를 질문 기반으로 채우는 Claude Code 플러그인 모음. 모두 의존성 0짜리 단일 .html로 출력.",
+    "version": "0.8.2"
   },
   "plugins": [
     {
       "name": "zzon-doc",
       "source": "./zzon-doc",
-      "description": "아키텍처 다이어그램(zzon-doc)·시퀀스 다이어그램(zzon-seq)·프로젝트 문서 위키(zzon-wiki) 스킬. 코드를 분석해 스펙 JSON·문서를 저작하고, 의존성 0짜리 인터랙티브 .html로 렌더링한다.",
+      "description": "아키텍처 다이어그램(zzon-doc)·시퀀스 다이어그램(zzon-seq)·Terraform 클라우드 인프라(terra-form)·프로젝트 문서 위키(zzon-wiki) 스킬. 코드를 분석해 스펙 JSON·문서를 저작하고, 내장 자동배치 엔진으로 의존성 0짜리 인터랙티브 .html을 렌더링한다.",
       "license": "MIT",
       "keywords": [
         "claude-code",
@@ -22,6 +22,8 @@
         "diagram",
         "architecture",
         "erd",
+        "infra",
+        "terraform",
         "visualization",
         "wiki",
         "documentation",

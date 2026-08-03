@@ -44,7 +44,8 @@ GCP/Azure 공식 아이콘 팩 파이프라인은 로드맵 — 추가 시 이 �
 
 ## 2. DSL 저작 — 계약
 
-- **파일 위치**: 대상 프로젝트의 `zzon-doc/terra/<slug>.ts` (다이어그램 소스도 그 프로젝트가 버전 관리한다).
+- **파일 위치**: 대상 프로젝트의 `docs/zzon-doc/terra/<slug>.ts` (다이어그램 소스도 그 프로젝트가 버전 관리한다).
+  구버전 기본값인 루트 `zzon-doc/` 산출 폴더가 이미 있으면 그걸 계속 쓴다 — 아래 경로도 전부 그 폴더 기준으로 바꾼다.
 - **API 정본은 엔진의 `examples/*.ts` 4종** — 반드시 하나를 먼저 읽는다 (`serverless-sample.ts`가 서버리스, `eks-cluster.ts`가 격자+overlay, `multi-account-lz.ts`가 멀티계정, `multi-region-cicd.ts`가 멀티리전).
 - 계층: `d.group(kind:"aws-cloud")` ▸ `region` ▸ 리소스. VPC의 AZ×티어는 `grid()`+`cell()`, 격자를 가로지르는 논리 그룹(ASG·노드풀)은 `overlay()`.
 - 액터는 `d.actor(side:)`, 외부 SaaS·부속 행은 `d.band("right"|"bottom")` — 외부 관리형(DB SaaS 등)은 오른쪽 밴드가 관례.
@@ -59,8 +60,8 @@ GCP/Azure 공식 아이콘 팩 파이프라인은 로드맵 — 추가 시 이 �
 
 ```bash
 cd $ENGINE
-bun ia render <project>/zzon-doc/terra/<slug>.ts --out <project>/zzon-doc/diagrams
-bun ia export <project>/zzon-doc/terra/<slug>.ts --png --out <project>/zzon-doc/diagrams
+bun ia render <project>/docs/zzon-doc/terra/<slug>.ts --out <project>/docs/zzon-doc/diagrams
+bun ia export <project>/docs/zzon-doc/terra/<slug>.ts --png --out <project>/docs/zzon-doc/diagrams
 ```
 
 렌더 후 **반드시** 불변식 검사를 돌리고 위반 0을 만든다:
@@ -69,7 +70,7 @@ bun ia export <project>/zzon-doc/terra/<slug>.ts --png --out <project>/zzon-doc/
 cd $ENGINE && bun -e '
 import { loadDiagram, buildScene } from "./src/pipeline.ts";
 import { checkScene } from "./tests/invariants.ts";
-const m = await loadDiagram("<project>/zzon-doc/terra/<slug>.ts");
+const m = await loadDiagram("<project>/docs/zzon-doc/terra/<slug>.ts");
 const s = await buildScene(m);
 console.log(checkScene(s, { aspectRatio: m.aspectRatio })); process.exit(0)'
 ```
@@ -80,7 +81,7 @@ console.log(checkScene(s, { aspectRatio: m.aspectRatio })); process.exit(0)'
 
 ## 4. 통합 문서/위키 편입 (manifest 정식 편입)
 
-렌더 산출물(`diagrams/<slug>.html`)이 놓인 상태에서, **패스스루 스펙**을 `zzon-doc/specs/<slug>.json`에 쓴다:
+렌더 산출물(`diagrams/<slug>.html`)이 놓인 상태에서, **패스스루 스펙**을 `docs/zzon-doc/specs/<slug>.json`에 쓴다:
 
 ```json
 {
@@ -99,7 +100,7 @@ console.log(checkScene(s, { aspectRatio: m.aspectRatio })); process.exit(0)'
 `source` 필드가 있으면 build-docs가 **엔진을 bun으로 직접 렌더**하고 counts를 scene.json에서 자동 산출한다. 통합 빌드:
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-doc/scripts/build-docs.mjs <project>/zzon-doc --title "<제목>"
+node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-doc/scripts/build-docs.mjs <project>/docs/zzon-doc --title "<제목>"
 ```
 
 `wiki.json`이 있으면(zzon-wiki 사용 중) `build-wiki.mjs`도 실행하고, 위키 문서 본문에는 `@diagram(<slug>)` 한 줄만 쓴다.

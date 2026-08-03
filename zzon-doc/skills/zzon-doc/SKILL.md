@@ -44,6 +44,9 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 
 ## 4. 렌더 + 통합 문서
 
+**산출 폴더(`<docsDir>`) 기본값은 대상 프로젝트의 `docs/zzon-doc/`이다.** 구버전 기본값인
+루트 `zzon-doc/` 산출 폴더가 이미 있으면 그걸 계속 쓴다(이사는 사용자가 요청할 때만).
+
 스펙 stub을 `<docsDir>/specs/<slug>.json`에 두면 build-docs가 엔진을 bun으로 직접 렌더한다:
 
 ```json

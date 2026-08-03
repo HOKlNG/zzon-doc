@@ -1,6 +1,6 @@
 # zzon-doc — 인수인계 (CLAUDE 세션용)
 
-이 레포는 **Claude Code 플러그인 마켓플레이스**다. 코드를 분석해 인터랙티브 아키텍처 다이어그램을 **의존성 0짜리 단일 .html**로 그려주는 스킬을 담는다. 나중에 문서 작성 기능까지 확장 예정.
+이 레포는 **Claude Code 플러그인 마켓플레이스**다. 코드를 분석해 인터랙티브 아키텍처·시퀀스 다이어그램과 프로젝트 문서 위키를 **의존성 0짜리 단일 .html**(산출물 기준)로 만들어 주는 스킬 4종을 담는다.
 
 ## 네이밍 (혼동 주의)
 
@@ -11,6 +11,7 @@
 | 스킬 1 | `zzon-doc` | → `/zzon-doc:zzon-doc` (플러그인 스킬은 `플러그인명:스킬명` 네임스페이스). 아키텍처 다이어그램 |
 | 스킬 2 | `zzon-wiki` | → `/zzon-doc:zzon-wiki`. 프로젝트 문서 위키 (질문 기반 채움 + 다이어그램 임베드) |
 | 스킬 3 | `zzon-seq` | → `/zzon-doc:zzon-seq`. 시퀀스 다이어그램 (액터 간 시간축 상호작용, `kind:"sequence"`) |
+| 스킬 4 | `terra-form` | → `/zzon-doc:terra-form`. Terraform 클라우드 인프라 (*.tf → 엔진 DSL, AWS 공식 아이콘 838종) |
 
 설치: `/plugin marketplace add <owner>/<repo>` → `/plugin install zzon-doc@zzon`
 호출: `/zzon-doc:zzon-doc <대상>` / `/zzon-doc:zzon-wiki`. 자연어 요청으로도 자동 동작.
@@ -20,59 +21,56 @@
 ```
 plugins-zzon-doc/
 ├── .claude-plugin/marketplace.json     # name: zzon, plugins:[zzon-doc → ./zzon-doc]
-├── README.md
+├── README.md / README.en.md
 └── zzon-doc/
     ├── .claude-plugin/plugin.json      # name: zzon-doc
     ├── README.md
-    └── skills/zzon-doc/
-        ├── SKILL.md                    # 코드분석 → 유형 판별 → DiagramSpec 저작 → render 실행
-        ├── references/
-        │   ├── document-types.md       # 유형 카탈로그 4계열(개요/구조·인프라/흐름/데이터) + 추상화 사다리 (리서치 40+ 근거)
-        │   ├── diagram-spec.md         # DiagramSpec 스펙 + 레이아웃 가이드 + 자가질문 (저작 가이드)
-        │   ├── sample-context.json     # 모범 답안 (C4 컨텍스트: nodeDescriptions+드릴다운 href)
-        │   ├── sample-container.json   # 모범 답안 (C4 컨테이너: 경계 그룹+밖에 L1 이웃 — L1~L2 한 장)
-        │   ├── sample-component.json   # 모범 답안 (C4 컴포넌트: 컨테이너 경계+이웃 — L2~L3 한 장)
-        │   ├── sample-full-landscape.json # 모범 답안 (풀뎁스 원장 27노드: 경계·도메인 밴드·데이터·운영 띠+드릴다운)
-        │   ├── sample-infra.json       # 모범 답안 (그룹+플로우)
-        │   ├── sample-eks.json         # 모범 답안 (EKS 2레이어: cluster+파드 그룹+파드 내부, KEDA/Karpenter 주석 노드, Spot badge)
-        │   ├── sample-msa-infra.json   # 모범 답안 (멀티 경계 MSA, 레인 밴드)
-        │   ├── sample-platform-infra.json # 모범 답안 (대규모·균형 그리드 14노드)
-        │   ├── sample-multiregion-ha.json # 모범 답안 (리전 미러 스탬프+badge+페일오버)
-        │   ├── sample-event-flow.json  # 모범 답안 (이벤트드리븐 data-flow)
-        │   ├── sample-data-pipeline.json # 모범 답안 (stage 밴드+횡단 거버넌스+데드레터)
-        │   ├── sample-erd.json         # 모범 답안 (FK 앵커+카디널리티)
-        │   ├── sample-erd-large.json   # 모범 답안 (다수 테이블·FK)
-        │   └── sample-agent-topology.json # 모범 답안 (에이전트 토폴로지)
-        └── scripts/
-            ├── render.mjs              # DiagramSpec JSON → 단일 .html (엔진)
-            ├── build-docs.mjs          # 여러 스펙 → 통합 문서 index.html (wiki.json 있으면 index 양보)
-            └── layout-lint.mjs         # 스펙 저작 후 배치 검사 (그룹 겹침·비멤버 삼킴 검출, 렌더 전 실행)
-    └── skills/zzon-wiki/
+    ├── engine/                         # 내장 TS 다이어그램 엔진 (v0.8.1 통합 — 구조·데이터 다이어그램의 정본 렌더러)
+    │   ├── CLAUDE.md / DESIGN.md       # 엔진 인수인계·설계 근거 — 레이아웃/라우팅 수정 전 필독 (§12 기각 대안 재제안 금지)
+    │   ├── src/                        # TS DSL·ELK 자동배치·libavoid 직교 라우팅·렌더러·CLI (bun+TS)
+    │   ├── examples/*.ts               # DSL API 정본 7종 (serverless/eks/multi-account/multi-region/msa/erd/flow)
+    │   ├── tests/                      # 불변식 검사(invariants.ts) 등 — bun test
+    │   └── package.json / bun.lock     # elkjs·libavoid-js·resvg 등 (node_modules는 gitignore, bun install 1회)
+    ├── skills/zzon-doc/                # 스킬 1 — 아키텍처 다이어그램
+    │   ├── SKILL.md                    # 범위 게이트 → 유형 판별·어휘 결정 → 엔진 DSL(.ts) 저작 → build-docs 렌더
+    │   ├── references/
+    │   │   ├── document-types.md       # 유형 카탈로그 4계열(개요/구조·인프라/흐름/데이터) + 추상화 사다리
+    │   │   ├── diagram-spec.md         # (레거시) DiagramSpec 스펙 + 레이아웃 가이드
+    │   │   ├── viewer-frame-contract.md# 뷰어 프레임 계약 v1 (payload/adapter/셸 프로토콜/glyph/드릴다운)
+    │   │   └── sample-*.json           # (레거시) DiagramSpec 모범 답안 14종 — 변환 내장으로 여전히 렌더됨
+    │   └── scripts/
+    │       ├── build-docs.mjs          # 여러 스펙 → 통합 문서 index.html (기본: 엔진 CLI(bun), sequence→render-seq, 폴백: legacy / wiki.json 있으면 index 양보)
+    │       ├── render.mjs              # (레거시 폴백) DiagramSpec JSON → 단일 .html — ZZON_LEGACY_RENDER=1·renderer:"legacy"·bun 부재 시
+    │       ├── viewer-frame.js         # 공용 뷰어 프레임 (+ viewer-frame.test.mjs)
+    │       ├── parity-check.mjs        # 레거시 vs 엔진 프레임 기능 패리티 게이트
+    │       └── layout-lint.mjs         # (레거시 저작용) 배치 검사 — 엔진 경로에선 불변식 검사가 대체
+    ├── skills/zzon-seq/                # 스킬 3 — 시퀀스 다이어그램
+    │   ├── SKILL.md                    # 판별(vs data-flow)→코드 추적→SeqSpec 저작→렌더/빌드→위키 임베드
+    │   ├── references/
+    │   │   ├── seq-spec.md             # SeqSpec 정본 (kind:"sequence", actors/steps/fragments, essential 규칙)
+    │   │   └── sample-seq-*.json       # 모범 답안 2종 (alt/else 결제 · loop/opt/par 배치)
+    │   └── scripts/
+    │       ├── render-seq.mjs          # SeqSpec 검증 + 템플릿 (seq-engine.js 인라인 주입)
+    │       └── seq-engine.js           # 뷰어 엔진 (순수 JS 정본 — 수정 시 브라우저 재검증)
+    ├── skills/terra-form/              # 스킬 4 — Terraform 클라우드 인프라
+    │   └── SKILL.md                    # *.tf 판독 → 엔진 DSL 저작 → bun ia render + 불변식 게이트 → 패스스루 스펙으로 manifest 편입
+    └── skills/zzon-wiki/               # 스킬 2 — 프로젝트 문서 위키
         ├── SKILL.md                    # 프로세스 강제: 스캔→티어 승인→섹션 루프(질문)→빌드, 재진입은 --status부터
         ├── references/
         │   ├── wiki-spec.md            # wiki.json 스키마 + md 규약(@diagram, ❓ 콜아웃) 정본
-        │   ├── doc-catalog.md          # SI 12섹션 카탈로그 템플릿 (tier 태그·dynamic 규칙·질문 은행)
+        │   ├── doc-catalog.md          # SI 12섹션 카탈로그 템플릿 (tier 태그·dynamic 규칙·질문 은행·seq-flows 슬롯)
         │   ├── sample-wiki.json        # 모범 답안 + 검증 픽스처
         │   └── sample-docs/            # 모범 문서 md (다이어그램 임베드·콜아웃 예시)
         └── scripts/
             └── build-wiki.mjs          # wiki.json+docs/*.md → self-contained 위키 index.html (--status 지원)
-    └── skills/zzon-seq/
-        ├── SKILL.md                    # 판별(vs data-flow)→코드 추적→SeqSpec 저작→렌더/빌드→위키 임베드
-        ├── references/
-        │   ├── seq-spec.md             # SeqSpec 정본 (kind:"sequence", actors/steps/fragments, essential 규칙)
-        │   ├── sample-seq-booking.json # 모범 답안 (결제 흐름: alt/else, reply 짝, async, 셀프, sourceRef)
-        │   └── sample-seq-reminder.json# 모범 답안 (배치: loop/opt/par 중첩, scheduler 트리거)
-        └── scripts/
-            ├── render-seq.mjs          # SeqSpec 검증 + 템플릿 (seq-engine.js 인라인 주입)
-            └── seq-engine.js           # 뷰어 엔진 (순수 JS 정본 — render.mjs와 같은 규칙: 수정 시 브라우저 재검증)
 ```
 
 ## 핵심 계약 (깨지 말 것)
 
-1. **의존성 0.** `render.mjs`·`build-docs.mjs` 모두 Node 20+ 내장 모듈만 쓴다. 출력 .html(개별 ~60KB, 통합 index ~13KB)도 외부 `<script>`/`<link>`/CDN 없이 self-contained. 레포에 node_modules/lockfile 두지 마라.
-2. **render.mjs는 이 프로젝트의 독자 엔진이다(info-hub와 무관).** 레인 레이아웃, 라운드 직교 엣지(관통 회피), 분산 앵커(fan-out/fan-in 겹침 방지), 그룹 언더레이, 플로우 순번/애니메이션, 팬·줌이 들어있다. **수정해도 되지만 반드시 브라우저 렌더로 재검증**한다(노드/엣지 수 일치, 선 겹침, pageerror 0). 원복은 git으로 가능.
-3. **build-docs.mjs는 엔진을 건드리지 않는다.** render.mjs를 자식 프로세스로 호출해 개별 .html을 만든 뒤, 출력 폴더를 스캔해 통합 셸(`index.html`)만 생성한다. 통합 뷰는 각 다이어그램을 iframe으로 끼워 보여줄 뿐 — 다이어그램 자체는 독립 .html 그대로다.
-4. **DiagramSpec 스키마가 계약.** 노드/그룹/엣지/플로우 평탄 배열 + slug id, 픽셀 좌표 없음(lane/order 힌트만). 통합 문서 메뉴용 선택 필드 `section`/`order`만 추가됨. 스펙 형태는 `references/diagram-spec.md` 참고.
+1. **산출물 의존성 0.** 출력 .html은 어느 렌더 경로든 외부 `<script>`/`<link>`/CDN 없이 self-contained(폰트·아이콘 인라인, 외부 요청 0). 스킬 스크립트(`build-docs.mjs`·`build-wiki.mjs`·`render.mjs`·`render-seq.mjs`)는 Node 20+ 내장 모듈만 쓴다. **예외는 `engine/` 하나** — bun+TS에 elkjs·libavoid-js·resvg 등 의존(bun.lock 커밋, node_modules는 gitignore·로컬 `bun install`). 엔진 밖으로 의존성을 새로 들이지 마라.
+2. **engine/이 구조·데이터 다이어그램(infra/data-flow/erd/agent-topology)의 정본 렌더러다(v0.8.1~).** TS DSL → ELK 자동배치+직교 라우팅+겹침·관통 불변식 → 셀프컨테인드 HTML. lane/order 수동 조정·layout-lint는 엔진 경로에 없다 — 대신 렌더 후 `tests/invariants.ts` 검사 위반 0을 만든다. **수정 전 `engine/DESIGN.md` 필독**(§12 기각 대안 재제안 금지), 수정 후 bun test+브라우저 재검증. `render.mjs`(순수 JS 독자 엔진)는 **레거시 폴백**으로 유지 — `ZZON_LEGACY_RENDER=1`·스펙 `"renderer":"legacy"`·bun 부재 시 자동 사용, 수정 시 브라우저 재검증 규칙 동일. **폴백은 레거시 DiagramSpec JSON에만 해당** — 엔진 DSL(.ts)·terra-form 스펙은 bun 필수(없으면 이미 렌더된 html 패스스루 편입만 가능).
+3. **build-docs.mjs는 렌더러를 건드리지 않는다.** 스펙의 kind/renderer를 보고 엔진 CLI(bun)/render-seq/레거시 render.mjs를 자식 프로세스로 라우팅해 개별 .html을 만든 뒤, 통합 셸(`index.html`)만 생성한다. 통합 뷰는 각 다이어그램을 iframe으로 끼워 보여줄 뿐 — 다이어그램 자체는 독립 .html 그대로다.
+4. **스펙 계약.** 신규 저작은 **엔진 TS DSL**(`<docsDir>/terra/<slug>.ts` + specs/의 패스스루 스텁 JSON)이다. 레거시 DiagramSpec JSON(노드/그룹/엣지/플로우 평탄 배열, `references/diagram-spec.md`)은 **변환 내장으로 그대로 렌더된다** — 하위호환은 지키되 신규 저작은 금지(deprecated). 클라우드 아이콘 어휘는 `"vocabulary": "aws"`로 선택(혼용은 validator 차단).
 5. **index.html 소유권**: 출력 폴더에 `wiki.json`이 있으면 index.html은 **build-wiki 소유** — build-docs는 다이어그램·manifest만 갱신하고 index를 건너뛴다(가드 내장). build-wiki는 build-docs를 자식 프로세스로 호출해 렌더를 위임한다.
 6. **wiki.json이 위키의 단일 상태 소스.** 스키마는 `skills/zzon-wiki/references/wiki-spec.md`가 정본. todo 문서는 빈 md를 만들지 않는다. 상태를 md frontmatter에 이중화하지 않는다.
 7. **시퀀스 엔진(zzon-seq)도 순수 JS가 정본이다 — 레포에 빌드 도구 0.** `skills/zzon-seq/scripts/seq-engine.js`는 render.mjs와 같은 규칙으로 직접 수정하고 반드시 브라우저 렌더로 재검증한다(샘플 2종 렌더, 겹침 없음·pageerror 0). SeqSpec 스키마 정본은 `skills/zzon-seq/references/seq-spec.md`. `kind:"sequence"` 스펙은 build-docs가 render-seq.mjs로 라우팅하며(형제 스킬 경로 참조), DiagramSpec과 스키마가 다르다(actors/steps — nodes/edges 아님). 뷰어는 zzon 셸 프로토콜(zzon:sidebar/zzon:sidebar-close, zzon-theme)을 구현한다. 최초 이식 출처는 ~/Documents/src/test_sequence_diagram(FlowScope TS를 1회 트랜스파일) — render.mjs의 info-hub 전례처럼 **이식 후 독립**, 다시 포팅하지 않는다.
@@ -130,9 +128,19 @@ plugins-zzon-doc/
   - **아키텍처 사이드바 팬 시프트**(render.mjs setSideOpen): 열릴 때 transform.x −152px, 닫으면 복귀 — 전체화면에서 사이드바가 그림을 가리던 문제 해소.
   - **위키 본문 반응형**: .page 860px→**1240px**(컨테이너 따라 신축 — 네비 접으면 넓어짐). 확장 figure 96vw·높이 calc(100vh−118px) + `scrollIntoView` — 임베드 사이드바가 사실상 "페이지 오른쪽 전체 높이" 패널이 됨(셸 이식 없이 동일 UX; 부족하면 셸 레벨 미러링이 다음 단계).
   - 검증: 헤드리스 Chrome 스크린샷 4종(임베드 fit 45%·드로어 리플로우·플로우+시프트·위키 와이드) + 콘솔 에러 0 + validate 통과. README 미리보기 스크린샷 5장 갱신(assets/, 시퀀스·위키 신규).
-- 남은 엔진 백로그는 P2~P3(같은 레인 좌측 C자 우회·접근 세그먼트 회피·lint 엣지/라벨 검사·그룹 접기·시맨틱 줌) — 메모리 `zzon-engine-priorities` 참조.
+- **v0.8.1 — 통합 다이어그램 엔진(engine/) + terra-form 스킬** (2026-08-01):
+  - 별도 프로젝트 infra-architect(TS DSL+자동배치)를 `zzon-doc/engine/`으로 통합(레포 내 vendored, 이식 후 독립). 구조·데이터 다이어그램의 **정본 렌더러**가 됨: ELK+감기 자동배치·libavoid 전역 직교 라우팅·겹침/관통 불변식·AWS 공식 아이콘 838종·카테고리 카드 31종·ERD(까마귀발)·플로우 순번·상세 사이드바·자동 범례·테마 유지.
+  - **공용 뷰어 프레임**(viewer-frame.js + references/viewer-frame-contract.md): payload/adapter/셸 postMessage 프로토콜/드릴다운 계약 명문화. F3 패리티 게이트(parity-check.mjs)로 레거시 뷰어와 기능 동등 검증.
+  - **build-docs 엔진 컷오버**: DiagramSpec 호환 변환 내장 — 기존 스펙 JSON 그대로 렌더. 레거시는 `ZZON_LEGACY_RENDER=1`/`"renderer":"legacy"`/bun 부재 자동 폴백.
+  - **네 번째 스킬 terra-form**: *.tf 스캔→범위 게이트→엔진 DSL 저작→`bun ia render`+불변식 위반 0→패스스루 스펙으로 manifest 정식 편입. zzon-doc SKILL.md도 DSL 저작 절차로 개정(신규 DiagramSpec 저작 deprecated).
+- **v0.8.2 — 어휘 정책·시퀀스 카탈로그 슬롯·플로우 라벨 품질** (2026-08-03):
+  - terra-form 범위를 AWS 전용에서 **클라우드 전반(IaC 기반)**으로 확장 — 타 클라우드는 카테고리 카드+확장 아이콘(`assets/extra-icons/`).
+  - **스펙 단위 어휘 옵션**: 레거시 DiagramSpec에 `"vocabulary": "aws"` 한 줄로 클라우드 아이콘 어휘 선택(정책은 스킬 지침, 메커니즘은 엔진 — 혼용은 validator 차단, `allowMixedVocabulary`로만 허용).
+  - **zzon-wiki 카탈로그에 시퀀스 1급 슬롯**(seq-flows 등): 티어 제안 단계에서 시퀀스 후보를 반드시 세어 명시 — 시퀀스가 제안에 자동으로 올라옴.
+  - 밀집 플로우 엣지 라벨 개선(통로 폭 적응·카드 위 pill 렌더) + 스텝 포커스가 포커스된 단계의 엣지에만 액센트 유지.
+- 남은 엔진 백로그는 P2~P3(같은 레인 좌측 C자 우회·접근 세그먼트 회피·lint 엣지/라벨 검사·그룹 접기·시맨틱 줌) — 메모리 `zzon-engine-priorities` 참조. (레거시 render.mjs 개선 백로그는 폴백 강등으로 우선순위 하락.)
 - 소유자 표준은 **메모리**에 기록됨(무의존/문서 디자인/레이아웃 품질) — 로컬, 레포 밖.
-- git: 첫 커밋(main) 존재. **GitHub push는 소유자가 직접 함.** 이후 변경분(통합 문서 등)은 아직 커밋 안 됨 — 소유자 검토 후 커밋.
+- git: main에 v0.8.2까지 커밋됨 — 릴리스 커밋(d622926) + **통합 후속 커밋**(marketplace 0.8.2 동기화·README 4스킬/bun 요구사항·산출 폴더 기본값 `docs/zzon-doc/`·CLAUDE.md 개정, 버전 번호는 소유자 결정으로 0.8.2 유지). **GitHub push는 소유자가 직접 함.**
 
 ## 다음 작업 (TODO)
 
@@ -142,10 +150,17 @@ plugins-zzon-doc/
 ## 테스트 방법
 
 ```bash
-# 단일 렌더
+# 엔진 준비(1회) + 엔진 단독 렌더·테스트
+cd zzon-doc/engine && bun install
+bun ia render examples/eks-cluster.ts    # → out/eks-cluster.html (+ .svg, .scene.json)
+bun test
+cd ../..
+
+# 단일 렌더 (레거시 렌더러 — bun 없이도 동작)
 node zzon-doc/skills/zzon-doc/scripts/render.mjs zzon-doc/skills/zzon-doc/references/sample-infra.json -o /tmp/x.html
 
 # 통합 문서 (플러그인 오염 없이 playground에서 — playground/는 .gitignore됨)
+# bun 있으면 엔진으로, 없으면 레거시로 자동 폴백 — 명령은 동일
 mkdir -p playground/zzon-doc/specs && cp zzon-doc/skills/zzon-doc/references/sample-*.json playground/zzon-doc/specs/
 node zzon-doc/skills/zzon-doc/scripts/build-docs.mjs playground/zzon-doc --title "데모 문서"
 open -a "Google Chrome" playground/zzon-doc/index.html
@@ -174,3 +189,4 @@ open -a "Google Chrome" playground/wiki-demo/index.html
 
 - 문서·UI 텍스트 한국어(한다체), 코드 식별자 영어
 - 스킬/플러그인 이름은 `zzon-*` 네임스페이스 유지
+- **스킬 산출 폴더 기본값은 대상 프로젝트의 `docs/zzon-doc/`** (v0.8.2 이후). 구버전 기본값인 루트 `zzon-doc/` 산출 폴더가 이미 있으면 그걸 유지한다. 빌드 스크립트는 `<docsDir>` 인자를 받을 뿐 기본값을 강제하지 않는다 — 기본값은 스킬 지침(SKILL.md)이 정한다.

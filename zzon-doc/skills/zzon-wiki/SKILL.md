@@ -7,7 +7,7 @@ argument-hint: '[대상 — 비우면 현재 프로젝트]'
 # 프로젝트 문서 위키 만들기
 
 코드/인터뷰에서 **wiki.json**(단일 상태 소스)과 **docs/*.md**를 저작하고 `scripts/build-wiki.mjs`로
-의존성 0짜리 self-contained 위키 사이트(index.html)를 만든다. 산출물은 `zzon-doc/` 하위에 기존 다이어그램 산출물과 공존한다.
+의존성 0짜리 self-contained 위키 사이트(index.html)를 만든다. 산출물은 대상 프로젝트의 `docs/zzon-doc/` 하위에 기존 다이어그램 산출물과 공존한다(구버전 기본값인 루트 `zzon-doc/`가 이미 있으면 그걸 유지).
 
 > 계약 정본: `references/wiki-spec.md`(스키마·md 규약) · `references/doc-catalog.md`(문서 카탈로그·질문 은행).
 > 아키텍처·데이터 다이어그램은 **zzon-doc 스킬 절차**(유형 판별→스펙→layout-lint→render)로,
@@ -16,9 +16,9 @@ argument-hint: '[대상 — 비우면 현재 프로젝트]'
 
 ## 0. 분기 — 첫 행동을 정한다
 
-- `zzon-doc/wiki.json`이 **있으면 → 재진입 모드(§4)**. 첫 행동은 무조건 `--status` 실행이다.
+- `docs/zzon-doc/wiki.json`(또는 구버전 경로 루트 `zzon-doc/wiki.json`)이 **있으면 → 재진입 모드(§4)**. 첫 행동은 무조건 `--status` 실행이다. 이후 명령의 `<docsDir>`는 wiki.json이 발견된 그 폴더다.
 - 없으면 → 신규. 코드가 있는 프로젝트면 `projectMode: "existing"`(스캔 우선), 빈/초기 프로젝트면 `"greenfield"`(인터뷰 우선).
-- 기존 `zzon-doc/manifest.json`(다이어그램)이 있으면 → 승격: 기존 다이어그램을 아키텍처/데이터 문서로 **자동 편입 제안**에 포함한다.
+- 기존 `docs/zzon-doc/manifest.json`(다이어그램 — 구버전은 루트 `zzon-doc/`)이 있으면 → 승격: 기존 다이어그램을 아키텍처/데이터 문서로 **자동 편입 제안**에 포함한다.
 
 ## 1. 스캔 → 제안 → 승인 (게이트 — 어기지 마라)
 
@@ -49,12 +49,12 @@ argument-hint: '[대상 — 비우면 현재 프로젝트]'
 ## 3. 빌드 — 명령어
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-wiki/scripts/build-wiki.mjs ./zzon-doc
+node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-wiki/scripts/build-wiki.mjs ./docs/zzon-doc
 ```
 
 - 다이어그램(specs/)이 있으면 build-docs를 자식으로 호출해 함께 갱신한다. **index.html은 위키 셸이 차지한다** (다이어그램 갤러리 index는 wiki.json이 있으면 자동으로 양보한다).
 - 검증 실패 시 `path: 메시지` 목록이 나온다 → **그 path만 고쳐 재실행.**
-- 상태 리포트만: `build-wiki.mjs ./zzon-doc --status` (쓰기 없음).
+- 상태 리포트만: `build-wiki.mjs ./docs/zzon-doc --status` (쓰기 없음).
 
 ## 4. 재진입 모드 (wiki.json이 이미 있을 때)
 

@@ -63,7 +63,7 @@ export async function renderAll(model: DiagramModel, opts: RenderOptions = {}): 
 /**
  * Load a diagram module (default export = DiagramModel).
  *
- * Sources may live OUTSIDE the engine (e.g. <project>/zzon-doc/terra/x.ts) but
+ * Sources may live OUTSIDE the engine (e.g. <project>/docs/zzon-doc/terra/x.ts) but
  * are written as if in examples/ (relative "../src/..." imports). External
  * files are copied into examples/.tmp/ so those imports resolve, then removed.
  */

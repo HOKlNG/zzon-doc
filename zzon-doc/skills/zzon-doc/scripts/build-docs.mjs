@@ -7,7 +7,7 @@
  * 좌측 메뉴(접기) + 전체보기(홈) + 뷰어가 들어있는 self-contained <docsDir>/index.html 을 생성한다.
  *
  *   사용법:  node build-docs.mjs <docsDir> [--title "문서 제목"]
- *   예:      node build-docs.mjs ./zzon-doc --title "데모숍 아키텍처 문서"
+ *   예:      node build-docs.mjs ./docs/zzon-doc --title "데모숍 아키텍처 문서"
  *
  * 규칙(소유자 표준):
  * - 라이브러리/프레임워크/CDN 0. 순수 HTML/CSS/바닐라 JS + Node 내장만. 출력도 self-contained.

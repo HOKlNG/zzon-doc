@@ -1,6 +1,6 @@
 # SeqSpec — 시퀀스 다이어그램 스펙 정본
 
-`kind:"sequence"` 스펙 하나가 시퀀스 다이어그램 한 장이다. `zzon-doc/specs/<slug>.json`에 두면
+`kind:"sequence"` 스펙 하나가 시퀀스 다이어그램 한 장이다. `docs/zzon-doc/specs/<slug>.json`에 두면
 build-docs.mjs가 render-seq.mjs로 렌더해 `diagrams/<slug>.html` + manifest에 올린다.
 DiagramSpec(infra/data-flow/erd)과 **다른 스키마**다 — 노드·엣지가 아니라 액터·스텝이다.
 

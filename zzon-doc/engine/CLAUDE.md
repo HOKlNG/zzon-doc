@@ -8,7 +8,7 @@ lucide icons, src/render/card.ts), ERD tables with column-anchored edges +
 crow's-foot cardinality (table.ts), narrative flows with step badges (flows.ts),
 a node-detail sidebar + zzon shell postMessage protocol + zzon-theme sync
 (sidebar.ts), and an auto legend (legend.ts). External diagram sources
-(<project>/zzon-doc/terra/*.ts) import "../src/dsl/index.ts" as if in examples/
+(<project>/docs/zzon-doc/terra/*.ts) import "../src/dsl/index.ts" as if in examples/
 — pipeline.loadDiagram tmp-copies them into examples/.
 Full design rationale (v2, post adversarial review): DESIGN.md. Read it before
 changing layout/routing/rendering behavior — §12 records rejected alternatives

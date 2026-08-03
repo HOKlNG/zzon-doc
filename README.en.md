@@ -10,7 +10,32 @@
 
 [한국어](./README.md) · **English**
 
-> A **Claude Code plugin (three skills)** — it analyzes your codebase to draw interactive architecture diagrams (`zzon-doc`), draws time-axis sequence diagrams of key features (`zzon-seq`), and fills in a project documentation wiki through code scanning and interview-style questions (`zzon-wiki`). Everything ships as zero-dependency `.html` — just open it in a browser.
+> A **Claude Code plugin (four skills)** — it analyzes your codebase to draw interactive architecture diagrams (`zzon-doc`), draws time-axis sequence diagrams of key features (`zzon-seq`), draws Terraform cloud infrastructure with official provider icons (`terra-form`), and fills in a project documentation wiki through code scanning and interview-style questions (`zzon-wiki`). Everything ships as zero-dependency `.html` — just open it in a browser.
+
+## v0.8.2 — vocabulary policy · sequence catalog slots · flow label quality
+
+terra-form now covers cloud infrastructure in general (IaC-based), and a legacy
+DiagramSpec can opt into the cloud icon vocabulary with a single
+`"vocabulary": "aws"` line (mixing vocabularies is blocked by the validator).
+The zzon-wiki catalog gained core-process sequence slots (seq-flows), so sequence
+diagrams now come up automatically at the proposal stage. Edge labels in dense
+flows (corridor-width adaptive, pill rendering over cards) and step-focus
+highlighting were improved.
+
+## v0.8.1 — unified diagram engine
+
+Structure and data diagrams (infra/data-flow/erd/agent-topology) are now rendered
+by a **built-in TS engine**: true auto-layout (ELK + wrapping — no manual
+lane/order tuning, no layout-lint), orthogonal routing, and overlap/crossing
+invariants. Terraform cloud infrastructure goes through the terra-form skill
+(838 official AWS icons + AZ×tier grid/span overlays built in; other clouds as
+category cards + extension icons). The viewer frame keeps the existing UX
+(sidebar, flows, legend, theme — and the theme now persists). Existing
+DiagramSpec JSON renders as-is through a built-in converter, and `zzon-seq`
+stays independent. The legacy renderer is available via `ZZON_LEGACY_RENDER=1`
+or `"renderer": "legacy"` in the spec.
+Engine setup: `cd zzon-doc/engine && bun install` (falls back to the legacy
+renderer automatically when bun is absent).
 
 ## Preview
 
@@ -35,6 +60,7 @@
 - **Interactive** — click nodes · highlight flows · step badges · drill-down (⊕ double-click) · hover tooltips · pan/zoom · dark mode · **SVG/PNG export** (pure vector)
 - **Unified docs** — bundle many diagrams into a left menu + overview
 - **Sequence diagrams (`zzon-seq`)** — traces code paths into actor lifelines over time: full/simplified toggle · per-step detail with source refs · step-through playback · alt/opt/loop/par fragments · SVG/PNG export
+- **Terraform infra (`terra-form`)** — reads `*.tf` and draws your cloud infrastructure: official AWS icon set (838) · AZ×tier grid · span overlays; other clouds render as category cards + extension icons
 - **Docs wiki (`zzon-wiki`)** — fills project documentation via code scan + questions, tracks progress and open questions as a wiki site; architecture pages embed the diagrams
 - **Scope-aware** — for big projects it surveys the structure and proposes how many docs and at which depth first
 - **Local-only** — your code is analyzed locally; no network, no telemetry
@@ -62,13 +88,27 @@ Call it with `/zzon-doc:zzon-doc <request>`, or just ask in natural language. (P
 /zzon-doc:zzon-doc draw the cloud architecture of this repo
 ```
 
-**③ Project documentation wiki** — agree on a tier (lite/standard/full SI) first; whatever is readable from code gets drafted automatically, and everything else is filled through questions. On re-runs it detects missing docs and human edits, and continues from there.
+**③ Feature sequence diagram** — traces a feature's code path (route → service → queue → worker) into a time-axis sequence.
+
+```
+/zzon-doc:zzon-seq draw a sequence diagram of the checkout flow
+```
+
+**④ Terraform infra** — reads `*.tf` and draws the cloud infrastructure. AWS gets official icons and the AZ×tier grid; other clouds render as category cards.
+
+```
+/zzon-doc:terra-form ./infra
+```
+
+**⑤ Project documentation wiki** — agree on a tier (lite/standard/full SI) first; whatever is readable from code gets drafted automatically, and everything else is filled through questions. On re-runs it detects missing docs and human edits, and continues from there.
 
 ```
 /zzon-doc:zzon-wiki build a docs wiki for this project
 ```
 
 The generated `.html` is interactive: **click nodes · highlight flows · click step badges · hover tooltips · pan/zoom · dark mode.**
+
+All output (specs, diagrams, wiki state) lands under **`docs/zzon-doc/`** in the target project. If a root-level `zzon-doc/` folder from an earlier version already exists, it keeps being used.
 
 ## Direct rendering (optional)
 
@@ -78,16 +118,17 @@ You can render hand-written specs without the skill.
 # a single .html
 node zzon-doc/skills/zzon-doc/scripts/render.mjs <spec.json> [-o out.html]
 
-# many specs -> unified document (zzon-doc/specs/*.json -> zzon-doc/index.html)
-node zzon-doc/skills/zzon-doc/scripts/build-docs.mjs ./zzon-doc --title "My architecture docs"
+# many specs -> unified document (docs/zzon-doc/specs/*.json -> docs/zzon-doc/index.html)
+node zzon-doc/skills/zzon-doc/scripts/build-docs.mjs ./docs/zzon-doc --title "My architecture docs"
 ```
 
-Uses only Node 20+ built-in modules. Nothing to install.
+The build scripts use only Node 20+ built-in modules. Structure diagrams are rendered by the built-in engine (bun — run `bun install` once in `zzon-doc/engine`); without bun it falls back to the legacy renderer **for legacy DiagramSpec JSON only**. Either way the output `.html` is self-contained with zero external requests.
 
 ## Requirements
 
 - Claude Code (a version with plugin/skill support)
-- Node.js 20+ (to run `render.mjs`)
+- Node.js 20+ (to run the build scripts)
+- [bun](https://bun.sh) — runs the diagram engine (`bun install` once in `zzon-doc/engine`). **Required for newly authored structure/infra diagrams and terra-form.** Without bun, only legacy DiagramSpec JSON rendering, sequence diagrams and the wiki keep working (automatic fallback)
 
 ## About the name
 

@@ -10,7 +10,7 @@
 
 **한국어** · [English](./README.en.md)
 
-> **Claude Code 플러그인(스킬 3종)** — 코드베이스를 분석해 인터랙티브 아키텍처 다이어그램을 그리고(`zzon-doc`), 주요 기능의 시간축 상호작용을 시퀀스 다이어그램으로 그리며(`zzon-seq`), 프로젝트 개발 문서 위키를 질문 기반으로 채워 준다(`zzon-wiki`). 결과물은 의존성 0짜리 `.html` — 브라우저로 열어서 보기만 하면 된다.
+> **Claude Code 플러그인(스킬 4종)** — 코드베이스를 분석해 인터랙티브 아키텍처 다이어그램을 그리고(`zzon-doc`), 주요 기능의 시간축 상호작용을 시퀀스 다이어그램으로 그리며(`zzon-seq`), Terraform 클라우드 인프라를 공식 아이콘 다이어그램으로 그리고(`terra-form`), 프로젝트 개발 문서 위키를 질문 기반으로 채워 준다(`zzon-wiki`). 결과물은 의존성 0짜리 `.html` — 브라우저로 열어서 보기만 하면 된다.
 
 ## v0.8.2 — 어휘 정책·시퀀스 슬롯·플로우 품질
 
@@ -53,6 +53,7 @@ validator가 차단). zzon-wiki 카탈로그에 핵심 프로세스 시퀀스(se
 - **인터랙티브** — 노드 클릭 · 플로우 강조 · 순번 배지 · 드릴다운(⊕ 더블클릭) · 호버 툴팁 · 팬/줌 · 다크모드 · **SVG/PNG 내보내기**(순수 벡터)
 - **통합 문서** — 여러 장을 좌측 메뉴 + 전체보기로 묶음
 - **시퀀스 다이어그램 (zzon-seq)** — 코드를 추적해 액터 간 요청/응답 왕복을 시간축으로. 전체/간소화 토글 · 단계 상세(근거 코드 위치) · 둘러보기(단계 재생) · alt/opt/loop/par 분기 · SVG/PNG 다운로드
+- **Terraform 인프라 (terra-form)** — `*.tf`를 읽어 클라우드 인프라를 그린다. AWS는 공식 아이콘 838종·AZ×티어 격자·스팬 overlay, 타 클라우드는 카테고리 카드+확장 아이콘
 - **문서 위키 (zzon-wiki)** — 코드 스캔 + 질문으로 개발 문서를 채우고, 진행 현황·열린 질문을 추적하는 위키 사이트 생성. 아키텍처 문서엔 다이어그램이 임베드된다
 - **범위 제안** — 큰 프로젝트는 구조를 파악해 "몇 장·어느 뎁스로 그릴지" 먼저 제안한다
 - **로컬 분석** — 코드는 로컬에서만 분석, 네트워크·텔레메트리 0
@@ -86,13 +87,21 @@ validator가 차단). zzon-wiki 카탈로그에 핵심 프로세스 시퀀스(se
 /zzon-doc:zzon-seq 결제 흐름 시퀀스 다이어그램 그려줘
 ```
 
-**④ 프로젝트 문서 위키** — 티어(라이트/표준/풀)를 합의한 뒤, 코드에서 읽히는 건 자동으로 쓰고 모르는 건 질문으로 채운다. 이미 만든 위키는 빠진 내용·사람이 고친 문서를 감지해 이어서 채운다.
+**④ Terraform 인프라** — `*.tf`를 읽어 클라우드 인프라를 그린다. AWS는 공식 아이콘·AZ×티어 격자, 타 클라우드는 카테고리 카드.
+
+```
+/zzon-doc:terra-form ./infra
+```
+
+**⑤ 프로젝트 문서 위키** — 티어(라이트/표준/풀)를 합의한 뒤, 코드에서 읽히는 건 자동으로 쓰고 모르는 건 질문으로 채운다. 이미 만든 위키는 빠진 내용·사람이 고친 문서를 감지해 이어서 채운다.
 
 ```
 /zzon-doc:zzon-wiki 이 프로젝트 문서 위키 만들어줘
 ```
 
 생성된 `.html`은 **노드 클릭 · 플로우 강조 · 순번 배지 클릭 · 호버 툴팁 · 팬/줌 · 다크모드**가 되는 인터랙티브 문서다.
+
+산출물(스펙·다이어그램·위키 상태 포함)은 대상 프로젝트의 **`docs/zzon-doc/`** 아래에 생성된다. 이전 버전 기본값인 루트 `zzon-doc/` 폴더가 이미 있으면 그대로 이어서 쓴다.
 
 ## 직접 렌더링 (선택)
 
@@ -102,16 +111,17 @@ validator가 차단). zzon-wiki 카탈로그에 핵심 프로세스 시퀀스(se
 # 단일 .html 한 장
 node zzon-doc/skills/zzon-doc/scripts/render.mjs <spec.json> [-o out.html]
 
-# 여러 스펙 → 통합 문서 (zzon-doc/specs/*.json → zzon-doc/index.html)
-node zzon-doc/skills/zzon-doc/scripts/build-docs.mjs ./zzon-doc --title "문서 제목"
+# 여러 스펙 → 통합 문서 (docs/zzon-doc/specs/*.json → docs/zzon-doc/index.html)
+node zzon-doc/skills/zzon-doc/scripts/build-docs.mjs ./docs/zzon-doc --title "문서 제목"
 ```
 
-Node 20+ 내장 모듈만 쓴다. 설치할 의존성 없음.
+빌드 스크립트는 Node 20+ 내장 모듈만 쓴다. 구조 다이어그램의 렌더러는 내장 엔진(bun — `zzon-doc/engine`에서 `bun install` 1회)이고, bun이 없으면 **레거시 DiagramSpec JSON에 한해** 레거시 렌더러로 자동 폴백된다. 어느 쪽이든 출력 `.html`은 외부 요청 0의 self-contained다.
 
 ## 요구사항
 
 - Claude Code (플러그인/스킬 지원 버전)
-- Node.js 20+ (`render.mjs` 실행용)
+- Node.js 20+ (빌드 스크립트 실행용)
+- [bun](https://bun.sh) — 다이어그램 엔진 실행용(`zzon-doc/engine`에서 `bun install` 1회). **새로 그리는 구조·인프라 다이어그램과 terra-form은 bun 필수.** bun이 없으면 기존 레거시 DiagramSpec JSON 렌더·시퀀스·위키만 동작한다(자동 폴백)
 
 ## [기타] 이름에 대하여
 

@@ -11,7 +11,7 @@
  * - `--status`: 파일 해시 대조 리포트(unchanged / edited-by-human / new / missing) + 질문 마커 대조.
  *
  * 사용법:
- *   node build-wiki.mjs <docsDir>            # 빌드 (예: node build-wiki.mjs ./zzon-doc)
+ *   node build-wiki.mjs <docsDir>            # 빌드 (예: node build-wiki.mjs ./docs/zzon-doc)
  *   node build-wiki.mjs <docsDir> --status   # 상태 리포트만 (쓰기 없음)
  *
  * Node 20+ 내장만 사용 (외부 의존 0). 출력 index.html도 self-contained.
