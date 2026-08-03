@@ -210,3 +210,10 @@ describe("FLOW_BADGE_CSS", () => {
     }
   });
 });
+
+
+test("스텝 포커스 CSS — 포커스 밖 플로우 엣지는 액센트를 잃는다 (전부 강조 버그 회귀 방지)", () => {
+  const { FLOW_BADGE_CSS } = require("../src/render/flows.ts");
+  expect(FLOW_BADGE_CSS).toContain(".step-focus .edge.flow-hl.flow-fade path");
+  expect(FLOW_BADGE_CSS).toContain(":not(.on){opacity:.35}");
+});

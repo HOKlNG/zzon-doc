@@ -128,6 +128,7 @@ export const CANVAS_JS: string = `(function () {
 
     /* flow/step: badge layer + on-path highlight + step focus fade */
     var flowOn = state.flow !== null;
+    svg.classList.toggle("step-focus", flowOn && state.step !== null);
     layers.forEach(function (l) {
       l.classList.toggle("active", l.getAttribute("data-flow") === state.flow);
     });

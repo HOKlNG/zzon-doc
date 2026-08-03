@@ -196,6 +196,9 @@ export const FLOW_BADGE_CSS: string = [
   `.flow-dim{opacity:.25}`,
   `.flow-fade{opacity:.5}`,
   `.edge.flow-hl path{stroke:var(--flow,#4f46e5);stroke-width:2.25}`,
+  // 스텝 포커스: 해당 스텝만 액센트 유지 — 나머지 플로우 엣지는 일반 선으로 복귀
+  `.step-focus .edge.flow-hl.flow-fade path{stroke:var(--ia-edge,#545B64);stroke-width:1.5}`,
+  `.step-focus .flow-badges [data-steps]:not(.on){opacity:.35}`,
   `@keyframes flow-pop{to{transform:scale(1)}}`,
   `.flow-badges.active .flow-badge{transform:scale(0);transform-box:fill-box;transform-origin:center;` +
     `animation:flow-pop 280ms cubic-bezier(.34,1.56,.64,1) forwards;` +
