@@ -190,10 +190,18 @@ function useIcon(icon: IconRef, r: Rect): string {
   );
 }
 
-function textEl(label: SceneLabel, defaultFill: string): string {
+function textEl(label: SceneLabel, defaultFill: string, pill = false): string {
   const fill = label.color ?? defaultFill;
   const weight = label.weight === "semibold" ? 600 : 400;
-  const open =
+  let bg = "";
+  if (pill) {
+    const w = measure(label.text, label.fontSize, label.weight ?? "regular").width;
+    const x = label.align === "middle" ? label.x - w / 2 : label.align === "end" ? label.x - w : label.x;
+    bg =
+      `<rect x="${fmt(x - 5)}" y="${fmt(label.y - label.fontSize - 1)}" width="${fmt(w + 10)}"` +
+      ` height="${fmt(label.fontSize + 8)}" rx="4" fill="var(--ia-canvas, #fff)" fill-opacity="0.92"/>`;
+  }
+  const open = bg +
     `<text x="${fmt(label.x)}" y="${fmt(label.y)}" font-size="${fmt(label.fontSize)}"` +
     ` font-weight="${weight}" text-anchor="${label.align}" fill="${fill}">`;
   if (label.lines && label.lines.length > 1) {
@@ -254,7 +262,7 @@ function overlayMarkup(o: SceneOverlay): string {
   return bits.join("");
 }
 
-function edgeMarkup(e: SceneEdge): string {
+function edgeMarkup(e: SceneEdge, withLabel = true): string {
   const geo = edgeGeometry(e);
   const card = edgeCardinalityAttrs(e);
   if (card.markerStart) geo.markerStart = card.markerStart;
@@ -267,9 +275,20 @@ function edgeMarkup(e: SceneEdge): string {
       `${attr("stroke-dasharray", geo.dash)}${attr("marker-start", geo.markerStart)}` +
       `${attr("marker-end", geo.markerEnd)}/>`,
   ];
-  if (e.label) bits.push(textEl(e.label, THEME_VAR.edge));
+  if (withLabel && e.label) bits.push(textEl(e.label, THEME_VAR.edge));
   bits.push("</g>");
   return bits.join("");
+}
+
+/** 엣지 라벨 상층 레이어 — 레거시 패리티: 라벨 pill은 카드 위에 뜬다 */
+function edgeLabelsLayer(edges: readonly SceneEdge[]): string {
+  const bits: string[] = [];
+  for (const e of edges) {
+    if (!e.label) continue;
+    const cls = `edge-label${e.layer ? ` layer-${cssId(e.layer)}` : ""}`;
+    bits.push(`<g class="${cls}" data-edge-id="${escapeXml(e.id)}">${textEl(e.label, THEME_VAR.edge, true)}</g>`);
+  }
+  return bits.length ? `<g class="edge-labels">${bits.join("")}</g>` : "";
 }
 
 function nodeMarkup(n: SceneNode): string {
@@ -313,8 +332,9 @@ export function renderInteractiveSvg(scene: Scene): string {
       ` fill="${THEME_VAR.canvas}"/>`,
     `<g class="groups">${scene.groups.map(groupMarkup).join("\n")}</g>`,
     `<g class="overlays">${scene.overlays.map(overlayMarkup).join("\n")}</g>`,
-    `<g class="edges">${scene.edges.map(edgeMarkup).join("\n")}</g>`,
+    `<g class="edges">${scene.edges.map((e) => edgeMarkup(e, false)).join("\n")}</g>`,
     `<g class="nodes">${scene.nodes.map(nodeMarkup).join("\n")}</g>`,
+    edgeLabelsLayer(scene.edges),
     `<g class="markers">${scene.markers.map(markerMarkup).join("\n")}</g>`,
     renderFlowBadgesSvg(scene),
     `</svg>`,

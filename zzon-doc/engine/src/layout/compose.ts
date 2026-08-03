@@ -32,6 +32,7 @@ import {
   type NodeVisual,
 } from "./sizing.ts";
 import { layoutGrid, type SizedChild } from "./grid.ts";
+import { measureWidth } from "../text/metrics.ts";
 import { placeLayered, placePack, type ChildBox, type ChildEdge } from "./elk-adapter.ts";
 import { GROUP_STYLES } from "../render/group-styles.ts";
 import { sizeTable, makeSceneTable } from "../render/table.ts";
@@ -257,7 +258,7 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
       const strategy = el.layout === "auto" ? autoStrategy(projected) : el.layout;
       const placed =
         strategy === "layered"
-          ? await placeLayered(boxes, projected, "RIGHT", model.aspectRatio)
+          ? await placeLayeredBestFit(boxes, projected, model.aspectRatio, corridorFor(el.children, model.edges))
           : await placePack(boxes, model.aspectRatio);
       contentW = placed.width;
       contentH = placed.height;
@@ -367,7 +368,7 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
   const coreEdges = projectEdges(model.children, model.edges);
   const corePlaced =
     autoStrategy(coreEdges) === "layered"
-      ? await placeLayered(coreBoxes, coreEdges, "RIGHT", model.aspectRatio)
+      ? await placeLayeredBestFit(coreBoxes, coreEdges, model.aspectRatio, corridorFor(model.children, model.edges))
       : await placePack(coreBoxes, model.aspectRatio);
 
   // actors by side
@@ -592,6 +593,45 @@ function autoStrategy(projected: ChildEdge[]): "pack" | "layered" {
     depth = Math.max(depth, d);
   }
   return depth <= 1 && maxDegree >= 4 ? "pack" : "layered";
+}
+
+/**
+ * layered 배치가 목표 종횡비 대비 2배 이상 넓으면(ELK wrapping은 소프트라 과폭이
+ * 남는다) DOWN 방향으로 한 번 더 배치해 목표에 가까운 쪽을 채택한다.
+ */
+async function placeLayeredBestFit(
+  boxes: ChildBox[],
+  edges: ChildEdge[],
+  aspectRatio: number,
+  minCorridor = 0,
+): Promise<Awaited<ReturnType<typeof placeLayered>>> {
+  const right = await placeLayered(boxes, edges, "RIGHT", aspectRatio, minCorridor);
+  const ratio = right.height > 0 ? right.width / right.height : aspectRatio;
+  const bandHi = aspectRatio * 1.75; // 불변식 허용 상한과 일치
+  const bandLo = aspectRatio * 0.25;
+  if (ratio <= bandHi) return right;
+  const down = await placeLayered(boxes, edges, "DOWN", aspectRatio, minCorridor);
+  const dRatio = down.height > 0 ? down.width / down.height : aspectRatio;
+  const inBand = (r: number) => r >= bandLo && r <= bandHi;
+  if (inBand(dRatio)) return down; // 밴드 안이 최우선
+  const dist = (r: number) => Math.abs(Math.log(r / aspectRatio));
+  return dist(dRatio) < dist(ratio) ? down : right;
+}
+
+/** 컨테이너에 투영되는 엣지들의 최대 라벨 폭 (통로 폭 요구치) */
+function corridorFor(children: Element[], edges: Edge[]): number {
+  const owner = (p: string): string | null => {
+    for (const c of children) if (p === c.path || p.startsWith(c.path + "/")) return c.path;
+    return null;
+  };
+  let w = 0;
+  for (const e of edges) {
+    if (!e.label) continue;
+    const from = owner(e.from);
+    const to = owner(e.to);
+    if (from && to && from !== to) w = Math.max(w, measureWidth(e.label, 11));
+  }
+  return w ? w + 28 : 0;
 }
 
 function projectEdges(children: Element[], edges: Edge[]): ChildEdge[] {

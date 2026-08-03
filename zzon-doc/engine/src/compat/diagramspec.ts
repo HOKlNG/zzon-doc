@@ -233,7 +233,10 @@ export function convertDiagramSpec(spec: unknown, opts: ConvertOptions = {}): Co
       ...(title !== undefined ? { title } : {}),
       ...(str(spec["description"]) !== undefined ? { description: str(spec["description"]) } : {}),
       docKind,
-      aspectRatio: ASPECT_BY_KIND[docKind],
+      // 스펙이 의도를 선언하면 그게 우선 (multi-region 예제와 같은 메커니즘)
+      aspectRatio: typeof spec["aspectRatio"] === "number" && spec["aspectRatio"] > 0
+        ? (spec["aspectRatio"] as number)
+        : ASPECT_BY_KIND[docKind],
     },
     (d) => {
       // ---- groups: parentId nesting, created in dependency (parent-first) order

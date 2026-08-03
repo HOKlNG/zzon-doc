@@ -23,7 +23,7 @@ const EDGE_LABEL_COLOR = "#545B64";
 /** gap between the polyline and the label box */
 const LABEL_GAP = 6;
 /** t offsets probed (in order) around the base placement */
-const T_CANDIDATES = [0, -0.08, 0.08, -0.16, 0.16, -0.24, 0.24] as const;
+const T_CANDIDATES = [0, -0.08, 0.08, -0.16, 0.16, -0.24, 0.24, -0.32, 0.32, -0.4, 0.4] as const;
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -75,11 +75,12 @@ interface LabelBox {
  * Label + bounding box for anchor `at`. `flip` mirrors to the other side of
  * the segment (below instead of above / left instead of right).
  */
-function labelAt(text: string, at: AnchorInfo, flip: boolean): LabelBox {
+function labelAt(text: string, at: AnchorInfo, flip: boolean, gapMul = 1): LabelBox {
   const m = measure(text, EDGE_LABEL_FONT_SIZE);
   const h = m.ascent + m.descent;
+  const gap = LABEL_GAP * gapMul;
   if (at.horizontal) {
-    const baseline = flip ? at.point.y + LABEL_GAP + m.ascent : at.point.y - LABEL_GAP - m.descent;
+    const baseline = flip ? at.point.y + gap + m.ascent : at.point.y - gap - m.descent;
     return {
       label: {
         text,
@@ -93,7 +94,7 @@ function labelAt(text: string, at: AnchorInfo, flip: boolean): LabelBox {
       box: { x: at.point.x - m.width / 2, y: baseline - m.ascent, width: m.width, height: h },
     };
   }
-  const x = flip ? at.point.x - LABEL_GAP - m.width : at.point.x + LABEL_GAP;
+  const x = flip ? at.point.x - gap - m.width : at.point.x + gap;
   const baseline = at.point.y + (m.ascent - m.descent) / 2;
   return {
     label: {
@@ -113,18 +114,29 @@ function clears(box: Rect, obstacles: readonly Rect[]): boolean {
   return !obstacles.some((r) => rectsOverlap(box, r, 1));
 }
 
-/** Probe candidates around base t; first clear position wins, else base. */
+/**
+ * Probe candidates around base t (two gap rings); first clear position wins.
+ * If nothing clears, take the candidate overlapping the FEWEST obstacles —
+ * never the blind base position (dense flow graphs defeat the ring search).
+ */
 function placeAlong(text: string, points: Point[], baseT: number, obstacles: readonly Rect[]): LabelBox {
-  let fallback: LabelBox | undefined;
-  for (const dt of T_CANDIDATES) {
-    const t = Math.min(Math.max(baseT + dt, 0.03), 0.97);
-    for (const flip of [false, true]) {
-      const cand = labelAt(text, pointAt(points, t), flip);
-      fallback ??= cand;
-      if (clears(cand.box, obstacles)) return cand;
+  let best: LabelBox | undefined;
+  let bestHits = Infinity;
+  for (const gapMul of [1, 2.4, 4.2]) {
+    for (const dt of T_CANDIDATES) {
+      const t = Math.min(Math.max(baseT + dt, 0.03), 0.97);
+      for (const flip of [false, true]) {
+        const cand = labelAt(text, pointAt(points, t), flip, gapMul);
+        const hits = obstacles.reduce((n, r) => n + (rectsOverlap(cand.box, r, 1) ? 1 : 0), 0);
+        if (hits === 0) return cand;
+        if (hits < bestHits) {
+          bestHits = hits;
+          best = cand;
+        }
+      }
     }
   }
-  return fallback!;
+  return best!;
 }
 
 function resolveT(placement: Edge["labelPlacement"], bundle: Bundle | undefined): number {

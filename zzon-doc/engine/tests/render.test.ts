@@ -52,8 +52,9 @@ describe("renderInteractiveSvg", () => {
     expect(svg).toContain('marker-start="url(#arw-ED7100)"'); // arrowhead "both"
   });
 
-  test("layer classes stay on edges", () => {
-    expect(count(svg, "layer-network")).toBe(2);
+  test("layer classes stay on edges AND their top-layer labels (toggle hides both)", () => {
+    // 엣지 g + 라벨 상층 g 각각에 클래스 — 픽스처: network 엣지 2(라벨 1개), deploy 엣지 1(라벨 없음)
+    expect(count(svg, "layer-network")).toBe(3);
     expect(count(svg, "layer-deploy")).toBe(1);
   });
 

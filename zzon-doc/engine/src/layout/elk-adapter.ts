@@ -69,8 +69,10 @@ export async function placeLayered(
   edges: ChildEdge[],
   direction: "RIGHT" | "DOWN" = "RIGHT",
   aspectRatio?: number,
+  minCorridor = 0,
 ): Promise<PlacementResult> {
   if (boxes.length === 0) return { children: [], width: 0, height: 0 };
+  const corridor = Math.max(LAYER_SPACING, minCorridor);
   const graph = await elkLayout({
     id: "layered",
     layoutOptions: {
@@ -78,7 +80,7 @@ export async function placeLayered(
       "elk.direction": direction,
       "elk.edgeRouting": "POLYLINE", // ignored downstream; we route globally
       "elk.spacing.nodeNode": String(SPACING),
-      "elk.layered.spacing.nodeNodeBetweenLayers": String(LAYER_SPACING),
+      "elk.layered.spacing.nodeNodeBetweenLayers": String(corridor),
       "elk.padding": "[top=0,left=0,bottom=0,right=0]",
       // 긴 레이어 체인을 종횡비에 맞춰 감는다 — 레거시 lane 감기의 대응물.
       // (평탄 SEPARATE 런에서만 유효; aspectRatio 미지정 시 비활성)
@@ -86,7 +88,7 @@ export async function placeLayered(
         ? {
             "elk.layered.wrapping.strategy": "MULTI_EDGE",
             "elk.aspectRatio": String(aspectRatio),
-            "elk.layered.wrapping.additionalEdgeSpacing": String(LAYER_SPACING),
+            "elk.layered.wrapping.additionalEdgeSpacing": String(corridor),
           }
         : {}),
     },
