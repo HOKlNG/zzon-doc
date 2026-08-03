@@ -21,6 +21,11 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 
 ## 2. 유형 판별 → 저작 방식
 
+**어휘 결정 규칙(정책)** — 판별 후 가장 먼저 정한다:
+- **IaC(Terraform 등) 기반 클라우드/네트워크 아키텍처** → 해당 클라우드 공식 아이콘 (terra-form 절차, 레거시 스펙이면 `"vocabulary": "aws"`)
+- **프로젝트 단위·C4 레이어(컨텍스트/컨테이너/컴포넌트/MSA/도메인)** → 기존 카테고리 카드
+- 한 장 안에서 혼용 금지(validator가 막는다) — 하이브리드는 `allowMixedVocabulary` 명시 시에만
+
 | 유형 | 저작 |
 |---|---|
 | A 개요(컨텍스트·랜드스케이프), B 구조 중 C4/MSA/도메인 | **카테고리 카드 노드**(`category:`/`tech:`/`description:`, AWS 아이콘 금지 관례) — 참고: `engine/examples/msa-sample.ts` |

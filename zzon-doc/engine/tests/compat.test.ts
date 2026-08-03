@@ -64,3 +64,41 @@ test("kind:sequence 스펙은 명확히 거부한다", () => {
     ConvertError,
   );
 });
+
+describe("vocabulary 옵션 — 정책은 스펙/호출자, 엔진은 메커니즘", () => {
+  const base = {
+    title: "t", kind: "infra",
+    nodes: [
+      { id: "u", label: "사용자", category: "user" },
+      { id: "fn", label: "API", category: "lambda", tech: "Node 20" },
+      { id: "db", label: "주문 DB", category: "db", tech: "PostgreSQL 16" },
+      { id: "q", label: "큐", category: "queue" },
+    ],
+    edges: [{ id: "e1", source: "u", target: "fn" }],
+  };
+  const nodesOf = (m: import("../src/model/types.ts").DiagramModel) =>
+    m.children.flatMap(function walk(el): import("../src/model/types.ts").NodeEl[] {
+      return el.type === "group" ? el.children.flatMap(walk) : [el as import("../src/model/types.ts").NodeEl];
+    });
+
+  test('기본은 카드 어휘 그대로', () => {
+    const { model } = convertDiagramSpec(base);
+    expect(nodesOf(model).every((n) => n.category && !n.icon)).toBe(true);
+  });
+
+  test('spec.vocabulary "aws" -> 전 노드 아이콘 어휘 (tech 힌트 우선)', () => {
+    const { model, warnings } = convertDiagramSpec({ ...base, vocabulary: "aws" });
+    const ns = nodesOf(model);
+    expect(ns.every((n) => n.icon && !n.category)).toBe(true);
+    expect(ns.find((n) => n.id === "db")!.icon).toBe("rds");
+    expect(ns.find((n) => n.id === "q")!.icon).toBe("sqs");
+    expect(warnings.some((w) => w.includes("폴백"))).toBe(false);
+  });
+
+  test("매핑 불가 노드가 있으면 전체 카드 폴백 + 경고 (혼용 금지)", () => {
+    const spec = { ...base, vocabulary: "aws", nodes: [...base.nodes, { id: "x", label: "?", category: "claude" }] };
+    const { model, warnings } = convertDiagramSpec(spec);
+    expect(nodesOf(model).every((n) => n.category && !n.icon)).toBe(true);
+    expect(warnings.some((w) => w.includes('"x"'))).toBe(true);
+  });
+});

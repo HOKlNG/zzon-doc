@@ -49,6 +49,7 @@ import type {
   TableSpec,
 } from "../model/types.ts";
 import { CARD_CATEGORY_META } from "../render/card.ts";
+import { mapAwsVocabulary } from "./aws-vocab.ts";
 
 // ---------------------------------------------------------------- result
 
@@ -66,6 +67,8 @@ export interface ConvertResult {
 export interface ConvertOptions {
   /** model id (CLI passes the json basename slug); default derives from title */
   id?: string;
+  /** 노드 어휘 — 정책은 호출자(스펙의 "vocabulary" 필드/스킬)가 정한다. 기본 "card". */
+  vocabulary?: "card" | "aws";
 }
 
 export class ConvertError extends Error {}
@@ -264,7 +267,24 @@ export function convertDiagramSpec(spec: unknown, opts: ConvertOptions = {}): Co
       };
       for (const gid of groupById.keys()) ensureGroup(gid);
 
-      // ---- nodes: card (category vocabulary) or table — never icons
+      // ---- nodes: 어휘는 정책 입력이다 — spec.vocabulary > opts.vocabulary > "card".
+      // "aws"는 전부-아니면-카드: 한 노드라도 매핑 실패 시 전체 카드 유지 + warning.
+      const vocabDecl = str(spec["vocabulary"]) ?? opts.vocabulary ?? "card";
+      let awsIcons: ReturnType<typeof mapAwsVocabulary>["icons"] = null;
+      if (vocabDecl === "aws") {
+        const probe = nodeSpecs
+          .filter((n) => !isDict(n["table"]))
+          .map((n) => ({
+            id: str(n["id"]) ?? "?",
+            category: str(n["category"]) ?? "service",
+            tech: str(n["tech"]),
+          }));
+        const res = mapAwsVocabulary(probe);
+        if (res.icons) awsIcons = res.icons;
+        else warnings.push(`vocabulary:"aws" 요청됐지만 매핑 불가 노드가 있어 카드 어휘로 폴백: ${res.failures.join(", ")}`);
+      } else if (vocabDecl !== "card") {
+        warnings.push(`unknown vocabulary "${vocabDecl}" — "card"로 처리`);
+      }
       const nodeRefs = new Map<string, NodeRef>();
       for (const n of nodeSpecs) {
         const nid = str(n["id"]);
@@ -292,6 +312,23 @@ export function convertDiagramSpec(spec: unknown, opts: ConvertOptions = {}): Co
               ...(description !== undefined ? { description } : {}),
               ...(href !== undefined ? { href } : {}),
               table: tableSpec(table),
+            }),
+          );
+          continue;
+        }
+        const awsIcon = awsIcons?.get(nid);
+        if (awsIcon) {
+          const tech = str(n["tech"]);
+          const badge = str(n["badge"]);
+          nodeRefs.set(
+            nid,
+            parent.node(nid, {
+              icon: awsIcon,
+              ...(label !== undefined ? { label } : {}),
+              // 아이콘 노드는 tech를 sublabel로 (카드의 tech 칩 대응)
+              ...(tech !== undefined ? { sublabel: tech } : badge !== undefined ? { sublabel: badge } : {}),
+              ...(description !== undefined ? { description } : {}),
+              ...(href !== undefined ? { href } : {}),
             }),
           );
           continue;
