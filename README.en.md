@@ -137,6 +137,7 @@ The build scripts use only Node 20+ built-in modules. Structure diagrams are ren
 
 ## What's new
 
+- **v0.8.3 — viewer bug fixes, authoring policy**: fixed node clicks not opening the detail sidebar (pointer capture retargeted clicks to the svg root) and flow highlights lingering after deselection. Authoring policy was also tightened — prose goes into the node `description` (right sidebar) instead of onto the canvas, and structure diagrams now include one or two representative flows by default.
 - **v0.8.2 — vocabulary policy, sequence catalog slots, flow label quality**: terra-form now covers cloud infrastructure in general (IaC-based). A legacy DiagramSpec can opt into the cloud icon vocabulary with a single `"vocabulary": "aws"` line (mixing is blocked by the validator), and the zzon-wiki catalog gained core-process sequence slots (seq-flows) so sequence diagrams come up automatically at the proposal stage. Dense-flow edge labels (corridor-width adaptive, pill rendering) and step-focus highlighting were improved.
 - **v0.8.1 — unified diagram engine**: structure and data diagrams (infra/data-flow/erd/agent-topology) are rendered by a **built-in TS engine** — true auto-layout (ELK), orthogonal routing, and overlap/crossing invariants, while the viewer keeps the existing UX (sidebar, flows, legend, theme). Existing DiagramSpec JSON renders as-is through a built-in converter; the legacy renderer stays available via `ZZON_LEGACY_RENDER=1` or `"renderer": "legacy"` in the spec.
 
