@@ -38,7 +38,8 @@ argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 E
 
 - 소스는 `<docsDir>/terra/<slug>.ts`, **engine/examples에 있는 것처럼** `import { diagram } from "../src/dsl/index.ts"` 로 쓴다(엔진이 임시 복사로 해석).
 - 노드: `icon:`(AWS 838종+lucide, `grep engine/src/icons/manifest.gen.ts`로 실재 확인) **또는** `category:`(31종) **또는** `table:` — 셋 중 하나.
-- `description:`은 사이드바에, `href:`는 형제 slug 드릴다운에 쓰인다. 엣지는 `layer:` 필수.
+- **캔버스 텍스트는 절제한다**: `label`은 짧은 이름, `sublabel`은 한 줄 보조까지만. 설명 문장·기능 나열을 캔버스에 그리지 마라 — **상세는 전부 `description:`(클릭 시 우측 사이드바)이 자리다.** 주요 노드에는 `description:`을 기본으로 채운다. `href:`는 형제 slug 드릴다운. 엣지는 `layer:` 필수.
+- **플로우를 빠뜨리지 마라**: 코드에서 대표 경로(요청·배포·이벤트 등)가 읽히면 구조 장에도 `d.flow()` 1~2개를 기본 포함한다(순번 배지·내레이션·단계 사이드바가 flow로만 산다). `docKind:"data-flow"` 장은 flow가 없으면 미완성이다.
 - 격자는 `grid()`+`cell()`, 스팬 그룹은 `overlay()`, 외부 시스템은 `band("right")`, 순번 마커는 `step()`.
 - 넓거나 좁은 그림은 `diagram(id, { aspectRatio })`로 의도 선언. 추측 금지 — 읽은 것만 그린다.
 

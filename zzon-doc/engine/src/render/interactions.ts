@@ -38,16 +38,25 @@ export const CANVAS_JS: string = `(function () {
   }
   function fitView() { vb = vb0.slice(); applyVB(); }
 
-  var pan = null, moved = false;
+  /* Pointer capture retargets the subsequent click to the svg root, which
+     breaks closest(".node") hit-testing — so capture is deferred until the
+     drag threshold is crossed (a plain click never captures), and the
+     pointerdown target is kept as a fallback for retargeted clicks. */
+  var pan = null, moved = false, downTarget = null;
   svg.addEventListener("pointerdown", function (ev) {
     if (ev.button !== 0) return;
     moved = false;
-    pan = { x: ev.clientX, y: ev.clientY, vb: vb.slice() };
-    if (svg.setPointerCapture) svg.setPointerCapture(ev.pointerId);
+    downTarget = ev.target instanceof Element ? ev.target : null;
+    pan = { x: ev.clientX, y: ev.clientY, id: ev.pointerId, vb: vb.slice() };
   });
   svg.addEventListener("pointermove", function (ev) {
     if (!pan) return;
-    if (Math.abs(ev.clientX - pan.x) + Math.abs(ev.clientY - pan.y) > 3) moved = true;
+    if (!moved && Math.abs(ev.clientX - pan.x) + Math.abs(ev.clientY - pan.y) > 3) {
+      moved = true;
+      if (svg.setPointerCapture) {
+        try { svg.setPointerCapture(pan.id); } catch (_) {}
+      }
+    }
     if (!moved) return;
     var r = svg.getBoundingClientRect();
     vb[0] = pan.vb[0] - ((ev.clientX - pan.x) / r.width) * pan.vb[2];
@@ -208,6 +217,7 @@ export const CANVAS_JS: string = `(function () {
   svg.addEventListener("click", function (ev) {
     if (moved) return;
     var t = ev.target instanceof Element ? ev.target : null;
+    if ((!t || t === svg) && downTarget) t = downTarget;
     var badge = t ? t.closest(".flow-badge") : null;
     if (badge) {
       var layer = badge.closest(".flow-badges[data-flow]");
@@ -225,6 +235,7 @@ export const CANVAS_JS: string = `(function () {
 
   svg.addEventListener("dblclick", function (ev) {
     var t = ev.target instanceof Element ? ev.target : null;
+    if ((!t || t === svg) && downTarget) t = downTarget;
     var node = t ? t.closest(".node[data-path]") : null;
     if (node) emit("onNodeActivated", node.getAttribute("data-path"));
     else fitView();

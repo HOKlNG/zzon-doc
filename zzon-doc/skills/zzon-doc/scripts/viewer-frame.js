@@ -335,17 +335,20 @@ const FRAME_RUNTIME = String.raw`"use strict";
     catch (err) { console.warn("[zzon-frame] " + S.adapterFail + " " + name, err); return null; }
   }
   function syncHighlight() {
-    if (st.flowId && st.step != null) {
-      callAdapter("highlight", "step", { flowId: st.flowId, step: st.step });
-    } else if (st.flowId) {
-      callAdapter("highlight", "flow", { flowId: st.flowId });
-    } else if (st.selected) {
-      callAdapter("highlight", "select", { path: st.selected });
-    } else if (st.hovered) {
-      callAdapter("highlight", "hover", { path: st.hovered });
-    } else {
-      callAdapter("highlight", "hover", null); /* target null = 해제 (§2) */
-    }
+    /* 어댑터는 모드별 상태를 누적한다 — 활성 모드만 보내면 꺼진 모드가
+       캔버스에 잔상으로 남는다(예: 플로우 해제 후 dim 잔류). 꺼진 모드는
+       target null 해제(§2)를 명시적으로 보낸 뒤 활성 모드를 적용한다. */
+    var mode = st.flowId && st.step != null ? "step"
+      : st.flowId ? "flow"
+      : st.selected ? "select"
+      : st.hovered ? "hover" : null;
+    if (mode !== "flow" && mode !== "step") callAdapter("highlight", "flow", null);
+    if (mode !== "select") callAdapter("highlight", "select", null);
+    if (mode !== "hover") callAdapter("highlight", "hover", null);
+    if (mode === "step") callAdapter("highlight", "step", { flowId: st.flowId, step: st.step });
+    else if (mode === "flow") callAdapter("highlight", "flow", { flowId: st.flowId });
+    else if (mode === "select") callAdapter("highlight", "select", { path: st.selected });
+    else if (mode === "hover") callAdapter("highlight", "hover", { path: st.hovered });
   }
 
   /* ---- 우측 사이드바: 열림/닫힘 + canvasShift(±152) + zzon:sidebar 통지 ---- */

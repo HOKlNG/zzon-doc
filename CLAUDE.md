@@ -138,6 +138,11 @@ plugins-zzon-doc/
   - **스펙 단위 어휘 옵션**: 레거시 DiagramSpec에 `"vocabulary": "aws"` 한 줄로 클라우드 아이콘 어휘 선택(정책은 스킬 지침, 메커니즘은 엔진 — 혼용은 validator 차단, `allowMixedVocabulary`로만 허용).
   - **zzon-wiki 카탈로그에 시퀀스 1급 슬롯**(seq-flows 등): 티어 제안 단계에서 시퀀스 후보를 반드시 세어 명시 — 시퀀스가 제안에 자동으로 올라옴.
   - 밀집 플로우 엣지 라벨 개선(통로 폭 적응·카드 위 pill 렌더) + 스텝 포커스가 포커스된 단계의 엣지에만 액센트 유지.
+- **뷰어 버그픽스 2건 + 저작 정책 교정** (2026-08-05, 사용처 세션의 진단 리포트 반영):
+  - **노드 클릭 먹통(engine/src/render/interactions.ts)**: pointerdown마다 `setPointerCapture` → 이어지는 `click`의 target이 svg 루트로 리타깃 → `closest(".node")` 항상 null. 실마우스에서만 재현(합성 이벤트는 통과)되던 버그. 수정: 캡처를 3px 드래그 임계를 넘긴 첫 pointermove로 지연 + pointerdown target을 저장해 리타깃된 click/dblclick에서 폴백.
+  - **플로우 해제 잔상(viewer-frame.js syncHighlight)**: 활성 모드만 어댑터에 보내 꺼진 모드(flow/select)가 캔버스에 누적 잔류(배지 표시·dim 유지). 수정: 꺼진 모드에 target null 해제(§2)를 명시 송신 후 활성 모드 적용. 같은 뿌리의 "플로우 중 노드 선택" 잔상도 함께 해소.
+  - 검증: bun test 165 pass + viewer-frame node --test 통과 + **실제 헤드리스 Chrome 차분 회귀**(수정 전 코드로 실패 재현 → 수정 후 전 항목 통과: 리타깃 클릭에 사이드바 열림·플레인 클릭 캡처 0회·플로우 해제 후 active/dim/fade 0, 에러 0). 하니스는 scratchpad(세션 한정).
+  - **저작 정책(SKILL.md)**: ① 캔버스 텍스트 절제 — 설명 문장은 전부 `description:`(우측 사이드바), 라벨은 짧게(zzon-doc·terra-form 양쪽 명문화, "아키텍처에 글이 너무 많다" 교정) ② 구조 장에도 대표 경로 `d.flow()` 1~2개 기본 포함(플로우 누락 경향 교정).
 - 남은 엔진 백로그는 P2~P3(같은 레인 좌측 C자 우회·접근 세그먼트 회피·lint 엣지/라벨 검사·그룹 접기·시맨틱 줌) — 메모리 `zzon-engine-priorities` 참조. (레거시 render.mjs 개선 백로그는 폴백 강등으로 우선순위 하락.)
 - 소유자 표준은 **메모리**에 기록됨(무의존/문서 디자인/레이아웃 품질) — 로컬, 레포 밖.
 - git: main에 v0.8.2까지 커밋됨 — 릴리스 커밋(d622926) + **통합 후속 커밋**(marketplace 0.8.2 동기화·README 4스킬/bun 요구사항·산출 폴더 기본값 `docs/zzon-doc/`·CLAUDE.md 개정, 버전 번호는 소유자 결정으로 0.8.2 유지). **GitHub push는 소유자가 직접 함.**

@@ -51,6 +51,7 @@ GCP/Azure 공식 아이콘 팩 파이프라인은 로드맵 — 추가 시 이 �
 - 액터는 `d.actor(side:)`, 외부 SaaS·부속 행은 `d.band("right"|"bottom")` — 외부 관리형(DB SaaS 등)은 오른쪽 밴드가 관례.
 - 엣지는 **`layer:` 필수**(request/pipeline/deploy/monitor…) — HTML 레이어 토글의 단위다.
 - 같은 의미의 반복 리소스(크론 N개, ECR N개)는 노드 1개 + `sublabel`로 압축. 흐름 순번은 `d.step()`.
+- 설명 문장은 캔버스에 그리지 않는다 — `description:`(클릭 시 사이드바)에 담고, 라벨은 리소스 이름 위주로 짧게.
 - **아이콘 키는 실재 확인**: `grep '"<키>"' $ENGINE/src/icons/manifest.gen.ts $ENGINE/src/icons/aliases.ts`.
   없으면 별칭 → 유사 서비스 → `res.*` 제네릭 순. 상표 제약 로고(Grafana 등)는 제네릭으로.
 - 본질적으로 넓은/좁은 그림은 `diagram(id, { aspectRatio })`로 의도를 선언한다.

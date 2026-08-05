@@ -115,6 +115,8 @@ svg.ia-svg.labels-off .edge text{opacity:0}
 .flow-dim{opacity:.25}
 .flow-fade{opacity:.5}
 .edge.flow-hl path{stroke:var(--flow,#4f46e5);stroke-width:2.25}
+.step-focus .edge.flow-hl.flow-fade path{stroke:var(--ia-edge,#545B64);stroke-width:1.5}
+.step-focus .flow-badges [data-steps]:not(.on){opacity:.35}
 @keyframes flow-pop{to{transform:scale(1)}}
 .flow-badges.active .flow-badge{transform:scale(0);transform-box:fill-box;transform-origin:center;animation:flow-pop 280ms cubic-bezier(.34,1.56,.64,1) forwards;animation-delay:calc(var(--step-index,0)*220ms + 120ms)}
 @media (prefers-reduced-motion:reduce){.flow-badges.active .flow-badge{animation:none;transform:scale(1)}}
@@ -122,30 +124,31 @@ svg.ia-svg.labels-off .edge text{opacity:0}
 </head>
 <body>
 <div id="frame-root" role="img" aria-label="주문 처리 데이터 플로우 — 노드 5개, 엣지 5개, 플로우 2개">
-<div class="frame-viewport" id="frame-viewport"><svg xmlns="http://www.w3.org/2000/svg" class="ia-svg" viewBox="0 0 1337.54 152.9" width="1337.54" height="152.9" font-family="Pretendard">
+<div class="frame-viewport" id="frame-viewport"><svg xmlns="http://www.w3.org/2000/svg" class="ia-svg" viewBox="0 0 554.96 645.43" width="554.96" height="645.43" font-family="Pretendard">
 <defs><symbol id="i-x_lucide-cog" viewBox="0 0 24 24"><path d="M11 10.27 7 3.34"/><path d="m11 13.73-4 6.93"/><path d="M12 22v-2"/><path d="M12 2v2"/><path d="M14 12h8"/><path d="m17 20.66-1-1.73"/><path d="m17 3.34-1 1.73"/><path d="M2 12h2"/><path d="m20.66 17-1.73-1"/><path d="m20.66 7-1.73 1"/><path d="m3.34 17 1.73-1"/><path d="m3.34 7 1.73 1"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="8"/></symbol>
 <symbol id="i-x_lucide-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></symbol>
 <symbol id="i-x_lucide-door-open" viewBox="0 0 24 24"><path d="M11 20H2"/><path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z"/><path d="M11 4H8a2 2 0 0 0-2 2v14"/><path d="M14 12h.01"/><path d="M22 20h-3"/></symbol>
 <symbol id="i-x_lucide-list-ordered" viewBox="0 0 24 24"><path d="M11 5h10"/><path d="M11 12h10"/><path d="M11 19h10"/><path d="M4 4h1v5"/><path d="M4 9h2"/><path d="M6.5 20H3.4c0-1 2.6-1.925 2.6-3.5a1.5 1.5 0 0 0-2.6-1.02"/></symbol>
 <symbol id="i-x_lucide-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></symbol>
 <marker id="arw-545B64" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#545B64"/></marker></defs>
-<rect class="canvas-bg" x="0" y="0" width="1337.54" height="152.9" fill="var(--ia-canvas)"/>
+<rect class="canvas-bg" x="0" y="0" width="554.96" height="645.43" fill="var(--ia-canvas)"/>
 <g class="groups"></g>
 <g class="overlays"></g>
-<g class="edges"><g class="edge layer-sync" data-edge-id="e0" data-from="client" data-to="api"><path d="M224 65.36L288 65.36" fill="none" stroke="#545B64" stroke-width="1.5" marker-end="url(#arw-545B64)"/><text x="256" y="56.71" font-size="11" font-weight="400" text-anchor="middle" fill="#545B64">주문 제출</text></g>
-<g class="edge layer-async" data-edge-id="e1" data-from="api" data-to="queue"><path d="M508 65.36L540.35 65.36L540.35 87.54L572.69 87.54" fill="none" stroke="#545B64" stroke-width="1.5" marker-end="url(#arw-545B64)"/><text x="537.54" y="56.71" font-size="11" font-weight="400" text-anchor="middle" fill="#545B64">이벤트 발행</text></g>
-<g class="edge layer-async" data-edge-id="e2" data-from="queue" data-to="worker"><path d="M764.69 87.54L828.69 87.54" fill="none" stroke="#545B64" stroke-width="1.5" marker-end="url(#arw-545B64)"/><text x="796.69" y="78.89" font-size="11" font-weight="400" text-anchor="middle" fill="#545B64">소비</text></g>
-<g class="edge layer-data" data-edge-id="e3" data-from="worker" data-to="orders-db"><path d="M1048.69 87.54L1081.11 87.54L1081.11 65.36L1113.54 65.36" fill="none" stroke="#545B64" stroke-width="1.5" marker-end="url(#arw-545B64)"/><text x="1087.11" y="80.36" font-size="11" font-weight="400" text-anchor="start" fill="#545B64">저장</text></g>
-<g class="edge layer-data" data-edge-id="e4" data-from="api" data-to="orders-db"><path d="M508 65.36L540.35 65.36L540.35 46.18L1081.11 46.18L1081.11 65.36L1113.54 65.36" fill="none" stroke="#545B64" stroke-width="1.5" stroke-dasharray="2 3" marker-end="url(#arw-545B64)"/><text x="810.77" y="37.53" font-size="11" font-weight="400" text-anchor="middle" fill="#545B64">상태 조회</text></g></g>
-<g class="nodes"><g class="node node-card" data-path="client"><rect x="32" y="39.36" width="192" height="52" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="33" y="40.36" width="3" height="50" fill="var(--cat-frontend)" opacity="0.85"/><rect x="46" y="49.36" width="32" height="32" rx="6" fill="var(--cat-frontend)" fill-opacity="0.13"/><use href="#i-x_lucide-monitor" x="54" y="57.36" width="16" height="16" fill="none" stroke="var(--cat-frontend)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="88" y="62.36" font-size="12" font-weight="600" fill="var(--ia-text)">웹 클라이언트</text><rect x="88" y="67.36" width="56.04" height="14" rx="4" fill="var(--muted,#f1f5f9)"/><text x="116.02" y="77.86" font-size="10" font-weight="500" text-anchor="middle" fill="var(--muted-foreground,#64748b)">Next.js 14</text></g>
-<g class="node node-card" data-path="api"><rect x="288" y="32" width="220" height="66.72" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="289" y="33" width="3" height="64.72" fill="var(--cat-edge)" opacity="0.85"/><rect x="302" y="42" width="32" height="32" rx="6" fill="var(--cat-edge)" fill-opacity="0.13"/><use href="#i-x_lucide-door-open" x="310" y="50" width="16" height="16" fill="none" stroke="var(--cat-edge)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="344" y="55" font-size="12" font-weight="600" fill="var(--ia-text)">주문 API</text><rect x="344" y="60" width="57.15" height="14" rx="4" fill="var(--muted,#f1f5f9)"/><text x="372.57" y="70.5" font-size="10" font-weight="500" text-anchor="middle" fill="var(--muted-foreground,#64748b)">NestJS 10</text><text x="302" y="85.52" font-size="10" fill="var(--muted-foreground,#64748b)">주문 접수와 상태 조회를 처리하는 단일 진입점.</text></g>
-<g class="node node-card" data-path="queue"><rect x="572.69" y="61.54" width="192" height="52" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="573.69" y="62.54" width="3" height="50" fill="var(--cat-data-aux)" opacity="0.85"/><rect x="586.69" y="71.54" width="32" height="32" rx="6" fill="var(--cat-data-aux)" fill-opacity="0.13"/><use href="#i-x_lucide-list-ordered" x="594.69" y="79.54" width="16" height="16" fill="none" stroke="var(--cat-data-aux)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="628.69" y="84.54" font-size="12" font-weight="600" fill="var(--ia-text)">주문 큐</text><rect x="628.69" y="89.54" width="31.41" height="14" rx="4" fill="var(--muted,#f1f5f9)"/><text x="644.4" y="100.04" font-size="10" font-weight="500" text-anchor="middle" fill="var(--muted-foreground,#64748b)">SQS</text></g>
-<g class="node node-card" data-path="worker"><rect x="828.69" y="54.18" width="220" height="66.72" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="829.69" y="55.18" width="3" height="64.72" fill="var(--cat-backend)" opacity="0.85"/><rect x="842.69" y="64.18" width="32" height="32" rx="6" fill="var(--cat-backend)" fill-opacity="0.13"/><use href="#i-x_lucide-cog" x="850.69" y="72.18" width="16" height="16" fill="none" stroke="var(--cat-backend)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="884.69" y="77.18" font-size="12" font-weight="600" fill="var(--ia-text)">정산 워커</text><text x="884.69" y="92.68" font-size="10" fill="var(--muted-foreground,#64748b)">워커</text><text x="842.69" y="107.7" font-size="10" fill="var(--muted-foreground,#64748b)">큐 이벤트를 소비해 주문 레코드를 확정한다.</text></g>
-<g class="node node-card" data-path="orders-db"><rect x="1113.54" y="39.36" width="192" height="52" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="1114.54" y="40.36" width="3" height="50" fill="var(--cat-data)" opacity="0.85"/><rect x="1127.54" y="49.36" width="32" height="32" rx="6" fill="var(--cat-data)" fill-opacity="0.13"/><use href="#i-x_lucide-database" x="1135.54" y="57.36" width="16" height="16" fill="none" stroke="var(--cat-data)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="1169.54" y="62.36" font-size="12" font-weight="600" fill="var(--ia-text)">주문 DB</text><rect x="1169.54" y="67.36" width="78.59" height="14" rx="4" fill="var(--muted,#f1f5f9)"/><text x="1208.83" y="77.86" font-size="10" font-weight="500" text-anchor="middle" fill="var(--muted-foreground,#64748b)">PostgreSQL 16</text></g></g>
+<g class="edges"><g class="edge layer-sync" data-edge-id="e0" data-from="client" data-to="api"><path d="M142 84L142 261.59" fill="none" stroke="#545B64" stroke-width="1.5" marker-end="url(#arw-545B64)"/></g>
+<g class="edge layer-async" data-edge-id="e1" data-from="api" data-to="queue"><path d="M252 294.95L305.48 294.95L305.48 313.45L330.96 313.45" fill="none" stroke="#545B64" stroke-width="1.5" marker-end="url(#arw-545B64)"/></g>
+<g class="edge layer-async" data-edge-id="e2" data-from="queue" data-to="worker"><path d="M330.96 313.45L277.48 313.45L277.48 580.07L252 580.07" fill="none" stroke="#545B64" stroke-width="1.5" marker-end="url(#arw-545B64)"/></g>
+<g class="edge layer-data" data-edge-id="e3" data-from="worker" data-to="orders-db"><path d="M252 580.07L291.48 580.07L291.48 558.39L330.96 558.39" fill="none" stroke="#545B64" stroke-width="1.5" marker-end="url(#arw-545B64)"/></g>
+<g class="edge layer-data" data-edge-id="e4" data-from="api" data-to="orders-db"><path d="M252 294.95L291.48 294.95L291.48 558.39L330.96 558.39" fill="none" stroke="#545B64" stroke-width="1.5" stroke-dasharray="2 3" marker-end="url(#arw-545B64)"/></g></g>
+<g class="nodes"><g class="node node-card" data-path="client"><rect x="46" y="32" width="192" height="52" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="47" y="33" width="3" height="50" fill="var(--cat-frontend)" opacity="0.85"/><rect x="60" y="42" width="32" height="32" rx="6" fill="var(--cat-frontend)" fill-opacity="0.13"/><use href="#i-x_lucide-monitor" x="68" y="50" width="16" height="16" fill="none" stroke="var(--cat-frontend)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="102" y="55" font-size="12" font-weight="600" fill="var(--ia-text)">웹 클라이언트</text><rect x="102" y="60" width="56.04" height="14" rx="4" fill="var(--muted,#f1f5f9)"/><text x="130.02" y="70.5" font-size="10" font-weight="500" text-anchor="middle" fill="var(--muted-foreground,#64748b)">Next.js 14</text></g>
+<g class="node node-card" data-path="api"><rect x="32" y="261.59" width="220" height="66.72" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="33" y="262.59" width="3" height="64.72" fill="var(--cat-edge)" opacity="0.85"/><rect x="46" y="271.59" width="32" height="32" rx="6" fill="var(--cat-edge)" fill-opacity="0.13"/><use href="#i-x_lucide-door-open" x="54" y="279.59" width="16" height="16" fill="none" stroke="var(--cat-edge)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="88" y="284.59" font-size="12" font-weight="600" fill="var(--ia-text)">주문 API</text><rect x="88" y="289.59" width="57.15" height="14" rx="4" fill="var(--muted,#f1f5f9)"/><text x="116.57" y="300.09" font-size="10" font-weight="500" text-anchor="middle" fill="var(--muted-foreground,#64748b)">NestJS 10</text><text x="46" y="315.11" font-size="10" fill="var(--muted-foreground,#64748b)">주문 접수와 상태 조회를 처리하는 단일 진입점.</text></g>
+<g class="node node-card" data-path="queue"><rect x="330.96" y="287.45" width="192" height="52" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="331.96" y="288.45" width="3" height="50" fill="var(--cat-data-aux)" opacity="0.85"/><rect x="344.96" y="297.45" width="32" height="32" rx="6" fill="var(--cat-data-aux)" fill-opacity="0.13"/><use href="#i-x_lucide-list-ordered" x="352.96" y="305.45" width="16" height="16" fill="none" stroke="var(--cat-data-aux)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="386.96" y="310.45" font-size="12" font-weight="600" fill="var(--ia-text)">주문 큐</text><rect x="386.96" y="315.45" width="31.41" height="14" rx="4" fill="var(--muted,#f1f5f9)"/><text x="402.67" y="325.95" font-size="10" font-weight="500" text-anchor="middle" fill="var(--muted-foreground,#64748b)">SQS</text></g>
+<g class="node node-card" data-path="worker"><rect x="32" y="546.71" width="220" height="66.72" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="33" y="547.71" width="3" height="64.72" fill="var(--cat-backend)" opacity="0.85"/><rect x="46" y="556.71" width="32" height="32" rx="6" fill="var(--cat-backend)" fill-opacity="0.13"/><use href="#i-x_lucide-cog" x="54" y="564.71" width="16" height="16" fill="none" stroke="var(--cat-backend)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="88" y="569.71" font-size="12" font-weight="600" fill="var(--ia-text)">정산 워커</text><text x="88" y="585.21" font-size="10" fill="var(--muted-foreground,#64748b)">워커</text><text x="46" y="600.23" font-size="10" fill="var(--muted-foreground,#64748b)">큐 이벤트를 소비해 주문 레코드를 확정한다.</text></g>
+<g class="node node-card" data-path="orders-db"><rect x="330.96" y="532.39" width="192" height="52" rx="8" fill="var(--card,#ffffff)" stroke-width="1" stroke="var(--border,#e2e8f0)"/><rect x="331.96" y="533.39" width="3" height="50" fill="var(--cat-data)" opacity="0.85"/><rect x="344.96" y="542.39" width="32" height="32" rx="6" fill="var(--cat-data)" fill-opacity="0.13"/><use href="#i-x_lucide-database" x="352.96" y="550.39" width="16" height="16" fill="none" stroke="var(--cat-data)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="386.96" y="555.39" font-size="12" font-weight="600" fill="var(--ia-text)">주문 DB</text><rect x="386.96" y="560.39" width="78.59" height="14" rx="4" fill="var(--muted,#f1f5f9)"/><text x="426.26" y="570.89" font-size="10" font-weight="500" text-anchor="middle" fill="var(--muted-foreground,#64748b)">PostgreSQL 16</text></g></g>
+<g class="edge-labels"><g class="edge-label layer-sync" data-edge-id="e0"><rect x="143" y="164.71" width="50.79" height="19" rx="4" fill="var(--ia-canvas, #fff)" fill-opacity="0.92"/><text x="148" y="176.71" font-size="11" font-weight="400" text-anchor="start" fill="#545B64">주문 제출</text></g><g class="edge-label layer-async" data-edge-id="e1"><rect x="270.58" y="274.3" width="60.29" height="19" rx="4" fill="var(--ia-canvas, #fff)" fill-opacity="0.92"/><text x="300.73" y="286.3" font-size="11" font-weight="400" text-anchor="middle" fill="#545B64">이벤트 발행</text></g><g class="edge-label layer-async" data-edge-id="e2"><rect x="278.48" y="424.67" width="29.01" height="19" rx="4" fill="var(--ia-canvas, #fff)" fill-opacity="0.92"/><text x="283.48" y="436.67" font-size="11" font-weight="400" text-anchor="start" fill="#545B64">소비</text></g><g class="edge-label layer-data" data-edge-id="e3"><rect x="292.48" y="561.14" width="29.01" height="19" rx="4" fill="var(--ia-canvas, #fff)" fill-opacity="0.92"/><text x="297.48" y="573.14" font-size="11" font-weight="400" text-anchor="start" fill="#545B64">저장</text></g><g class="edge-label layer-data" data-edge-id="e4"><rect x="292.48" y="391.19" width="50.79" height="19" rx="4" fill="var(--ia-canvas, #fff)" fill-opacity="0.92"/><text x="297.48" y="403.19" font-size="11" font-weight="400" text-anchor="start" fill="#545B64">상태 조회</text></g></g>
 <g class="markers"></g>
 <g class="flows">
-<g class="flow-badges flow-order" data-flow="order"><g class="flow-badge" data-edge-id="e0" data-steps="1" style="--step-index:0"><circle cx="256" cy="65.36" r="10" fill="var(--flow, #4f46e5)"/><text x="256" y="69.36" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">1</text></g><g class="flow-badge" data-edge-id="e1" data-steps="2" style="--step-index:1"><circle cx="540.35" cy="76.45" r="10" fill="var(--flow, #4f46e5)"/><text x="540.35" y="80.45" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">2</text></g><g class="flow-badge" data-edge-id="e2" data-steps="3" style="--step-index:2"><circle cx="796.69" cy="87.54" r="10" fill="var(--flow, #4f46e5)"/><text x="796.69" y="91.54" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">3</text></g><g class="flow-badge" data-edge-id="e3" data-steps="4" style="--step-index:3"><circle cx="1081.11" cy="76.44" r="10" fill="var(--flow, #4f46e5)"/><text x="1081.11" y="80.44" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">4</text></g></g>
-<g class="flow-badges flow-status" data-flow="status"><g class="flow-badge" data-edge-id="e0" data-steps="1" style="--step-index:0"><circle cx="263.68" cy="65.36" r="10" fill="var(--flow, #4f46e5)"/><text x="263.68" y="69.36" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">1</text></g><g class="flow-badge" data-edge-id="e4" data-steps="2" style="--step-index:1"><circle cx="810.77" cy="46.18" r="10" fill="var(--flow, #4f46e5)"/><text x="810.77" y="50.18" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">2</text></g></g>
+<g class="flow-badges flow-order" data-flow="order"><g class="flow-badge" data-edge-id="e0" data-steps="1" style="--step-index:0"><circle cx="142" cy="172.8" r="10" fill="var(--flow, #4f46e5)"/><text x="142" y="176.8" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">1</text></g><g class="flow-badge" data-edge-id="e1" data-steps="2" style="--step-index:1"><circle cx="300.73" cy="294.95" r="10" fill="var(--flow, #4f46e5)"/><text x="300.73" y="298.95" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">2</text></g><g class="flow-badge" data-edge-id="e2" data-steps="3" style="--step-index:2"><circle cx="277.48" cy="432.76" r="10" fill="var(--flow, #4f46e5)"/><text x="277.48" y="436.76" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">3</text></g><g class="flow-badge" data-edge-id="e3" data-steps="4" style="--step-index:3"><circle cx="291.48" cy="569.23" r="10" fill="var(--flow, #4f46e5)"/><text x="291.48" y="573.23" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">4</text></g></g>
+<g class="flow-badges flow-status" data-flow="status"><g class="flow-badge" data-edge-id="e0" data-steps="1" style="--step-index:0"><circle cx="142" cy="194.11" r="10" fill="var(--flow, #4f46e5)"/><text x="142" y="198.11" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">1</text></g><g class="flow-badge" data-edge-id="e4" data-steps="2" style="--step-index:1"><circle cx="291.48" cy="426.67" r="10" fill="var(--flow, #4f46e5)"/><text x="291.48" y="430.67" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">2</text></g></g>
 </g>
 </svg></div>
 <div class="frame-ui frame-titlebar" data-frame-ui><span class="frame-kind-chip"><span class="frame-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="11" height="11"><path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/><path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/><path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/></svg></span>데이터 흐름</span><span class="frame-title-text">주문 처리 데이터 플로우</span></div>
@@ -274,17 +277,20 @@ window.__zzonFrameIcons = {"Server":"\u003crect width=\"20\" height=\"8\" x=\"2\
     catch (err) { console.warn("[zzon-frame] " + S.adapterFail + " " + name, err); return null; }
   }
   function syncHighlight() {
-    if (st.flowId && st.step != null) {
-      callAdapter("highlight", "step", { flowId: st.flowId, step: st.step });
-    } else if (st.flowId) {
-      callAdapter("highlight", "flow", { flowId: st.flowId });
-    } else if (st.selected) {
-      callAdapter("highlight", "select", { path: st.selected });
-    } else if (st.hovered) {
-      callAdapter("highlight", "hover", { path: st.hovered });
-    } else {
-      callAdapter("highlight", "hover", null); /* target null = \uD574\uC81C (\u00A72) */
-    }
+    /* \uC5B4\uB311\uD130\uB294 \uBAA8\uB4DC\uBCC4 \uC0C1\uD0DC\uB97C \uB204\uC801\uD55C\uB2E4 \u2014 \uD65C\uC131 \uBAA8\uB4DC\uB9CC \uBCF4\uB0B4\uBA74 \uAEBC\uC9C4 \uBAA8\uB4DC\uAC00
+       \uCE94\uBC84\uC2A4\uC5D0 \uC794\uC0C1\uC73C\uB85C \uB0A8\uB294\uB2E4(\uC608: \uD50C\uB85C\uC6B0 \uD574\uC81C \uD6C4 dim \uC794\uB958). \uAEBC\uC9C4 \uBAA8\uB4DC\uB294
+       target null \uD574\uC81C(\u00A72)\uB97C \uBA85\uC2DC\uC801\uC73C\uB85C \uBCF4\uB0B8 \uB4A4 \uD65C\uC131 \uBAA8\uB4DC\uB97C \uC801\uC6A9\uD55C\uB2E4. */
+    var mode = st.flowId && st.step != null ? "step"
+      : st.flowId ? "flow"
+      : st.selected ? "select"
+      : st.hovered ? "hover" : null;
+    if (mode !== "flow" && mode !== "step") callAdapter("highlight", "flow", null);
+    if (mode !== "select") callAdapter("highlight", "select", null);
+    if (mode !== "hover") callAdapter("highlight", "hover", null);
+    if (mode === "step") callAdapter("highlight", "step", { flowId: st.flowId, step: st.step });
+    else if (mode === "flow") callAdapter("highlight", "flow", { flowId: st.flowId });
+    else if (mode === "select") callAdapter("highlight", "select", { path: st.selected });
+    else if (mode === "hover") callAdapter("highlight", "hover", { path: st.hovered });
   }
 
   /* ---- \uC6B0\uCE21 \uC0AC\uC774\uB4DC\uBC14: \uC5F4\uB9BC/\uB2EB\uD798 + canvasShift(\u00B1152) + zzon:sidebar \uD1B5\uC9C0 ---- */
@@ -655,16 +661,25 @@ window.__zzonFrameIcons = {"Server":"\u003crect width=\"20\" height=\"8\" x=\"2\
   }
   function fitView() { vb = vb0.slice(); applyVB(); }
 
-  var pan = null, moved = false;
+  /* Pointer capture retargets the subsequent click to the svg root, which
+     breaks closest(".node") hit-testing — so capture is deferred until the
+     drag threshold is crossed (a plain click never captures), and the
+     pointerdown target is kept as a fallback for retargeted clicks. */
+  var pan = null, moved = false, downTarget = null;
   svg.addEventListener("pointerdown", function (ev) {
     if (ev.button !== 0) return;
     moved = false;
-    pan = { x: ev.clientX, y: ev.clientY, vb: vb.slice() };
-    if (svg.setPointerCapture) svg.setPointerCapture(ev.pointerId);
+    downTarget = ev.target instanceof Element ? ev.target : null;
+    pan = { x: ev.clientX, y: ev.clientY, id: ev.pointerId, vb: vb.slice() };
   });
   svg.addEventListener("pointermove", function (ev) {
     if (!pan) return;
-    if (Math.abs(ev.clientX - pan.x) + Math.abs(ev.clientY - pan.y) > 3) moved = true;
+    if (!moved && Math.abs(ev.clientX - pan.x) + Math.abs(ev.clientY - pan.y) > 3) {
+      moved = true;
+      if (svg.setPointerCapture) {
+        try { svg.setPointerCapture(pan.id); } catch (_) {}
+      }
+    }
     if (!moved) return;
     var r = svg.getBoundingClientRect();
     vb[0] = pan.vb[0] - ((ev.clientX - pan.x) / r.width) * pan.vb[2];
@@ -745,6 +760,7 @@ window.__zzonFrameIcons = {"Server":"\u003crect width=\"20\" height=\"8\" x=\"2\
 
     /* flow/step: badge layer + on-path highlight + step focus fade */
     var flowOn = state.flow !== null;
+    svg.classList.toggle("step-focus", flowOn && state.step !== null);
     layers.forEach(function (l) {
       l.classList.toggle("active", l.getAttribute("data-flow") === state.flow);
     });
@@ -824,6 +840,7 @@ window.__zzonFrameIcons = {"Server":"\u003crect width=\"20\" height=\"8\" x=\"2\
   svg.addEventListener("click", function (ev) {
     if (moved) return;
     var t = ev.target instanceof Element ? ev.target : null;
+    if ((!t || t === svg) && downTarget) t = downTarget;
     var badge = t ? t.closest(".flow-badge") : null;
     if (badge) {
       var layer = badge.closest(".flow-badges[data-flow]");
@@ -841,6 +858,7 @@ window.__zzonFrameIcons = {"Server":"\u003crect width=\"20\" height=\"8\" x=\"2\
 
   svg.addEventListener("dblclick", function (ev) {
     var t = ev.target instanceof Element ? ev.target : null;
+    if ((!t || t === svg) && downTarget) t = downTarget;
     var node = t ? t.closest(".node[data-path]") : null;
     if (node) emit("onNodeActivated", node.getAttribute("data-path"));
     else fitView();
