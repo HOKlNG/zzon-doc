@@ -5,9 +5,11 @@
  */
 import ELKApi from "elkjs/lib/elk-api.js";
 import type { ELK, ElkNode } from "elkjs/lib/elk-api";
+import { fileURLToPath } from "node:url";
 
-const WORKER_PATH = new URL("../../node_modules/elkjs/lib/elk-worker.min.js", import.meta.url)
-  .pathname;
+// fileURLToPath, not URL.pathname: on Windows .pathname is "/C:/…", which
+// new Worker() cannot open — ELK then hangs forever with no error.
+const WORKER_PATH = fileURLToPath(new URL("../../node_modules/elkjs/lib/elk-worker.min.js", import.meta.url));
 
 let instance: ELK | null = null;
 

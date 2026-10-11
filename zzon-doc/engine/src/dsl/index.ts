@@ -12,6 +12,7 @@ import type {
   BandEl,
   BandPosition,
   DiagramModel,
+  DocKind,
   Edge,
   EdgeHints,
   EdgeStyle,
@@ -28,6 +29,11 @@ import type {
   RailItem,
   Side,
   TableSpec,
+  Tier,
+  NodeShape,
+  NodeTone,
+  ClassSpec,
+  EdgeMarker,
   Cardinality,
   TrackDef,
 } from "../model/types.ts";
@@ -60,6 +66,10 @@ export interface NodeOpts {
   /** AWS/vendor icon — optional when category or table drives the visual */
   icon?: IconRef;
   category?: string;
+  /** notation shape (state machine / flowchart / screen / class / module) — prefer the helpers */
+  shape?: NodeShape;
+  tone?: NodeTone;
+  classSpec?: ClassSpec;
   tech?: string;
   description?: string;
   href?: string;
@@ -68,6 +78,18 @@ export interface NodeOpts {
   sublabel?: string;
   badges?: IconRef[];
   stack?: true | number;
+  meta?: Record<string, string>;
+  hints?: ElementHints;
+}
+
+/** options shared by the notation helpers (state/process/screen/…) */
+export interface ShapeOpts {
+  label?: string;
+  sublabel?: string;
+  /** state / process meaning: "wait" | "done" | "fail" — card accent and icon */
+  tone?: NodeTone;
+  description?: string;
+  href?: string;
   meta?: Record<string, string>;
   hints?: ElementHints;
 }
@@ -108,6 +130,11 @@ export interface EdgeOpts {
   style?: EdgeStyle;
   layer?: string;
   hints?: EdgeHints;
+  /**
+   * a RETURN edge ("쇼핑 계속", "재시도", "다시 로그인"): placement treats it as
+   * to→from so it does not break the reading order of the main flow
+   */
+  back?: boolean;
 }
 
 export interface OverlayOpts {
@@ -139,6 +166,32 @@ const OVERLAY_PRESETS: Record<string, OverlayStyle> = {
   "dashed-gray": { stroke: "#7D8998", strokeDasharray: "6 4" },
 };
 
+/** class-diagram relation options */
+export interface RelationOpts {
+  label?: string;
+  hints?: EdgeHints;
+  sourceCardinality?: Cardinality;
+  targetCardinality?: Cardinality;
+}
+
+function relation(opts: RelationOpts, layer: string, sourceMarker: EdgeMarker): EdgeOpts {
+  // multiplicities ride in the label ("1 — 0..N") — crow's feet are ERD notation
+  const mult = opts.sourceCardinality || opts.targetCardinality
+    ? `${opts.sourceCardinality ?? ""} — ${opts.targetCardinality ?? ""}`.trim()
+    : "";
+  const label = [opts.label, mult].filter(Boolean).join(" · ") || undefined;
+  return { label, layer, style: { sourceMarker, targetMarker: "none", arrowhead: "none" }, hints: opts.hints };
+}
+
+/** default main direction per notation view (declared direction always wins) */
+const DEFAULT_DIRECTION: Partial<Record<DocKind, "RIGHT" | "DOWN">> = {
+  flowchart: "DOWN",
+  dependency: "DOWN",
+  class: "DOWN",
+  state: "RIGHT",
+  "screen-flow": "RIGHT",
+};
+
 // ---------------------------------------------------------------- builders
 
 const track = (t: Track): TrackDef => (typeof t === "string" ? { id: t } : t);
@@ -156,12 +209,76 @@ abstract class ContainerBuilder {
   }
 
   node(id: string, opts: NodeOpts): NodeRef {
+    return this.addNode(id, opts, callSite());
+  }
+
+  // ---- notation helpers (each captures its own call site: callSite() reads
+  // stack[3], so helpers must not route through node())
+
+  /** UML state (rounded box); `sublabel` = internal activity, e.g. "entry / 재고 예약" */
+  state(id: string, opts: ShapeOpts = {}): NodeRef {
+    return this.addNode(id, { ...opts, label: opts.label ?? id, shape: "state" }, callSite());
+  }
+  /** UML initial pseudo-state (filled dot) */
+  initial(id = "initial", opts: ShapeOpts = {}): NodeRef {
+    return this.addNode(id, { ...opts, label: opts.label ?? "시작", shape: "initial" }, callSite());
+  }
+  /** UML final state (bullseye) */
+  final(id = "final", opts: ShapeOpts = {}): NodeRef {
+    return this.addNode(id, { ...opts, label: opts.label ?? "종료", shape: "final" }, callSite());
+  }
+  /** UML choice pseudo-state (small diamond) — guards go on outgoing transitions */
+  choice(id: string, opts: ShapeOpts = {}): NodeRef {
+    return this.addNode(id, { ...opts, label: opts.label ?? id, shape: "choice" }, callSite());
+  }
+  /** flowchart step (rectangle) */
+  process(id: string, opts: ShapeOpts = {}): NodeRef {
+    return this.addNode(id, { ...opts, label: opts.label ?? id, shape: "process" }, callSite());
+  }
+  /** flowchart decision (diamond with the question inside) */
+  decision(id: string, opts: ShapeOpts = {}): NodeRef {
+    return this.addNode(id, { ...opts, label: opts.label ?? id, shape: "decision" }, callSite());
+  }
+  /** flowchart start/end (pill) */
+  terminal(id: string, opts: ShapeOpts = {}): NodeRef {
+    return this.addNode(id, { ...opts, label: opts.label ?? id, shape: "terminal" }, callSite());
+  }
+  /** screen-flow page (browser-chrome frame); `route` is shown as the sublabel */
+  screen(id: string, opts: ShapeOpts & { route?: string } = {}): NodeRef {
+    const { route, ...rest } = opts;
+    return this.addNode(id, { ...rest, label: rest.label ?? id, sublabel: rest.sublabel ?? route, shape: "screen" }, callSite());
+  }
+  /** UML class box with compartments (`d.classNode` — `class` is a reserved word) */
+  classNode(id: string, opts: ShapeOpts & ClassSpec = {}): NodeRef {
+    const { stereotype, attributes, methods, ...rest } = opts;
+    return this.addNode(
+      id,
+      { ...rest, label: rest.label ?? id, shape: "class", classSpec: { stereotype, attributes, methods } },
+      callSite(),
+    );
+  }
+  /** dependency-graph module card; `files` goes to the sidebar, never the canvas */
+  module(id: string, opts: ShapeOpts & { files?: number; shared?: boolean } = {}): NodeRef {
+    const { files, shared, ...rest } = opts;
+    if (shared) rest.tone = "shared";
+    const fileNote = files !== undefined ? `파일 ${files}개로 이루어진 모듈이다.` : undefined;
+    return this.addNode(
+      id,
+      { ...rest, label: rest.label ?? id, description: rest.description ?? fileNote, shape: "module" },
+      callSite(),
+    );
+  }
+
+  protected addNode(id: string, opts: NodeOpts, site: string | undefined): NodeRef {
     const el: NodeEl = {
       type: "node",
       id,
       path: this.childPath(id),
       icon: opts.icon,
       category: opts.category,
+      shape: opts.shape,
+      tone: opts.tone,
+      classSpec: opts.classSpec,
       tech: opts.tech,
       description: opts.description,
       href: opts.href,
@@ -172,7 +289,7 @@ abstract class ContainerBuilder {
       stack: opts.stack,
       meta: opts.meta,
       hints: opts.hints,
-      site: callSite(),
+      site,
     };
     this.children.push(el);
     return new NodeRef(el);
@@ -352,6 +469,59 @@ export class DiagramBuilder extends ContainerBuilder {
   }
 
   edge(from: RefOrPath, to: RefOrPath, opts: EdgeOpts = {}): Ref {
+    return this.addEdge(from, to, opts, callSite(), opts.back === true);
+  }
+
+  // ---- relation helpers (state machine / class diagram / dependency graph)
+
+  /** state transition labelled "event [guard] / action" */
+  transition(
+    from: RefOrPath,
+    to: RefOrPath,
+    opts: { event?: string; guard?: string; action?: string; layer?: string; style?: EdgeStyle; hints?: EdgeHints; back?: boolean } = {},
+  ): Ref {
+    const label = [opts.event, opts.guard ? `[${opts.guard}]` : "", opts.action ? `/ ${opts.action}` : ""]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+    return this.addEdge(from, to, { label: label || undefined, layer: opts.layer ?? "transition", style: opts.style, hints: opts.hints }, callSite(), opts.back === true);
+  }
+  /** UML generalization child ▷ parent (parents are laid out first) */
+  inherits(child: RefOrPath, parent: RefOrPath, opts: { label?: string } = {}): Ref {
+    return this.addEdge(child, parent, { ...opts, layer: "inherit", style: { targetMarker: "triangle" } }, callSite(), true);
+  }
+  /** UML realization class ⇢▷ interface */
+  implements(cls: RefOrPath, iface: RefOrPath, opts: { label?: string } = {}): Ref {
+    return this.addEdge(cls, iface, { ...opts, layer: "implement", style: { preset: "dashed", targetMarker: "triangle" } }, callSite(), true);
+  }
+  /** UML composition whole ◆— part */
+  composes(whole: RefOrPath, part: RefOrPath, opts: RelationOpts = {}): Ref {
+    return this.addEdge(whole, part, relation(opts, "compose", "diamond"), callSite());
+  }
+  /** UML aggregation whole ◇— part */
+  aggregates(whole: RefOrPath, part: RefOrPath, opts: RelationOpts = {}): Ref {
+    return this.addEdge(whole, part, relation(opts, "aggregate", "diamond-open"), callSite());
+  }
+  /** UML association (plain line, optional multiplicities in the label) */
+  associates(a: RefOrPath, b: RefOrPath, opts: RelationOpts = {}): Ref {
+    return this.addEdge(a, b, relation(opts, "assoc", "none"), callSite());
+  }
+  /** dependency (solid line, open arrow) — module graphs, «use» relations; `cycle` paints it red */
+  dependsOn(a: RefOrPath, b: RefOrPath, opts: { label?: string; cycle?: boolean; layer?: string; hints?: EdgeHints } = {}): Ref {
+    return this.addEdge(
+      a,
+      b,
+      {
+        label: opts.label,
+        layer: opts.layer ?? (opts.cycle ? "cycle" : "depends"),
+        style: { targetMarker: "open-arrow", ...(opts.cycle ? { color: "#DC2626" } : {}) },
+        hints: opts.hints,
+      },
+      callSite(),
+    );
+  }
+
+  private addEdge(from: RefOrPath, to: RefOrPath, opts: EdgeOpts, site: string | undefined, layoutReverse = false): Ref {
     const edge: Edge = {
       id: `e${this.m.edges.length}`,
       from: refPath(from),
@@ -364,8 +534,9 @@ export class DiagramBuilder extends ContainerBuilder {
       targetColumn: opts.targetColumn,
       sourceCardinality: opts.sourceCardinality,
       targetCardinality: opts.targetCardinality,
+      ...(layoutReverse ? { layoutReverse: true } : {}),
       hints: opts.hints,
-      site: callSite(),
+      site,
     };
     this.m.edges.push(edge);
     return { path: edge.id };
@@ -408,7 +579,15 @@ export interface DiagramOpts {
   /** diagram-level description — surfaces as the viewer titlebar tooltip */
   description?: string;
   aspectRatio?: number;
-  docKind?: "infra" | "data-flow" | "erd" | "agent-topology";
+  docKind?: DocKind;
+  /** main flow direction — declared = honored as is (no aspect flip) */
+  direction?: "RIGHT" | "DOWN";
+  /** draw card descriptions on the canvas (C4 context style); default sidebar-only */
+  nodeDescriptions?: boolean;
+  /** selection-rubric view name (references/selection-rubric.md §2.1) */
+  view?: string;
+  /** selection-rubric density tier — drives `bun ia check` thresholds */
+  tier?: Tier;
   /** allow mixing category-card and icon node vocabularies in one diagram */
   allowMixedVocabulary?: boolean;
 }
@@ -426,6 +605,10 @@ export function diagram(
     description: opts.description,
     docKind: opts.docKind,
     aspectRatio: opts.aspectRatio ?? 1.6,
+    direction: opts.direction ?? (opts.docKind ? DEFAULT_DIRECTION[opts.docKind] : undefined),
+    nodeDescriptions: opts.nodeDescriptions,
+    view: opts.view,
+    tier: opts.tier,
     allowMixedVocabulary: opts.allowMixedVocabulary,
     children: [],
     actors: [],

@@ -7,7 +7,7 @@
  */
 import { diagram } from "../src/dsl/index.ts";
 
-export default diagram("erd-sample", { aspectRatio: 2.6, title: "Bookmark Service — ERD (core tables)", docKind: "erd" }, (d) => {
+export default diagram("erd-sample", { aspectRatio: 2.6, title: "북마크 서비스 핵심 테이블", docKind: "erd" }, (d) => {
   const users = d.node("users", {
     label: "users",
     description: "가입 사용자 계정",
@@ -49,7 +49,7 @@ export default diagram("erd-sample", { aspectRatio: 2.6, title: "Bookmark Servic
 
   const linkTags = d.node("link_tags", {
     label: "link_tags",
-    description: "링크·태그 M:N 조인 테이블",
+    description: "링크와 태그를 다대다로 잇는 조인 테이블",
     table: {
       columns: [
         { name: "link_id", type: "uuid", pk: true, fk: { table: "links", column: "id" } },

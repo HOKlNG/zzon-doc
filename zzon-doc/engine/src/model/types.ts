@@ -37,6 +37,58 @@ export interface TableSpec {
 
 export type Cardinality = "1" | "0..1" | "N" | "0..N" | "1..N";
 
+/** manifest/document kind (build-docs menu grouping + viewer kind chip) */
+export type DocKind =
+  | "infra"
+  | "data-flow"
+  | "erd"
+  | "agent-topology"
+  | "state"
+  | "flowchart"
+  | "dependency"
+  | "screen-flow"
+  | "class";
+
+/**
+ * Notation shapes for the behaviour/structure views (render/shapes.ts):
+ * UML state machine (state/initial/final/choice), flowchart (process/
+ * decision/terminal), screen flow (screen), class/domain model (class),
+ * module dependency graph (module). A node has exactly one visual driver:
+ * table > shape > category > icon.
+ */
+export type NodeShape =
+  | "state"
+  | "initial"
+  | "final"
+  | "choice"
+  | "process"
+  | "decision"
+  | "terminal"
+  | "screen"
+  | "class"
+  | "module";
+
+/**
+ * What a state or flowchart step means for the reader. It picks the card's
+ * accent and icon: wait = amber clock, done = green check, fail = red cross.
+ * Unset = the plain in-progress card.
+ */
+export type NodeTone = "wait" | "done" | "fail" | "shared";
+
+/** UML class box compartments (shape "class") */
+export interface ClassSpec {
+  /** «interface», «entity», «value object», «aggregate root» … (without guillemets) */
+  stereotype?: string;
+  attributes?: string[];
+  methods?: string[];
+}
+
+/** end decorations beyond the plain arrowhead (UML relations) */
+export type EdgeMarker = "none" | "arrow" | "open-arrow" | "triangle" | "diamond" | "diamond-open";
+
+/** density tier of the selection rubric: T1 overview / T2 standard / T3 reference */
+export type Tier = "overview" | "standard" | "reference";
+
 export interface NodeEl {
   type: "node";
   id: string;
@@ -54,6 +106,12 @@ export interface NodeEl {
   href?: string;
   /** ERD table node — renders header + column rows, FK edges anchor per column */
   table?: TableSpec;
+  /** notation shape (state machine / flowchart / screen / class / module) */
+  shape?: NodeShape;
+  /** state / process meaning — card accent + icon (see NodeTone) */
+  tone?: NodeTone;
+  /** class compartments, shape "class" only */
+  classSpec?: ClassSpec;
   label?: string;
   sublabel?: string;
   /** small icons rendered in a row under/next to the label */
@@ -142,6 +200,9 @@ export interface EdgeStyle {
   preset?: "default" | "dotted" | "dashed";
   color?: string;
   arrowhead?: "none" | "end" | "both";
+  /** UML end decorations — override `arrowhead` at that end when set */
+  sourceMarker?: EdgeMarker;
+  targetMarker?: EdgeMarker;
 }
 
 export interface EdgeHints {
@@ -168,6 +229,11 @@ export interface Edge {
   /** ERD: crow's-foot decorations at the endpoints */
   sourceCardinality?: Cardinality;
   targetCardinality?: Cardinality;
+  /**
+   * placement only: treat the edge as to→from when layering (UML
+   * inheritance/realization point child→parent but parents sit on top)
+   */
+  layoutReverse?: boolean;
   hints?: EdgeHints;
   site?: CallSite;
 }
@@ -220,13 +286,21 @@ export interface Marker {
 // ---------------------------------------------------------------- hints
 
 export interface ElementHints {
-  /** same-rank grouping for layered containers */
-  rank?: string;
-  /** sibling ordering override (lower first) */
+  /**
+   * layer (column for RIGHT, row for DOWN) inside a layered container — lower
+   * first. Siblings sharing a value share a layer; gaps collapse. Unhinted
+   * siblings are derived from their hinted neighbours along edges.
+   */
+  layer?: number;
+  /** slot within the layer (cross axis) — lower first */
   order?: number;
+  /** @deprecated not implemented — use `layer` (validate warns) */
+  rank?: string;
+  /** @deprecated not implemented (validate warns) */
   minWidth?: number;
+  /** @deprecated not implemented (validate warns) */
   minHeight?: number;
-  /** dock this node on the parent group's border */
+  /** @deprecated not implemented — use rails (validate warns) */
   onBorder?: { side: Side; offset?: number };
   /** grid cell span (only meaningful on cell groups) */
   colSpan?: number;
@@ -243,9 +317,22 @@ export interface DiagramModel {
   /** diagram-level description — titlebar tooltip in the viewer frame */
   description?: string;
   /** manifest kind for the docs site (default "infra") */
-  docKind?: "infra" | "data-flow" | "erd" | "agent-topology";
+  docKind?: DocKind;
   /** target aspect ratio for the overall canvas */
   aspectRatio: number;
+  /**
+   * main flow direction for layered containers. Declared = honored as is;
+   * omitted = RIGHT, flipped to DOWN only when RIGHT overshoots the aspect
+   * band on a diagram larger than the overview tier.
+   */
+  direction?: "RIGHT" | "DOWN";
+  /** draw card descriptions ON the canvas (C4 context style). Default false:
+   * descriptions live in the detail sidebar only. */
+  nodeDescriptions?: boolean;
+  /** selection rubric metadata (references/selection-rubric.md) — drives the
+   * tier-specific quality gate in `bun ia check` */
+  view?: string;
+  tier?: Tier;
   /**
    * Opt out of the vocabulary-mixing validation error: by default a diagram
    * may not mix category-card nodes with icon nodes (AWS/lucide `icon:`) —

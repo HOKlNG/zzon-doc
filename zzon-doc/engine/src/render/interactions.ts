@@ -37,19 +37,61 @@ export const CANVAS_JS: string = `(function () {
     svg.classList.toggle("labels-off", labelMode === "auto" && zoomLevel() < LABEL_ZOOM);
   }
   function fitView() { vb = vb0.slice(); applyVB(); }
+  /* On a phone-width canvas a whole-diagram fit shrinks text past reading
+     size, so the FIRST fit (frame boot) opens at a readable zoom from the
+     top-left instead; the fit button and dblclick still show everything. */
+  var READABLE_ZOOM = 0.6, NARROW_PX = 640, booted = false;
+  function bootView() {
+    var r = svg.getBoundingClientRect();
+    if (!r.width || !r.height || r.width > NARROW_PX) return fitView();
+    if (Math.min(r.width / vb0[2], r.height / vb0[3]) >= READABLE_ZOOM) return fitView();
+    var w = r.width / READABLE_ZOOM, h = r.height / READABLE_ZOOM;
+    vb = [vb0[0] + Math.min(0, (vb0[2] - w) / 2), vb0[1] + Math.min(0, (vb0[3] - h) / 2), w, h];
+    applyVB();
+  }
 
   /* Pointer capture retargets the subsequent click to the svg root, which
      breaks closest(".node") hit-testing — so capture is deferred until the
      drag threshold is crossed (a plain click never captures), and the
      pointerdown target is kept as a fallback for retargeted clicks. */
   var pan = null, moved = false, downTarget = null;
+  /* two-finger pinch on touch screens: zoom around the fingers' midpoint */
+  var touches = {}, pinch = null;
+  function touchList() { return Object.keys(touches).map(function (k) { return touches[k]; }); }
+  function pinchState() {
+    var t = touchList(), r = svg.getBoundingClientRect();
+    var cx = (t[0].x + t[1].x) / 2, cy = (t[0].y + t[1].y) / 2;
+    return { d: Math.max(1, Math.hypot(t[0].x - t[1].x, t[0].y - t[1].y)), cx: cx, cy: cy, r: r };
+  }
   svg.addEventListener("pointerdown", function (ev) {
+    if (ev.pointerType === "touch") {
+      touches[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
+      if (touchList().length === 2) {
+        var p = pinchState();
+        pan = null; moved = true;
+        pinch = { d: p.d, vb: vb.slice(),
+          px: vb[0] + ((p.cx - p.r.left) / p.r.width) * vb[2],
+          py: vb[1] + ((p.cy - p.r.top) / p.r.height) * vb[3] };
+        return;
+      }
+    }
     if (ev.button !== 0) return;
     moved = false;
     downTarget = ev.target instanceof Element ? ev.target : null;
     pan = { x: ev.clientX, y: ev.clientY, id: ev.pointerId, vb: vb.slice() };
   });
   svg.addEventListener("pointermove", function (ev) {
+    if (touches[ev.pointerId]) touches[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
+    if (pinch && touchList().length === 2) {
+      var p = pinchState();
+      var zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, (vb0[2] / pinch.vb[2]) * (p.d / pinch.d)));
+      vb[2] = vb0[2] / zoom;
+      vb[3] = pinch.vb[3] * (vb[2] / pinch.vb[2]);
+      vb[0] = pinch.px - ((p.cx - p.r.left) / p.r.width) * vb[2];
+      vb[1] = pinch.py - ((p.cy - p.r.top) / p.r.height) * vb[3];
+      applyVB();
+      return;
+    }
     if (!pan) return;
     if (!moved && Math.abs(ev.clientX - pan.x) + Math.abs(ev.clientY - pan.y) > 3) {
       moved = true;
@@ -64,7 +106,11 @@ export const CANVAS_JS: string = `(function () {
     applyVB();
   });
   ["pointerup", "pointercancel"].forEach(function (type) {
-    svg.addEventListener(type, function () { pan = null; });
+    svg.addEventListener(type, function (ev) {
+      delete touches[ev.pointerId];
+      if (touchList().length < 2) pinch = null;
+      pan = null;
+    });
   });
   svg.addEventListener("wheel", function (ev) {
     ev.preventDefault();
@@ -195,7 +241,11 @@ export const CANVAS_JS: string = `(function () {
       labelMode = mode === "always" ? "always" : "auto";
       applyVB();
     },
-    fit: function () { fitView(); },
+    fit: function () {
+      if (booted) return fitView();
+      booted = true;
+      bootView();
+    },
     reset: function () { fitView(); },
     canvasShift: function (px) {
       svg.style.transform = px ? "translateX(" + px + "px)" : "";

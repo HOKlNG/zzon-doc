@@ -23,14 +23,17 @@ import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from 
 import { basename, join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
+import { ENGINE_CLI, ENGINE_DIR, fontFaceCss, resolveBun, runEngine } from "./engine-cli.mjs";
+import { BREAKPOINT, CONTROL, FONT_STACK, RADIUS, themeCss } from "./design-tokens.mjs";
+import { stampOnBuild, statusReport, formatStatus } from "./sources-lock.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RENDER = join(HERE, "render.mjs");
 // kind:"sequence" 스펙은 형제 스킬 zzon-seq의 렌더러로 위임한다
 const RENDER_SEQ = join(HERE, "..", "..", "zzon-seq", "scripts", "render-seq.mjs");
-// renderer:"terra-form" 스펙은 플러그인 동봉 엔진(bun+TS)으로 위임한다
-const TERRA_ENGINE = join(HERE, "..", "..", "..", "engine");
-const TERRA_CLI = join(TERRA_ENGINE, "src", "cli", "index.ts");
+// 엔진 스펙(DSL·DiagramSpec JSON)은 플러그인 동봉 엔진(bun+TS)으로 위임한다 — 호출은 engine-cli.mjs
+const TERRA_ENGINE = ENGINE_DIR;
+const TERRA_CLI = ENGINE_CLI;
 
 /* ── CLI ─────────────────────────────────────────────────────────────── */
 
@@ -38,19 +41,27 @@ function parseArgs(argv) {
   const a = argv.slice(2);
   let docsDir = null;
   let title = null;
+  let status = false;
+  let json = false;
+  const stamp = [];
   for (let i = 0; i < a.length; i++) {
     if (a[i] === "--title") title = a[++i];
+    else if (a[i] === "--status") status = true;
+    else if (a[i] === "--json") json = true;
+    else if (a[i] === "--stamp") stamp.push(a[++i]);
     else if (a[i] === "-h" || a[i] === "--help") return { help: true };
     else if (!docsDir) docsDir = a[i];
   }
-  return { docsDir, title };
+  return { docsDir, title, status, json, stamp };
 }
 
 function usage() {
   console.log(`zzon-doc build-docs — 여러 다이어그램을 문서 사이트 하나로 묶는다
 
 사용법:
-  node build-docs.mjs <docsDir> [--title "문서 제목"]
+  node build-docs.mjs <docsDir> [--title "문서 제목"]      빌드 (+ 근거 스탬프·품질 게이트 수집)
+  node build-docs.mjs <docsDir> --status [--json]           근거 대조 보고만 (쓰기 없음) — 재진입 첫 행동
+  node build-docs.mjs <docsDir> --stamp <slug|all>          빌드 + 검토 완료 장 강제 재스탬프
 
 구조(<docsDir> 기준):
   specs/*.json   입력 — DiagramSpec JSON 들을 여기에 둔다 (파일명이 메뉴 slug)
@@ -58,7 +69,7 @@ function usage() {
   index.html     출력 — 통합 메뉴 + 전체보기 + 뷰어 (이 파일을 브라우저로 연다)
   manifest.json  출력 — 생성된 카탈로그
 
-메뉴 그룹: spec.section 이 있으면 그걸로, 없으면 kind(infra/data-flow/erd/agent-topology)로 묶는다.
+메뉴 그룹: spec.section 이 있으면 그걸로, 없으면 kind(infra/data-flow/sequence/state/flowchart/erd/class/dependency/screen-flow/agent-topology)로 묶는다.
 
 렌더 경로: 기본은 동봉 엔진 CLI(bun, DiagramSpec JSON 변환 내장). kind:"sequence"는 zzon-seq.
 탈출구:   ZZON_LEGACY_RENDER=1 또는 스펙 "renderer":"legacy" → 레거시 render.mjs.`);
@@ -66,7 +77,7 @@ function usage() {
 
 /* ── 스펙 로딩 ───────────────────────────────────────────────────────── */
 
-const KIND_ORDER = ["infra", "data-flow", "sequence", "erd", "agent-topology"];
+const KIND_ORDER = ["infra", "data-flow", "sequence", "state", "flowchart", "erd", "class", "dependency", "screen-flow", "agent-topology"];
 
 function loadSpec(path) {
   const raw = JSON.parse(readFileSync(path, "utf8"));
@@ -82,11 +93,7 @@ function engineAvailable() {
   if (!existsSync(TERRA_CLI)) {
     why = `엔진 폴더가 없다: ${TERRA_ENGINE}`;
   } else {
-    try {
-      execFileSync("bun", ["--version"], { stdio: "pipe" });
-    } catch {
-      why = "bun이 PATH에 없다";
-    }
+    if (!resolveBun()) why = "bun을 찾지 못했다(PATH·ZZON_BUN)";
   }
   engineOk = why === null;
   if (!engineOk) {
@@ -112,10 +119,36 @@ function sceneCounts(outHtml) {
   }
 }
 
+/**
+ * 엔진이 남긴 <slug>.gate.json(불변식+등급 게이트)을 manifest 필드로 접는다.
+ * 실패/경고는 빌드 끝에 한 번에 보고되도록 누적한다.
+ */
+function qualityOf(outHtml, spec, slug, failures, warnings) {
+  const p = outHtml.replace(/\.html$/, ".gate.json");
+  if (!existsSync(p)) return { view: spec.view || null };
+  try {
+    const g = JSON.parse(readFileSync(p, "utf8"));
+    const fails = [
+      ...(g.invariants || []).map((v) => `불변식 ${v.rule}`),
+      ...(g.gate?.results || []).filter((r) => r.severity === "fail").map((r) => `${r.label} ${r.value} (${r.limit})`),
+    ];
+    const warns = (g.gate?.results || []).filter((r) => r.severity === "warn").map((r) => `${r.label} ${r.value} (${r.limit})`);
+    if (fails.length) failures.push({ slug, msg: fails.join(", ") });
+    if (warns.length) warnings.push({ slug, msg: warns.join(", ") });
+    return {
+      view: g.view || spec.view || null,
+      tier: g.gate?.tier || null,
+      quality: { failed: fails.length > 0, fails, warns },
+    };
+  } catch {
+    return { view: spec.view || null };
+  }
+}
+
 /* ── 메인 ────────────────────────────────────────────────────────────── */
 
 function main() {
-  const { docsDir, title, help } = parseArgs(process.argv);
+  const { docsDir, title, help, status, json, stamp } = parseArgs(process.argv);
   if (help || !docsDir) {
     usage();
     process.exit(help ? 0 : 1);
@@ -137,9 +170,35 @@ function main() {
     process.exit(1);
   }
 
+  // ---- 재진입: 근거 대조 보고만 (렌더·쓰기 없음)
+  if (status) {
+    const entries = [];
+    for (const file of specFiles) {
+      try {
+        entries.push({ slug: basename(file, ".json"), specPath: join(specsDir, file), spec: loadSpec(join(specsDir, file)) });
+      } catch { /* 파싱 실패는 빌드가 보고한다 */ }
+    }
+    const rep = statusReport(root, entries);
+    // 마지막 빌드의 품질 게이트 실패도 함께 (manifest 기준)
+    let gateFails = [];
+    try {
+      const m = JSON.parse(readFileSync(join(root, "manifest.json"), "utf8"));
+      gateFails = (m.diagrams || []).filter((d) => d.quality && d.quality.failed).map((d) => ({ slug: d.slug, fails: d.quality.fails }));
+    } catch { /* 아직 빌드 전 */ }
+    if (json) console.log(JSON.stringify({ ...rep, gateFails }, null, 2));
+    else {
+      console.log(formatStatus(rep, docsDir));
+      for (const g of gateFails) console.log(`  ✗ 품질 게이트 실패(마지막 빌드): ${g.slug} — ${g.fails.join(", ")}`);
+    }
+    return;
+  }
+
   mkdirSync(outDir, { recursive: true });
 
   const diagrams = [];
+  const lockEntries = []; // 근거 스탬프 대상 (스펙 파싱에 성공한 전부)
+  const gateFailures = [];
+  const gateWarnings = [];
   const failures = [];
   const engineFallbacks = []; // 엔진 렌더 실패 → 레거시 폴백으로 살린 스펙들 (빌드 성공, exit 0 유지)
 
@@ -154,25 +213,24 @@ function main() {
       failures.push({ slug, msg: `JSON 파싱 실패: ${e.message}` });
       continue;
     }
+    lockEntries.push({ slug, specPath, spec });
     // terra-form/외부 렌더 스펙: 동봉 엔진(bun)으로 직접 렌더하고, bun이나
     // 소스가 없으면 이미 놓인 diagrams/<slug>.html 을 패스스루로 편입한다.
-    if (spec.renderer === "terra-form" || spec.renderer === "external") {
+    // "engine" = DSL 소스(.ts)를 엔진으로 렌더 — "terra-form"은 같은 경로의 옛 이름(하위호환)
+    const engineSource = spec.renderer === "engine" || spec.renderer === "terra-form";
+    if (engineSource || spec.renderer === "external") {
       const srcTs = typeof spec.source === "string" ? join(root, spec.source) : null;
-      if (spec.renderer === "terra-form" && srcTs && existsSync(srcTs) && existsSync(TERRA_CLI)) {
+      if (engineSource && srcTs && existsSync(srcTs) && engineAvailable()) {
         try {
-          execFileSync("bun", [TERRA_CLI, "render", srcTs, "--out", outDir], {
-            stdio: "pipe",
-            cwd: TERRA_ENGINE,
-          });
+          runEngine(["render", srcTs, "--out", outDir, "--gate"]);
         } catch (e) {
-          const out = (e.stdout?.toString() || "") + (e.stderr?.toString() || "");
-          failures.push({ slug, msg: `terra-form 렌더 실패: ${out.trim() || e.message}` });
+          failures.push({ slug, msg: `terra-form 렌더 실패: ${e.message}` });
           continue;
         }
         // CLI는 소스 파일명 기준으로 산출한다 — slug와 다르면 맞춰 옮긴다
         const produced = join(outDir, `${basename(srcTs).replace(/\.[tj]s$/, "")}.html`);
         if (produced !== outHtml && existsSync(produced)) {
-          for (const ext of [".html", ".svg", ".scene.json"]) {
+          for (const ext of [".html", ".svg", ".scene.json", ".gate.json"]) {
             const from = produced.replace(/\.html$/, ext);
             if (existsSync(from)) writeFileSync(outHtml.replace(/\.html$/, ext), readFileSync(from));
           }
@@ -205,7 +263,45 @@ function main() {
         summary: spec.description || "",
         file: `diagrams/${slug}.html`,
         counts,
+        ...(spec.overview === true ? { level: "detail" } : {}),
+        ...qualityOf(outHtml, spec, slug, gateFailures, gateWarnings),
       });
+      // 큰 그림: 같은 DSL 모델을 접어(engine --fold) 개괄 장을 함께 만든다 (selection-rubric §3.4)
+      if (spec.overview === true && engineSource && srcTs && existsSync(srcTs) && engineAvailable()) {
+        const ovSlug = `${slug}-overview`;
+        const ovHtml = join(outDir, `${ovSlug}.html`);
+        try {
+          runEngine(["render", srcTs, "--out", outDir, "--gate", "--fold", "--href", slug]);
+          const produced = join(outDir, `${basename(srcTs).replace(/\.[tj]s$/, "")}-overview.html`);
+          if (produced !== ovHtml && existsSync(produced)) {
+            for (const ext of [".html", ".svg", ".scene.json", ".gate.json"]) {
+              const from = produced.replace(/\.html$/, ext);
+              if (existsSync(from)) writeFileSync(ovHtml.replace(/\.html$/, ext), readFileSync(from));
+            }
+          }
+          let ovCounts = { nodes: 0, edges: 0, flows: 0, groups: 0 };
+          try {
+            const sc = JSON.parse(readFileSync(ovHtml.replace(/\.html$/, ".scene.json"), "utf8"));
+            ovCounts = { nodes: (sc.nodes || []).length, edges: (sc.edges || []).length, flows: (sc.flows || []).length, groups: (sc.groups || []).length };
+          } catch { /* 기본값 */ }
+          diagrams.push({
+            slug: ovSlug,
+            title: `${spec.title || slug} (큰 그림)`,
+            kind: spec.kind || "infra",
+            section: typeof spec.section === "string" ? spec.section : null,
+            // 정렬에서 세부 그림 바로 앞에 온다(같은 order, 비교 함수가 큰 그림을 앞에 둔다)
+            order: typeof spec.order === "number" ? spec.order : null,
+            summary: `${spec.title || slug}을 묶음 단위로 접은 큰 그림이다. 노드를 더블클릭하면 세부 그림으로 넘어간다.`,
+            file: `diagrams/${ovSlug}.html`,
+            counts: ovCounts,
+            level: "overview",
+            zoomOf: slug,
+            ...qualityOf(ovHtml, { ...spec, tier: undefined }, ovSlug, gateFailures, gateWarnings),
+          });
+        } catch (e) {
+          failures.push({ slug: ovSlug, msg: `큰 그림 렌더 실패: ${e.message}` });
+        }
+      }
       continue;
     }
     const isSeq = spec.kind === "sequence";
@@ -219,18 +315,14 @@ function main() {
     let renderedByEngine = false;
     if (!isSeq && !wantLegacy && engineAvailable()) {
       try {
-        execFileSync("bun", [TERRA_CLI, "render", specPath, "--out", outDir], {
-          stdio: "pipe",
-          cwd: TERRA_ENGINE,
-        });
+        runEngine(["render", specPath, "--out", outDir, "--gate"]);
         renderedByEngine = existsSync(outHtml);
         if (!renderedByEngine) {
           engineFallbacks.push({ slug, msg: `엔진이 diagrams/${slug}.html 을 만들지 않았다` });
         }
       } catch (e) {
         // 방어: 엔진이 이 JSON을 (아직) 못 받으면 레거시로 폴백하고 빌드는 계속한다.
-        const out = (e.stdout?.toString() || "") + (e.stderr?.toString() || "");
-        engineFallbacks.push({ slug, msg: (out.trim() || e.message).split("\n")[0] });
+        engineFallbacks.push({ slug, msg: e.message.split("\n")[0] });
       }
     }
     if (!renderedByEngine) {
@@ -268,7 +360,16 @@ function main() {
       summary: spec.description || "",
       file: `diagrams/${slug}.html`,
       counts,
+      ...(renderedByEngine ? qualityOf(outHtml, spec, slug, gateFailures, gateWarnings) : { view: spec.view || (isSeq ? "sequence" : null) }),
     });
+  }
+
+  // 그림 크기(엔진 scene) — 위키가 임베드 창 높이를 그림 비율에 맞추는 데 쓴다
+  for (const d of diagrams) {
+    try {
+      const sc = JSON.parse(readFileSync(join(root, d.file).replace(/\.html$/, ".scene.json"), "utf8"));
+      if (sc.width > 0 && sc.height > 0) d.size = { width: Math.round(sc.width), height: Math.round(sc.height) };
+    } catch { /* 시퀀스·레거시 렌더는 scene이 없다 — 기본 높이 */ }
   }
 
   diagrams.sort((a, b) => {
@@ -276,7 +377,11 @@ function main() {
     if (ka !== kb) return (ka < 0 ? 99 : ka) - (kb < 0 ? 99 : kb);
     const oa = a.order ?? 1e9, ob = b.order ?? 1e9;
     if (oa !== ob) return oa - ob;
-    return a.title.localeCompare(b.title, "ko");
+    // 큰 그림과 세부 그림은 붙어 있고, 큰 그림이 먼저다
+    const base = (d) => (d.zoomOf ? d.title.slice(0, -" (큰 그림)".length) : d.title);
+    const c = base(a).localeCompare(base(b), "ko");
+    if (c) return c;
+    return (a.level === "overview" ? 0 : 1) - (b.level === "overview" ? 0 : 1);
   });
 
   const manifest = { title: title || "아키텍처 문서", diagrams };
@@ -295,6 +400,24 @@ function main() {
 
   const total = diagrams.reduce((a, d) => a + d.counts.nodes, 0);
   console.log(`  다이어그램 ${diagrams.length}개 · 총 노드 ${total}개`);
+
+  // 근거 스탬프: 스펙(stub+DSL)이 바뀐 장 + --stamp로 지정한 장
+  try {
+    const { stamped } = stampOnBuild(root, lockEntries, { force: stamp });
+    const untracked = lockEntries.filter((e) => !Array.isArray(e.spec.sources) || e.spec.sources.length === 0).map((e) => e.slug);
+    if (stamped.length) console.log(`  근거 스탬프: ${stamped.join(", ")}`);
+    if (untracked.length) console.log(`  ⚠ sources 미기록 ${untracked.length}장(갱신 여부 판정 불가): ${untracked.join(", ")}`);
+  } catch (e) {
+    console.log(`  ⚠ 근거 스탬프 실패: ${e.message}`);
+  }
+  if (gateFailures.length) {
+    console.log(`\n✗ 품질 게이트 실패 ${gateFailures.length}장 — 고친 뒤 다시 빌드하라 (상세: bun ia check <소스>):`);
+    for (const g of gateFailures) console.log(`  - ${g.slug}: ${g.msg}`);
+  }
+  if (gateWarnings.length) {
+    console.log(`\n! 품질 경고 ${gateWarnings.length}장 (selection-rubric §4 — 검토 권장):`);
+    for (const g of gateWarnings) console.log(`  - ${g.slug}: ${g.msg}`);
+  }
   if (engineFallbacks.length) {
     console.log(`\n⚠ 엔진 렌더 실패 → 레거시 render.mjs 폴백 ${engineFallbacks.length}건 (빌드는 성공):`);
     for (const f of engineFallbacks) console.log(`  - ${f.slug}: ${f.msg}`);
@@ -310,9 +433,11 @@ function main() {
 
 function buildIndexHtml(manifest) {
   const json = JSON.stringify(manifest).replace(/</g, "\\u003c");
-  return INDEX_TEMPLATE
+  const html = INDEX_TEMPLATE
     .replace(/__TITLE__/g, escapeHtml(manifest.title))
-    .replace("__MANIFEST__", json);
+    .replace("__MANIFEST__", () => json);
+  // 다이어그램 뷰어와 같은 글꼴(Pretendard 서브셋)을 셸에도 넣는다 — bun이 없으면 OS 글꼴
+  return html.replace("/*__FONT__*/", () => fontFaceCss(html));
 }
 
 function escapeHtml(s) {
@@ -321,96 +446,108 @@ function escapeHtml(s) {
   );
 }
 
-/* ── 셸 템플릿 (CSS/JS 인라인, 의존성 0, shadcn 풍) ──────────────────── */
+/* ── 셸 템플릿 (CSS/JS 인라인, 의존성 0) — 색·글꼴·모서리·폭 구간은 design-tokens.mjs ── */
+
+/** 공용 토큰 → 셸 변수 이름 (위키 셸과 같은 이름) */
+const SHELL_TOKENS = {
+  bg: "--bg", fg: "--fg", card: "--card", muted: "--muted", "muted-fg": "--muted-fg",
+  border: "--border", ring: "--ring", accent: "--primary", "accent-fg": "--primary-fg",
+  shadow: "--shadow", "shadow-lg": "--shadow-lg",
+};
 
 const INDEX_CSS = `
 *{box-sizing:border-box}
-:root{
-  --bg:#ffffff; --fg:#09090b; --card:#ffffff; --muted:#f4f4f5; --muted-fg:#71717a;
-  --border:#e4e4e7; --accent:#f4f4f5; --accent-fg:#18181b; --ring:#a1a1aa;
-  --radius:10px; --shadow:0 1px 2px rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.06);
-}
-html[data-theme="dark"]{
-  --bg:#09090b; --fg:#fafafa; --card:#0f0f11; --muted:#1c1c1f; --muted-fg:#a1a1aa;
-  --border:#27272a; --accent:#1c1c1f; --accent-fg:#fafafa; --ring:#52525b;
-  --shadow:0 1px 2px rgba(0,0,0,.4);
-}
+${themeCss(SHELL_TOKENS, { light: ":root", dark: 'html[data-theme="dark"]' })}
+:root{--accent:var(--muted);--accent-fg:var(--fg);--radius:${RADIUS.lg};--side-w:256px}
 html,body{margin:0;height:100%}
 body{display:flex;background:var(--bg);color:var(--fg);
-  font:14px/1.5 "Inter",ui-sans-serif,system-ui,-apple-system,"Apple SD Gothic Neo",Pretendard,"Segoe UI",Roboto,sans-serif;
-  -webkit-font-smoothing:antialiased}
+  font:14px/1.55 ${FONT_STACK};
+  -webkit-font-smoothing:antialiased;overflow:hidden}
 a{color:inherit;text-decoration:none}
 .ic{width:16px;height:16px;flex:0 0 auto;vertical-align:middle}
 
 /* 사이드바 */
-#side{width:256px;flex:0 0 256px;height:100vh;overflow-y:auto;border-right:1px solid var(--border);
-  background:var(--card);display:flex;flex-direction:column;transition:margin-left .18s ease}
-body.side-collapsed #side{margin-left:-256px}
+#side{width:var(--side-w);flex:0 0 var(--side-w);height:100vh;height:100dvh;overflow-y:auto;border-right:1px solid var(--border);
+  background:var(--card);display:flex;flex-direction:column;transition:margin-left .18s ease,transform .2s ease}
 .s-head{padding:18px 18px 14px}
 .s-head .t{font-size:14px;font-weight:600;letter-spacing:-.01em}
 .s-head .s{font-size:12px;color:var(--muted-fg);margin-top:2px}
 .nav{padding:6px 10px 28px;flex:1}
-.navhome{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:8px;
-  font-size:13.5px;font-weight:500;color:var(--fg);background:none;border:0;cursor:pointer;text-align:left}
+.navhome{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:${RADIUS.md};
+  font:inherit;font-size:13.5px;font-weight:500;color:var(--fg);background:none;border:0;cursor:pointer;text-align:left}
 .navhome:hover{background:var(--accent)}
 .navhome.active{background:var(--accent);color:var(--accent-fg);font-weight:600}
 .grp{margin-top:6px}
-.grp-h{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:8px;
-  font-size:12px;font-weight:600;color:var(--muted-fg);background:none;border:0;cursor:pointer;
-  text-transform:uppercase;letter-spacing:.04em}
+.grp-h{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:${RADIUS.md};
+  font:inherit;font-size:12.5px;font-weight:600;color:var(--muted-fg);background:none;border:0;cursor:pointer;text-align:left}
 .grp-h:hover{background:var(--accent);color:var(--fg)}
-.grp-h .cnt{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted-fg)}
-.grp-h .chev{transition:transform .15s;color:var(--muted-fg)}
+.grp-h .chev{margin-left:auto;transition:transform .15s;color:var(--muted-fg)}
 .grp.collapsed .grp-h .chev{transform:rotate(-90deg)}
 .grp-items{display:flex;flex-direction:column;gap:1px;padding:2px 0 4px 12px;margin-left:6px;border-left:1px solid var(--border)}
 .grp.collapsed .grp-items{display:none}
-.navlink{display:block;padding:6.5px 10px;border-radius:7px;font-size:13px;color:var(--muted-fg);
+.navlink{display:block;padding:6.5px 10px;border-radius:${RADIUS.md};font-size:13px;color:var(--muted-fg);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .navlink:hover{background:var(--accent);color:var(--fg)}
 .navlink.active{background:var(--accent);color:var(--accent-fg);font-weight:600}
+#scrim{display:none}
 
 /* 본문 */
-#main{flex:1;height:100vh;display:flex;flex-direction:column;min-width:0}
+#main{flex:1;height:100vh;height:100dvh;display:flex;flex-direction:column;min-width:0}
 #top{display:flex;align-items:center;gap:10px;padding:0 16px;height:56px;flex:0 0 56px;
   border-bottom:1px solid var(--border);background:var(--card)}
 #crumb{display:flex;align-items:center;gap:7px;min-width:0;font-size:13px;color:var(--muted-fg)}
 #crumb .sep{opacity:.5}
 #crumb b{color:var(--fg);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sp{flex:1}
-.iconbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 11px;
-  border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--fg);
-  font-size:13px;font-weight:500;cursor:pointer}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:${CONTROL.bar};padding:0 11px;flex:0 0 auto;
+  border:1px solid var(--border);border-radius:${RADIUS.md};background:var(--card);color:var(--fg);
+  font:inherit;font-size:13px;font-weight:500;cursor:pointer}
 .iconbtn:hover{background:var(--accent)}
-.iconbtn.sq{width:34px;padding:0}
+.iconbtn.sq{width:${CONTROL.bar};padding:0}
 #stage{flex:1;min-height:0;position:relative;background:var(--bg)}
 #frame{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg);display:none}
-#home{position:absolute;inset:0;overflow-y:auto;padding:30px 34px 56px;display:none}
+#home{position:absolute;inset:0;overflow-y:auto;padding:32px 36px 56px;display:none}
 #home.show{display:block}#frame.show{display:block}
 #stage:fullscreen{background:var(--bg)}
 
 /* 홈(전체보기) */
-.hero h1{margin:0 0 8px;font-size:25px;font-weight:650;letter-spacing:-.02em}
+.hero{max-width:1200px}
+.hero h1{margin:0 0 8px;font-size:24px;font-weight:650;letter-spacing:-.02em}
 .hero p{margin:0;color:var(--muted-fg);font-size:14px}
-.stats{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0 6px}
-.stat{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border:1px solid var(--border);
-  border-radius:8px;background:var(--card);font-size:12.5px;font-weight:500;color:var(--muted-fg)}
-.stat b{color:var(--fg);font-weight:600}
-.grouphead{display:flex;align-items:center;gap:8px;margin:30px 0 13px;font-size:12px;font-weight:600;
-  color:var(--muted-fg);text-transform:uppercase;letter-spacing:.05em}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:14px}
+.grouphead{display:flex;align-items:center;gap:8px;margin:32px 0 12px;font-size:13px;font-weight:600;color:var(--muted-fg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:14px;max-width:1200px}
 .card{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--radius);
-  background:var(--card);padding:18px;box-shadow:var(--shadow);cursor:pointer;
+  background:var(--card);padding:18px;box-shadow:var(--shadow);cursor:pointer;min-width:0;
   transition:border-color .15s,box-shadow .15s}
 .card:hover{border-color:var(--ring)}
 .kbadge{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:11.5px;font-weight:600;
-  padding:3px 8px;border:1px solid var(--border);border-radius:7px;color:var(--muted-fg)}
+  padding:3px 8px;border:1px solid var(--border);border-radius:${RADIUS.sm};color:var(--muted-fg);white-space:nowrap}
 .kbadge .ic{width:13px;height:13px}
-.card h3{margin:13px 0 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
-.card .sum{color:var(--muted-fg);font-size:13px;margin:0 0 14px;flex:1}
-.card .meta{display:flex;gap:10px;color:var(--muted-fg);font-size:11.5px;font-weight:500;
-  border-top:1px solid var(--border);padding-top:11px}
+.card .kbadge{margin-bottom:12px}
+.card h3{margin:0 0 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.card .sum{color:var(--muted-fg);font-size:13px;margin:0;flex:1}
 .empty{color:var(--muted-fg);padding:48px 0}
-@media(max-width:760px){#side{position:absolute;z-index:20;box-shadow:var(--shadow)}}
+
+/* 넓은 화면: 메뉴 접기 */
+@media(min-width:${BREAKPOINT.drawer + 1}px){
+  body.side-collapsed #side{margin-left:calc(-1 * var(--side-w))}
+}
+/* 태블릿·휴대폰: 메뉴는 본문을 덮는 서랍 */
+@media(max-width:${BREAKPOINT.drawer}px){
+  #side{position:fixed;left:0;top:0;bottom:0;z-index:40;width:min(var(--side-w),86vw);box-shadow:var(--shadow-lg);transform:translateX(-102%)}
+  body.nav-open #side{transform:none}
+  body.nav-open #scrim{display:block;position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.4)}
+}
+@media(max-width:${BREAKPOINT.narrow}px){
+  #top{padding:0 10px;gap:6px;height:52px;flex-basis:52px}
+  #crumb .kbadge,#crumb .sep,#crumb a{display:none}
+  #opentab .lbl{display:none}
+  #opentab{width:${CONTROL.bar};padding:0}
+  #home{padding:22px 16px 48px}
+  .hero h1{font-size:21px}
+  .grouphead{margin-top:26px}
+}
+@media(prefers-reduced-motion:reduce){#side,.grp-h .chev,.card{transition:none}}
 `;
 
 const INDEX_JS = `
@@ -426,7 +563,12 @@ var IC = {
   Webhook:'<path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/><path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/><path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/>',
   Database:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
   Bot:'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
-  Seq:'<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>'
+  Seq:'<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  Route:'<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+  Workflow:'<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>',
+  Network:'<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
+  Monitor:'<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
+  Boxes:'<path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85"/><path d="m7 16.5 5-3"/><path d="M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3"/><path d="m17 16.5 4.74-2.85"/><path d="M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15"/><path d="m12 8 4.74-2.85"/><path d="M12 13.5V8"/>'
 };
 function ic(n){return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(IC[n]||"")+'</svg>';}
 var KINDS = {
@@ -434,7 +576,12 @@ var KINDS = {
   "data-flow":{label:"데이터 흐름",icon:"Webhook"},
   "sequence":{label:"시퀀스",icon:"Seq"},
   "erd":{label:"ERD",icon:"Database"},
-  "agent-topology":{label:"에이전트 구조",icon:"Bot"}
+  "agent-topology":{label:"에이전트 구조",icon:"Bot"},
+  "state":{label:"상태 전이",icon:"Route"},
+  "flowchart":{label:"플로우차트",icon:"Workflow"},
+  "dependency":{label:"모듈 의존성",icon:"Network"},
+  "screen-flow":{label:"화면 흐름",icon:"Monitor"},
+  "class":{label:"도메인 모델",icon:"Boxes"}
 };
 function kmeta(k){return KINDS[k]||{label:k,icon:"Server"};}
 var bySlug={}; M.diagrams.forEach(function(d){bySlug[d.slug]=d;});
@@ -450,30 +597,32 @@ document.getElementById("doctitle").textContent=M.title;
 var nav=document.getElementById("nav");
 var html='<button class="navhome" data-home>'+ic("panel")+'<span>전체보기</span></button>';
 groups.forEach(function(g,idx){
-  html+='<div class="grp" data-grp="'+idx+'"><button class="grp-h">'+ic(kmeta(g.kind).icon)+'<span>'+esc(g.key)+'</span><span class="cnt">'+g.items.length+'</span><span class="chev">'+ic("chevron").replace("ic\\"","ic\\" style=\\"width:14px;height:14px\\"")+'</span></button><div class="grp-items">';
+  html+='<div class="grp" data-grp="'+idx+'"><button class="grp-h">'+ic(kmeta(g.kind).icon)+'<span>'+esc(g.key)+'</span><span class="chev">'+ic("chevron").replace("ic\\"","ic\\" style=\\"width:14px;height:14px\\"")+'</span></button><div class="grp-items">';
   g.items.forEach(function(d){html+='<a class="navlink" data-slug="'+esc(d.slug)+'" href="#'+encodeURIComponent(d.slug)+'">'+esc(d.title)+'</a>';});
   html+='</div></div>';
 });
 nav.innerHTML=html;
-nav.querySelector("[data-home]").onclick=function(){location.hash="";};
+nav.querySelector("[data-home]").onclick=function(){location.hash="";closeNav();};
+nav.addEventListener("click",function(e){if(e.target.closest&&e.target.closest(".navlink"))closeNav();});
+// 태블릿·휴대폰 폭에서는 왼쪽 메뉴가 서랍이다
+var drawerMQ=matchMedia("(max-width:${BREAKPOINT.drawer}px)");
+function isDrawer(){return drawerMQ.matches;}
+function closeNav(){document.body.classList.remove("nav-open");}
+document.getElementById("scrim").onclick=closeNav;
+addEventListener("keydown",function(e){if(e.key==="Escape")closeNav();});
+(drawerMQ.addEventListener?drawerMQ.addEventListener.bind(drawerMQ,"change"):drawerMQ.addListener.bind(drawerMQ))(function(){closeNav();});
 [].forEach.call(nav.querySelectorAll(".grp-h"),function(b){b.onclick=function(){b.parentNode.classList.toggle("collapsed");};});
 
 // 홈(전체보기)
 function kbadge(kind){var m=kmeta(kind);return '<span class="kbadge">'+ic(m.icon)+esc(m.label)+'</span>';}
-function metaLine(c){
-  if(c.actors!=null){var q=['<span>액터 '+c.actors+'</span>','<span>메시지 '+c.messages+'</span>'];if(c.groups)q.push('<span>프래그먼트 '+c.groups+'</span>');return q.join("");}
-  var p=['<span>노드 '+c.nodes+'</span>'];if(c.edges)p.push('<span>엣지 '+c.edges+'</span>');if(c.groups)p.push('<span>그룹 '+c.groups+'</span>');if(c.flows)p.push('<span>플로우 '+c.flows+'</span>');return p.join("");}
 function buildHome(){
-  var byKind={};M.diagrams.forEach(function(d){byKind[d.kind]=(byKind[d.kind]||0)+1;});
-  var h='<div class="hero"><h1>'+esc(M.title)+'</h1><p>'+M.diagrams.length+'개의 아키텍처를 한 곳에서 본다. 왼쪽 메뉴나 아래 카드에서 고른다.</p></div>';
-  h+='<div class="stats">';
-  ["infra","data-flow","sequence","erd","agent-topology"].forEach(function(k){if(!byKind[k])return;var m=kmeta(k);h+='<span class="stat">'+ic(m.icon)+esc(m.label)+' <b>'+byKind[k]+'</b></span>';});
-  h+='</div>';
+  var h='<div class="hero"><h1>'+esc(M.title)+'</h1><p>이 프로젝트의 다이어그램을 모았다. 카드를 누르면 크게 열린다.</p></div>';
   if(!M.diagrams.length){h+='<div class="empty">아직 다이어그램이 없다. specs/ 에 스펙을 넣고 다시 빌드한다.</div>';}
   groups.forEach(function(g){
     h+='<div class="grouphead">'+ic(kmeta(g.kind).icon)+esc(g.key)+'</div><div class="grid">';
     g.items.forEach(function(d){
-      h+='<a class="card" href="#'+encodeURIComponent(d.slug)+'">'+kbadge(d.kind)+'<h3>'+esc(d.title)+'</h3><div class="sum">'+esc(d.summary)+'</div><div class="meta">'+metaLine(d.counts)+'</div></a>';
+      var badge=(d.section&&d.section!==kmeta(d.kind).label)?kbadge(d.kind):"";
+      h+='<a class="card" href="#'+encodeURIComponent(d.slug)+'">'+badge+'<h3>'+esc(d.title)+'</h3><div class="sum">'+esc(d.summary)+'</div></a>';
     });
     h+='</div>';
   });
@@ -515,6 +664,7 @@ addEventListener("message",function(e){
     location.hash="#"+encodeURIComponent(d.slug);
   }
   if(d.type==="zzon:sidebar"&&e.source===frame.contentWindow){
+    if(isDrawer()){if(d.open)closeNav();return;}
     if(d.open&&!document.body.classList.contains("side-collapsed")){
       document.body.classList.add("side-collapsed");autoCollapsed=true;
     }else if(!d.open){restoreSide();}
@@ -523,6 +673,11 @@ addEventListener("message",function(e){
 
 // 사이드바 접기 / 전체화면 / 테마 — 좌측 메뉴를 다시 열면 iframe의 우측 사이드바를 닫는다
 document.getElementById("sidetoggle").onclick=function(){
+  if(isDrawer()){
+    var open=document.body.classList.toggle("nav-open");
+    if(open){try{frame.contentWindow&&frame.contentWindow.postMessage({type:"zzon:sidebar-close"},"*");}catch(err){}}
+    return;
+  }
   var opening=document.body.classList.contains("side-collapsed");
   document.body.classList.toggle("side-collapsed");
   autoCollapsed=false;
@@ -550,22 +705,24 @@ const INDEX_TEMPLATE = `<!doctype html>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>__TITLE__</title>
-<style>${INDEX_CSS}</style>
+<style>/*__FONT__*/
+${INDEX_CSS}</style>
 </head>
 <body>
 <aside id="side">
   <div class="s-head">
     <div class="t" id="doctitle">아키텍처 문서</div>
-    <div class="s">zzon-doc · 통합 보기</div>
+    <div class="s">아키텍처 다이어그램</div>
   </div>
   <nav class="nav" id="nav"></nav>
 </aside>
+<div id="scrim"></div>
 <main id="main">
   <header id="top">
-    <button id="sidetoggle" class="iconbtn sq" title="사이드바 접기"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></button>
+    <button id="sidetoggle" class="iconbtn sq" title="메뉴" aria-label="메뉴"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></button>
     <div id="crumb"></div>
     <div class="sp"></div>
-    <a id="opentab" class="iconbtn" target="_blank" rel="noopener" style="display:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>새 탭</a>
+    <a id="opentab" class="iconbtn" target="_blank" rel="noopener" title="새 탭에서 열기" style="display:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg><span class="lbl">새 탭</span></a>
     <button id="fs" class="iconbtn sq" title="전체화면"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
     <button id="theme" class="iconbtn sq" title="다크/라이트"><span id="themeic"></span></button>
   </header>

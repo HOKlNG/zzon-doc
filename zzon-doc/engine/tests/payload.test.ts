@@ -133,6 +133,7 @@ describe("buildPayload", () => {
       path: "gw",
       label: "API <GW>", // RAW string — the FRAME escapes at render time
       category: "gateway",
+      categoryLabel: "게이트웨이",
       tech: "Kong",
       href: "gw-detail",
     });
@@ -140,6 +141,7 @@ describe("buildPayload", () => {
       path: "svc/order",
       label: "Order",
       category: "service",
+      categoryLabel: "서비스",
       description: "주문 도메인",
     });
     expect(p.nodes[2]!.label).toBe("orders"); // path-tail fallback

@@ -41,7 +41,7 @@ export default diagram(
 
     d.flow("order", {
       title: "주문 접수",
-      description: "클라이언트 제출부터 워커 저장까지의 해피 패스",
+      description: "클라이언트가 주문을 제출해 워커가 저장하기까지의 정상 경로",
       steps: [
         { edge: submit, text: "클라이언트가 주문을 제출한다" },
         { edge: publish, text: "API가 주문 이벤트를 큐에 발행한다" },
@@ -53,7 +53,7 @@ export default diagram(
     // shares the client→api edge with "order" — badge offset + frame step UI
     d.flow("status", {
       title: "상태 조회",
-      description: "폴링 조회 경로 — 제출 엣지를 공유한다",
+      description: "클라이언트가 주문 상태를 주기적으로 묻는 경로",
       steps: [
         { edge: submit, text: "클라이언트가 주문 상태를 폴링한다" },
         { edge: read, text: "API가 DB에서 주문 상태를 읽는다" },

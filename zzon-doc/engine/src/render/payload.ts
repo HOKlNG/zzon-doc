@@ -7,14 +7,15 @@
  * omitted so the serialized payload stays minimal and deterministic.
  */
 import type { Scene, SceneNode } from "../layout/scene.ts";
-import type { DiagramModel } from "../model/types.ts";
+import type { DiagramModel, DocKind } from "../model/types.ts";
 import { legendEntries, type LegendEntry } from "./legend.ts";
+import { CATEGORY_META } from "./categories.gen.ts";
 
 export type { LegendEntry };
 
 // ------------------------------------------------------------ contract types
 
-export type PayloadKind = "infra" | "data-flow" | "erd" | "agent-topology";
+export type PayloadKind = DocKind;
 
 export interface PayloadTableColumn {
   name: string;
@@ -29,6 +30,8 @@ export interface PayloadNode {
   path: string;
   label: string;
   category?: string;
+  /** reader-facing category name (Korean) — the frame shows this, never the raw id */
+  categoryLabel?: string;
   tech?: string;
   description?: string;
   href?: string;
@@ -95,6 +98,7 @@ function payloadNode(n: SceneNode): PayloadNode {
     path: n.path,
     label: nodeLabel(n),
     ...defined("category", n.category),
+    ...defined("categoryLabel", n.category ? CATEGORY_META[n.category]?.labelKo : undefined),
     ...defined("tech", n.tech),
     ...defined("description", n.description),
     ...defined("href", n.href),

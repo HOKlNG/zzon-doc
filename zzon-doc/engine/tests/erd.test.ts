@@ -127,8 +127,8 @@ describe("renderTableStatic", () => {
   });
 
   test("theme literals baked", () => {
-    expect(stat).toContain('fill="#FFFFFF"');
-    expect(renderTableStatic(tableNode(), "dark")).toContain('fill="#161E2D"');
+    expect(stat).toContain('fill="#ffffff"');
+    expect(renderTableStatic(tableNode(), "dark")).toContain('fill="#09090b"');
   });
 
   test("deterministic", () => {

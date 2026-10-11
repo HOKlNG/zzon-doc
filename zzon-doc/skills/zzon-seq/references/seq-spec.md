@@ -12,7 +12,7 @@ DiagramSpec(infra/data-flow/erd)과 **다른 스키마**다 — 노드·엣지�
   "kind": "sequence",
   "title": "예약 결제 흐름",
   "subtitle": "결제 요청부터 확정 알림까지",
-  "description": "2~4문장. 이 프로세스가 무엇이고 왜 이렇게 흐르는지.",
+  "description": "1~2문장. 이 프로세스가 무엇이고 왜 이렇게 흐르는지 쓴다.",
   "section": "기능 흐름",
   "order": 1,
   "actors": [ … ],
@@ -28,6 +28,7 @@ DiagramSpec(infra/data-flow/erd)과 **다른 스키마**다 — 노드·엣지�
 | `subtitle` | | 툴바에 표시되는 한 줄 부제 |
 | `description` | | 개요 패널·카드 요약에 표시 |
 | `section` / `order` | | 통합 문서 메뉴 그룹·정렬 (DiagramSpec과 동일 규약) |
+| `sources` | (권장) | 이 장을 그리며 추적한 파일 glob 배열(프로젝트 루트 기준, 예: `["services/api/src/routes/bookings.ts", "services/worker/**"]`). build-docs가 해시를 기록하고, `--status`가 코드 변경으로 낡은 장을 짚는다. 비우면 갱신 여부 판정 불가 |
 | `actors` | ✷ | 왼→오 표시 순서대로. **첫 등장 순서가 아니라 이야기가 읽히는 순서**로 배치한다 |
 | `steps` | ✷ | 위→아래 시간순 |
 
@@ -58,7 +59,7 @@ DiagramSpec(infra/data-flow/erd)과 **다른 스키마**다 — 노드·엣지�
   "label": "POST /v1/bookings { slotId }",
   "arrow": "sync",
   "essential": true,
-  "description": "이 단계가 무엇을 하고 왜 필요한지 2~4문장 (클릭 상세 패널에 표시).",
+  "description": "이 단계가 무엇을 하고 왜 필요한지 1~2문장 (클릭 상세 패널에 표시). 라벨의 식별자를 되풀이하지 않는다.",
   "sourceRef": "services/api/src/routes/bookings.ts:41" }
 ```
 
@@ -75,7 +76,7 @@ DiagramSpec(infra/data-flow/erd)과 **다른 스키마**다 — 노드·엣지�
 - `essential: true`: 간소화 보기에 남는 스텝. **전체의 30~40%**에 표시하되, essential만 읽어도
   프로세스가 처음부터 끝까지 이해되게 골라라(요청 시작→핵심 처리→결과 전달은 반드시 포함).
 
-**note** — 액터 옆 참고 메모. `{ "type": "note", "actor": "q", "text": "실패는 DLQ로 — 3회 재시도" }`
+**note** — 액터 옆 참고 메모. `{ "type": "note", "actor": "q", "text": "3회 재시도해도 실패하면 DLQ로 옮긴다." }`
 
 **fragment / fragment_else / fragment_end** — 조건·반복 블록. 반드시 짝을 맞춘다(중첩 허용).
 

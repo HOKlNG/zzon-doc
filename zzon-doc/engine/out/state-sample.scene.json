@@ -1,0 +1,679 @@
+{
+ "id": "state-sample",
+ "title": "주문 상태 전이",
+ "docKind": "state",
+ "width": 1504.08,
+ "height": 257.67,
+ "groups": [],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "start",
+   "to": "pending",
+   "points": [
+    {
+     "x": 52,
+     "y": 114.67
+    },
+    {
+     "x": 176,
+     "y": 114.67
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition",
+   "label": {
+    "text": "주문 생성",
+    "x": 114,
+    "y": 106.02,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "pending",
+   "to": "paid",
+   "points": [
+    {
+     "x": 368,
+     "y": 114.67
+    },
+    {
+     "x": 430.63,
+     "y": 114.67
+    },
+    {
+     "x": 430.63,
+     "y": 66.67
+    },
+    {
+     "x": 493.27,
+     "y": 66.67
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition",
+   "label": {
+    "text": "결제 승인",
+    "x": 461.95,
+    "y": 58.02,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e10",
+   "from": "canceled",
+   "to": "end",
+   "points": [
+    {
+     "x": 685.27,
+     "y": 162.67
+    },
+    {
+     "x": 1066.67,
+     "y": 162.67
+    },
+    {
+     "x": 1066.67,
+     "y": 113
+    },
+    {
+     "x": 1448.08,
+     "y": 113
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition"
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "pending",
+   "to": "pending",
+   "points": [
+    {
+     "x": 368,
+     "y": 102.67
+    },
+    {
+     "x": 390,
+     "y": 102.67
+    },
+    {
+     "x": 390,
+     "y": 66.67
+    },
+    {
+     "x": 340,
+     "y": 66.67
+    },
+    {
+     "x": 340,
+     "y": 88.67
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition",
+   "label": {
+    "text": "결제 실패 [시도<3] / 재시도",
+    "x": 365,
+    "y": 58.02,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "pending",
+   "to": "canceled",
+   "points": [
+    {
+     "x": 368,
+     "y": 114.67
+    },
+    {
+     "x": 430.63,
+     "y": 114.67
+    },
+    {
+     "x": 430.63,
+     "y": 162.67
+    },
+    {
+     "x": 493.27,
+     "y": 162.67
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition",
+   "label": {
+    "text": "취소 [또는 30분 경과]",
+    "x": 434.23,
+    "y": 179.14,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "paid",
+   "to": "shipping",
+   "points": [
+    {
+     "x": 685.27,
+     "y": 66.67
+    },
+    {
+     "x": 749.27,
+     "y": 66.67
+    },
+    {
+     "x": 749.27,
+     "y": 58
+    },
+    {
+     "x": 813.28,
+     "y": 58
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition",
+   "label": {
+    "text": "출고",
+    "x": 781.28,
+    "y": 49.35,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e5",
+   "from": "shipping",
+   "to": "delivered",
+   "points": [
+    {
+     "x": 1005.28,
+     "y": 58
+    },
+    {
+     "x": 1129.28,
+     "y": 58
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition",
+   "label": {
+    "text": "수령 확인",
+    "x": 1067.28,
+    "y": 49.35,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e6",
+   "from": "delivered",
+   "to": "end",
+   "points": [
+    {
+     "x": 1321.28,
+     "y": 58
+    },
+    {
+     "x": 1384.68,
+     "y": 58
+    },
+    {
+     "x": 1384.68,
+     "y": 113
+    },
+    {
+     "x": 1448.08,
+     "y": 113
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition"
+  },
+  {
+   "kind": "edge",
+   "id": "e7",
+   "from": "paid",
+   "to": "refunding",
+   "points": [
+    {
+     "x": 685.27,
+     "y": 66.67
+    },
+    {
+     "x": 749.27,
+     "y": 66.67
+    },
+    {
+     "x": 749.27,
+     "y": 199.67
+    },
+    {
+     "x": 813.28,
+     "y": 199.67
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition",
+   "label": {
+    "text": "환불 요청",
+    "x": 755.27,
+    "y": 137.08,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e8",
+   "from": "refunding",
+   "to": "refunded",
+   "points": [
+    {
+     "x": 1005.28,
+     "y": 199.67
+    },
+    {
+     "x": 1129.28,
+     "y": 199.67
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition",
+   "label": {
+    "text": "PG 환불 완료",
+    "x": 1067.28,
+    "y": 191.02,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e9",
+   "from": "refunded",
+   "to": "end",
+   "points": [
+    {
+     "x": 1321.28,
+     "y": 199.67
+    },
+    {
+     "x": 1384.68,
+     "y": 199.67
+    },
+    {
+     "x": 1384.68,
+     "y": 113
+    },
+    {
+     "x": 1448.08,
+     "y": 113
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "transition"
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "canceled",
+   "rect": {
+    "x": 493.27,
+    "y": 136.67,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "state",
+   "category": "n-state-fail",
+   "description": "결제 전에 취소했거나 결제 기한이 지났다.",
+   "label": {
+    "text": "취소",
+    "x": 545.2688172043011,
+    "y": 160.66666666666669,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "delivered",
+   "rect": {
+    "x": 1129.28,
+    "y": 32,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "state",
+   "category": "n-state-done",
+   "label": {
+    "text": "배송 완료",
+    "x": 1181.279569892473,
+    "y": 56,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "end",
+   "rect": {
+    "x": 1448.08,
+    "y": 101,
+    "width": 24,
+    "height": 24
+   },
+   "role": "shape",
+   "shape": "final",
+   "label": {
+    "text": "종료",
+    "x": 1460.0752688172042,
+    "y": 113,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "paid",
+   "rect": {
+    "x": 493.27,
+    "y": 40.67,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "state",
+   "category": "n-state",
+   "description": "결제가 승인되어 출고 지시를 기다린다.",
+   "label": {
+    "text": "결제 완료",
+    "x": 545.2688172043011,
+    "y": 64.66666666666666,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "pending",
+   "rect": {
+    "x": 176,
+    "y": 88.67,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "state",
+   "category": "n-state-wait",
+   "tech": "들어갈 때 재고 가예약",
+   "description": "주문이 생성되고 결제를 기다린다. 30분 안에 결제가 없으면 만료된다.",
+   "label": {
+    "text": "결제 대기",
+    "x": 228,
+    "y": 112.66666666666667,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "refunded",
+   "rect": {
+    "x": 1129.28,
+    "y": 173.67,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "state",
+   "category": "n-state-done",
+   "label": {
+    "text": "환불 완료",
+    "x": 1181.279569892473,
+    "y": 197.66666666666669,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "refunding",
+   "rect": {
+    "x": 813.28,
+    "y": 173.67,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "state",
+   "category": "n-state-wait",
+   "label": {
+    "text": "환불 중",
+    "x": 865.2795698924731,
+    "y": 197.66666666666669,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "shipping",
+   "rect": {
+    "x": 813.28,
+    "y": 32,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "state",
+   "category": "n-state",
+   "tech": "머무는 동안 배송 추적",
+   "label": {
+    "text": "배송 중",
+    "x": 865.2795698924731,
+    "y": 56,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "start",
+   "rect": {
+    "x": 32,
+    "y": 104.67,
+    "width": 20,
+    "height": 20
+   },
+   "role": "shape",
+   "shape": "initial",
+   "label": {
+    "text": "시작",
+    "x": 42,
+    "y": 114.66666666666667,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  }
+ ],
+ "markers": [],
+ "flows": [
+  {
+   "id": "happy",
+   "title": "정상 주문",
+   "steps": [
+    {
+     "edgeId": "e0",
+     "text": "주문이 생성되며 재고를 가예약한다",
+     "badge": {
+      "x": 114,
+      "y": 114.67
+     },
+     "n": 1
+    },
+    {
+     "edgeId": "e1",
+     "text": "결제대행사가 결제를 승인한다",
+     "badge": {
+      "x": 430.63,
+      "y": 90.67
+     },
+     "n": 2
+    },
+    {
+     "edgeId": "e4",
+     "text": "물류에 출고를 지시한다",
+     "badge": {
+      "x": 749.27,
+      "y": 62.33
+     },
+     "n": 3
+    },
+    {
+     "edgeId": "e5",
+     "text": "고객이 수령을 확인한다",
+     "badge": {
+      "x": 1067.28,
+      "y": 58
+     },
+     "n": 4
+    },
+    {
+     "edgeId": "e6",
+     "text": "주문이 종결된다",
+     "badge": {
+      "x": 1384.68,
+      "y": 85.5
+     },
+     "n": 5
+    }
+   ]
+  }
+ ],
+ "icons": [
+  "x.lucide-circle-check",
+  "x.lucide-circle-dot",
+  "x.lucide-circle-x",
+  "x.lucide-clock"
+ ],
+ "texts": [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "PG 환불 완료",
+  "…«»+",
+  "결제 대기",
+  "결제 승인",
+  "결제 실패 [시도<3] / 재시도",
+  "결제 완료",
+  "결제 전에 취소했거나 결제 기한이 지났다.",
+  "결제가 승인되어 출고 지시를 기다린다.",
+  "결제대행사가 결제를 승인한다",
+  "고객이 수령을 확인한다",
+  "대기 상태",
+  "들어갈 때 재고 가예약",
+  "머무는 동안 배송 추적",
+  "물류에 출고를 지시한다",
+  "배송 완료",
+  "배송 중",
+  "수령 확인",
+  "시작",
+  "실패 상태",
+  "완료 상태",
+  "정상 주문",
+  "종료",
+  "주문 생성",
+  "주문이 생성되고 결제를 기다린다. 30분 안에 결제가 없으면 만료된다.",
+  "주문이 생성되며 재고를 가예약한다",
+  "주문이 종결된다",
+  "진행 상태",
+  "출고",
+  "취소",
+  "취소 [또는 30분 경과]",
+  "환불 완료",
+  "환불 요청",
+  "환불 중"
+ ]
+}

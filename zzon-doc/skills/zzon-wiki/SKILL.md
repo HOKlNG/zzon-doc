@@ -10,9 +10,11 @@ argument-hint: '[대상 — 비우면 현재 프로젝트]'
 의존성 0짜리 self-contained 위키 사이트(index.html)를 만든다. 산출물은 대상 프로젝트의 `docs/zzon-doc/` 하위에 기존 다이어그램 산출물과 공존한다(구버전 기본값인 루트 `zzon-doc/`가 이미 있으면 그걸 유지).
 
 > 계약 정본: `references/wiki-spec.md`(스키마·md 규약) · `references/doc-catalog.md`(문서 카탈로그·질문 은행).
-> 아키텍처·데이터 다이어그램은 **zzon-doc 스킬 절차**(유형 판별→스펙→layout-lint→render)로,
-> 시간축 상호작용(요청/응답 왕복·분기)은 **zzon-seq 스킬 절차**(SeqSpec 저작→render-seq)로 그린다.
-> 둘 다 같은 specs/→diagrams/→manifest 파이프라인이라 위키 임베드 방법(`@diagram`)은 동일하다.
+> 문체 정본: `../zzon-doc/references/writing-style.md`. 본문, 문서 요약, 섹션 소개, 질문 문장은 모두 이 여섯 규칙을 따른다.
+> 다이어그램은 전부 **메인 스킬 zzon-doc의 절차**(`../zzon-doc/SKILL.md`)로 그린다.
+> 순서: 신호(scan) → 뷰·등급(selection-rubric) → 뷰 문서 저작 → `bun ia check` 게이트 → build-docs.
+> 시퀀스는 zzon-seq, Terraform은 terra-form 절차로 넘어간다. 모두 같은 specs/→diagrams/→manifest 파이프라인이라 위키 임베드 방법(`@diagram`)은 동일하다.
+> **위키 본문 임베드의 매체 상한은 T2 표준이다.** T3 원장 장은 본문에 직접 넣지 말고 링크로 연다(selection-rubric §3.2).
 
 ## 0. 분기 — 첫 행동을 정한다
 
@@ -41,7 +43,8 @@ argument-hint: '[대상 — 비우면 현재 프로젝트]'
 1. **초안**: 코드에서 읽힌 것만으로 문서를 쓴다. **못 읽은 값을 추측으로 채우지 마라** — 그 자리는 ❓ 콜아웃으로 남긴다.
 2. **질문은 섹션당 한 묶음(3~5개)**, 번호 목록으로, 각 질문에 "모름/스킵 가능"을 명시한다. 10개 이상 몰아 묻기 금지.
    무응답·모름은 **즉시 wiki.json 질문 대장(q-NNN) + 본문 `> ❓ 미확인(q-NNN): …` 콜아웃**으로 남기고 진행을 막지 마라.
-3. **다이어그램 노드**(architecture/data의 `@diagram` 표시)는 zzon-doc(구조·ERD·플로우) 또는 zzon-seq(시퀀스) 스킬 절차로 스펙을 저작해 `specs/`에 두고, 문서에는 `@diagram(slug)` 한 줄만 쓴다. HTML 직접 작성 금지.
+3. **다이어그램 노드**(`@diagram` 표시 슬롯)는 zzon-doc 메인 절차로 스펙을 저작해 `specs/`에 둔다. 문서에는 `@diagram(slug)` 한 줄만 쓴다. HTML 직접 작성 금지.
+   카탈로그 슬롯에 적힌 **뷰·등급**(예: `state·T2`)이 기본값이다. 스펙 stub의 `sources`(근거 파일)를 반드시 채운다. 그래야 코드가 바뀐 뒤 `--status`가 낡은 그림을 짚는다.
    **시퀀스 판별을 건너뛰지 마라**: 문서가 다루는 프로세스가 "누가 누구에게 순서대로 주고받는가"(왕복·활성 구간·alt/loop)면 zzon-seq가 정본이고, seq-flows/usecase/authn 문서는 시퀀스 임베드를 기본값으로 한다. 구조 관점(data-flow)과의 병행은 중복이 아니라 보완이다.
 4. 섹션을 마치면 **빌드하고**(아래 명령) 결과를 보여준 뒤 **"이 섹션에 빠진 내용은 없나?"를 반드시 묻는다.** 다음 섹션은 그 답을 반영한 후에.
 5. **todo 문서는 빈 md를 만들지 않는다** — wiki.json 엔트리로만 둔다.
@@ -58,7 +61,7 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-wiki/scripts/build-wiki.mjs ./docs/zzon-d
 
 ## 4. 재진입 모드 (wiki.json이 이미 있을 때)
 
-1. **첫 행동: `--status` 실행** → 사람 수정(edited)·파일 유실·미등록 md·열린 질문·todo 잔량을 보고한다.
+1. **첫 행동: `--status` 실행** → 사람 수정(edited)·파일 유실·미등록 md·열린 질문·todo 잔량을 보고한다. **임베드 다이어그램의 근거 대조(fresh/stale/untracked)와 프로젝트 신호 변화도 같은 출력에 나온다.** stale 그림은 문서보다 먼저 갱신한다(zzon-doc §0 재진입 절차).
 2. 보고 후 **반드시 4택으로 묻는다**: "① 사람 수정 반영(재독 후 상태·질문 갱신) ② 열린 질문 재개 ③ todo 이어쓰기 ④ 새 문서/섹션 추가 — 뭘 할까?"
 3. **사람이 고친 md는 정본이다** — 자동 덮어쓰기 금지. 재독 후 "이 변경을 반영해 상태/질문을 갱신할까?"를 물어서만 갱신한다.
 4. "질문 open인데 본문 마커 소멸" 항목은 사람이 답했을 가능성 — 본문을 읽고 확인 질문으로 승격한다.
@@ -72,5 +75,5 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-wiki/scripts/build-wiki.mjs ./docs/zzon-d
 
 - 승인 전 파일 생성 금지 / 전 섹션 일괄 자동 생성 금지 / 추측으로 채우기 금지(모르면 ❓+질문 대장) / 빈 md 생성 금지.
 - 상태는 wiki.json 단일 소유 — md frontmatter에 상태 쓰지 마라. 로그 파일 이중화 금지.
-- 다이어그램은 zzon-doc 스킬로만. `render.mjs`·`build-docs.mjs`·`build-wiki.mjs` 엔진 수정 금지(스펙·md·wiki.json만 작성).
+- 다이어그램은 zzon-doc 메인 절차로만 그린다(시퀀스·Terraform은 그쪽이 넘긴다). 렌더러·`build-docs.mjs`·`build-wiki.mjs` 수정 금지(스펙·md·wiki.json만 작성).
 - 라이브러리/프레임워크/CDN 0. 문서·UI 텍스트 한국어(한다체).

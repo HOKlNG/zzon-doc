@@ -7,5 +7,19 @@
   "counts": {
     "total": 838
   },
-  "generatedBy": "scripts/build-icons.ts"
+  "generatedBy": "scripts/build-icons.ts",
+  "extraSets": {
+    "azure": {
+      "source": "https://learn.microsoft.com/azure/architecture/icons/ (Azure_Public_Service_Icons_V24)",
+      "count": 636
+    },
+    "k8s": {
+      "source": "https://github.com/kubernetes/community/tree/b0e9e677be6c9b178368d57b86e9f548fcbd575f/icons (Apache-2.0)",
+      "count": 39
+    },
+    "sap": {
+      "source": "https://github.com/SAP/btp-solution-diagrams (btpsd-v1.0.43, Apache-2.0)",
+      "count": 125
+    }
+  }
 }

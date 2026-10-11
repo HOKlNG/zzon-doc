@@ -1,6 +1,11 @@
-# DiagramSpec 명세
+# DiagramSpec 명세 (레거시 — 신규 저작 금지)
 
-> DiagramSpec JSON을 저작하는 모든 작업의 계약. render.mjs가 이 형태를 검증하고 렌더링한다.
+> ⚠ **레거시 문서다.** 신규 다이어그램은 엔진 DSL(`views/*.md`)로 저작한다.
+> 이 문서는 기존 DiagramSpec JSON을 읽거나 고칠 때만 참고한다. 기존 JSON은 엔진이 변환해 그대로 렌더한다.
+> 변환할 때 `lane`/`order`는 `hints.layer`/`hints.order`로, `layout.direction`과 `nodeDescriptions`는 그대로 옮겨진다.
+> 아래의 layout-lint·자가질문은 레거시 render.mjs 시절 절차다. 엔진 경로의 검사는 `bun ia check`다.
+>
+> DiagramSpec JSON 저작 계약. render.mjs가 이 형태를 검증하고 렌더링한다.
 
 ## 핵심 원칙
 

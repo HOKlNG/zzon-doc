@@ -22,6 +22,7 @@ import type { Scene } from "../layout/scene.ts";
 import { FONT_FAMILY, GlyphCollector, fontFileBuffer } from "../text/metrics.ts";
 import { renderInteractiveSvg } from "./svg.ts";
 import { themeVars } from "./theme.ts";
+import { DEFAULT_EDGE_COLOR } from "../route/router.ts";
 import { cardCssVars } from "./card.ts";
 import { FLOW_BADGE_CSS } from "./flows.ts";
 import { CANVAS_JS } from "./interactions.ts";
@@ -41,15 +42,15 @@ export interface CanvasBundle {
  * DEFINES its custom properties) */
 const LIGHT_EXTRA =
   `--flow:#4f46e5;` +
-  `--card:#FFFFFF;--border:#E2E8F0;--muted:#F1F5F9;--muted-foreground:#64748B;` +
-  `--table-head:#f4f4f5;--table-border:#D4D4D8;--table-zebra:rgba(125,137,152,0.09);` +
+  `--card:#ffffff;--border:#e4e4e7;--muted:#f4f4f5;--muted-foreground:#71717a;` +
+  `--table-head:#f4f4f5;--table-border:#d4d4d8;--table-zebra:rgba(113,113,122,0.07);` +
   `--table-accent:#10B981;--table-fk:#0284C7;`;
 
 /** dark-theme overrides (previously inlined in the old html.ts) */
 const DARK_EXTRA =
-  `--flow:#6366F1;` +
-  `--card:#1F2937;--border:#334155;--muted:#2B3648;--muted-foreground:#94A3B8;` +
-  `--table-head:#1D2739;--table-border:#2E3B50;--table-zebra:rgba(125,137,152,0.12);` +
+  `--flow:#6366f1;` +
+  `--card:#141417;--border:#2a2a2e;--muted:#1f1f23;--muted-foreground:#a1a1aa;` +
+  `--table-head:#1f1f23;--table-border:#3f3f46;--table-zebra:rgba(161,161,170,0.07);` +
   `--table-accent:#34D399;--table-fk:#38BDF8;`;
 
 const lightVars = (): string => themeVars("light") + cardCssVars("light") + LIGHT_EXTRA;
@@ -61,6 +62,9 @@ const CANVAS_RULES: string = [
     `transition:transform .2s ease}`,
   `svg.ia-svg:active{cursor:grabbing}`,
   `.node,.edge{transition:opacity .15s ease}`,
+  // default line color follows the theme (the markup carries the light literal for the static export)
+  `svg.ia-svg [stroke="${DEFAULT_EDGE_COLOR}"]{stroke:var(--ia-edge)}`,
+  `svg.ia-svg [fill="${DEFAULT_EDGE_COLOR}"]{fill:var(--ia-edge)}`,
   `.dim{opacity:var(--ia-dim,.25)}`,
   `.hl{opacity:1}`,
   // zoom-linked label auto-hide (adapter setLabelMode; runtime toggles the class)
@@ -110,6 +114,24 @@ function collectPayloadGlyphs(g: GlyphCollector, p: ViewerPayload): void {
   for (const l of p.legend) g.add(l.label);
 }
 
+/**
+ * @font-face rules embedding Pretendard regular + semibold, subset to `chars`.
+ * Also used by the skill shells (index, wiki, sequence viewer) through
+ * `bun ia font-css`, so every page renders in the same face.
+ */
+export async function fontFaceCss(chars: string): Promise<string> {
+  const [regular, semibold] = await Promise.all([
+    subsetFont(fontFileBuffer("regular"), chars, { targetFormat: "woff2" }),
+    subsetFont(fontFileBuffer("semibold"), chars, { targetFormat: "woff2" }),
+  ]);
+  return [
+    `@font-face{font-family:${FONT_FAMILY};font-weight:400;font-style:normal;font-display:block;` +
+      `src:url(data:font/woff2;base64,${regular.toString("base64")}) format("woff2")}`,
+    `@font-face{font-family:${FONT_FAMILY};font-weight:600 800;font-style:normal;font-display:block;` +
+      `src:url(data:font/woff2;base64,${semibold.toString("base64")}) format("woff2")}`,
+  ].join("\n");
+}
+
 // ------------------------------------------------------------ entry point
 
 /**
@@ -128,18 +150,8 @@ export async function buildCanvas(scene: Scene, payload?: ViewerPayload): Promis
   // contract §3: frame chrome strings MUST be in the subset input
   const frame = await loadViewerFrame();
   if (frame) glyphs.add(frame.FRAME_GLYPHS);
-  const chars = glyphs.toString();
-
-  const [regular, semibold] = await Promise.all([
-    subsetFont(fontFileBuffer("regular"), chars, { targetFormat: "woff2" }),
-    subsetFont(fontFileBuffer("semibold"), chars, { targetFormat: "woff2" }),
-  ]);
-
   const css = [
-    `@font-face{font-family:${FONT_FAMILY};font-weight:400;font-style:normal;` +
-      `src:url(data:font/woff2;base64,${regular.toString("base64")}) format("woff2")}`,
-    `@font-face{font-family:${FONT_FAMILY};font-weight:600;font-style:normal;` +
-      `src:url(data:font/woff2;base64,${semibold.toString("base64")}) format("woff2")}`,
+    await fontFaceCss(glyphs.toString()),
     // canvas variables: light default; explicit data-theme wins (the frame
     // stamps it at boot — seq semantics); the media query covers no-JS
     `:root{${lightVars()}}`,

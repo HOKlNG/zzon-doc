@@ -10,7 +10,7 @@
  * (stable key order, coords rounded to 2 decimals).
  */
 import type { Rect, Point } from "../model/geometry.ts";
-import type { GroupKind, Side, Anchor, TableColumn, Cardinality } from "../model/types.ts";
+import type { GroupKind, Side, Anchor, TableColumn, Cardinality, DocKind, NodeShape, ClassSpec, EdgeMarker } from "../model/types.ts";
 import type { IconRef } from "../icons/aliases.ts";
 
 export interface SceneLabel {
@@ -45,6 +45,11 @@ export interface SceneNode {
   category?: string;
   tech?: string;
   description?: string;
+  /** card draws `description` inside the box (model.nodeDescriptions) */
+  descriptionOnCanvas?: true;
+  /** notation shape (render/shapes.ts) — label/sublabel positions are inside rect */
+  shape?: NodeShape;
+  classSpec?: ClassSpec;
   href?: string;
   table?: SceneTable;
   label?: SceneLabel;
@@ -53,7 +58,7 @@ export interface SceneNode {
   stack?: number;
   meta?: Record<string, string>;
   /** actor / rail-item / band-member nodes carry their origin for styling */
-  role?: "resource" | "actor" | "rail-item" | "chip" | "card" | "table";
+  role?: "resource" | "actor" | "rail-item" | "chip" | "card" | "table" | "shape";
 }
 
 export interface SceneGroup {
@@ -95,6 +100,8 @@ export interface SceneEdge {
     preset: "default" | "dotted" | "dashed";
     color: string;
     arrowhead: "none" | "end" | "both";
+    sourceMarker?: EdgeMarker;
+    targetMarker?: EdgeMarker;
   };
   layer?: string;
   /** id of the bundle this edge joined, if any */
@@ -133,7 +140,7 @@ export interface Scene {
   id: string;
   title?: string;
   /** manifest kind for the docs site */
-  docKind?: "infra" | "data-flow" | "erd" | "agent-topology";
+  docKind?: DocKind;
   /** total canvas size including margins */
   width: number;
   height: number;

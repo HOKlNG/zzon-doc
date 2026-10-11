@@ -1,0 +1,569 @@
+{
+ "id": "domain-model-sample",
+ "title": "주문 도메인 모델",
+ "docKind": "class",
+ "width": 756,
+ "height": 1032.14,
+ "groups": [],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "customer",
+   "to": "order",
+   "points": [
+    {
+     "x": 286,
+     "y": 146.19
+    },
+    {
+     "x": 286,
+     "y": 242.19
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "none",
+    "sourceMarker": "none",
+    "targetMarker": "none"
+   },
+   "layer": "assoc",
+   "label": {
+    "text": "주문 · 1 — 0..N",
+    "x": 292,
+    "y": 198.1,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "order",
+   "to": "line",
+   "points": [
+    {
+     "x": 286,
+     "y": 402.38
+    },
+    {
+     "x": 286,
+     "y": 453.73
+    },
+    {
+     "x": 102,
+     "y": 453.73
+    },
+    {
+     "x": 102,
+     "y": 505.08
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "none",
+    "sourceMarker": "diamond",
+    "targetMarker": "none"
+   },
+   "layer": "compose",
+   "label": {
+    "text": "1 — 1..N",
+    "x": 194,
+    "y": 445.08,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "order",
+   "to": "payment",
+   "points": [
+    {
+     "x": 286,
+     "y": 402.38
+    },
+    {
+     "x": 286,
+     "y": 454.23
+    },
+    {
+     "x": 470,
+     "y": 454.23
+    },
+    {
+     "x": 470,
+     "y": 506.08
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "none",
+    "sourceMarker": "none",
+    "targetMarker": "none"
+   },
+   "layer": "assoc",
+   "label": {
+    "text": "1 — 0..1",
+    "x": 378,
+    "y": 445.58,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "line",
+   "to": "money",
+   "points": [
+    {
+     "x": 102,
+     "y": 619.27
+    },
+    {
+     "x": 102,
+     "y": 721.48
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end",
+    "targetMarker": "open-arrow"
+   },
+   "layer": "depends"
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "card",
+   "to": "payment",
+   "points": [
+    {
+     "x": 286,
+     "y": 736.34
+    },
+    {
+     "x": 286,
+     "y": 669.87
+    },
+    {
+     "x": 470,
+     "y": 669.87
+    },
+    {
+     "x": 470,
+     "y": 618.27
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end",
+    "targetMarker": "triangle"
+   },
+   "layer": "inherit"
+  },
+  {
+   "kind": "edge",
+   "id": "e5",
+   "from": "transfer",
+   "to": "payment",
+   "points": [
+    {
+     "x": 654,
+     "y": 736.34
+    },
+    {
+     "x": 654,
+     "y": 669.87
+    },
+    {
+     "x": 470,
+     "y": 669.87
+    },
+    {
+     "x": 470,
+     "y": 618.27
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end",
+    "targetMarker": "triangle"
+   },
+   "layer": "inherit"
+  },
+  {
+   "kind": "edge",
+   "id": "e6",
+   "from": "toss",
+   "to": "gateway",
+   "points": [
+    {
+     "x": 470,
+     "y": 915.67
+    },
+    {
+     "x": 470,
+     "y": 819.67
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end",
+    "targetMarker": "triangle"
+   },
+   "layer": "implement"
+  },
+  {
+   "kind": "edge",
+   "id": "e7",
+   "from": "payment",
+   "to": "gateway",
+   "points": [
+    {
+     "x": 540,
+     "y": 562.17
+    },
+    {
+     "x": 548,
+     "y": 562.17
+    },
+    {
+     "x": 548,
+     "y": 770.57
+    },
+    {
+     "x": 540,
+     "y": 770.57
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end",
+    "targetMarker": "open-arrow"
+   },
+   "layer": "depends",
+   "label": {
+    "text": "승인 요청",
+    "x": 554,
+    "y": 652.33,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start"
+   }
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "card",
+   "rect": {
+    "x": 216,
+    "y": 736.34,
+    "width": 140,
+    "height": 68.47
+   },
+   "role": "shape",
+   "shape": "class",
+   "classSpec": {
+    "attributes": [
+     "approvalNo: string"
+    ]
+   },
+   "label": {
+    "text": "CardPayment",
+    "x": 286,
+    "y": 770.5747504340278,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "customer",
+   "rect": {
+    "x": 216,
+    "y": 32,
+    "width": 140,
+    "height": 114.19
+   },
+   "role": "shape",
+   "shape": "class",
+   "classSpec": {
+    "stereotype": "entity",
+    "attributes": [
+     "id: CustomerId",
+     "email: Email",
+     "grade: Grade"
+    ]
+   },
+   "label": {
+    "text": "Customer",
+    "x": 286,
+    "y": 89.09599609375,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "gateway",
+   "rect": {
+    "x": 400,
+    "y": 721.48,
+    "width": 140,
+    "height": 98.19
+   },
+   "role": "shape",
+   "shape": "class",
+   "classSpec": {
+    "stereotype": "interface",
+    "methods": [
+     "approve(req)",
+     "cancel(id)"
+    ]
+   },
+   "label": {
+    "text": "PaymentGateway",
+    "x": 470,
+    "y": 770.5747504340278,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "line",
+   "rect": {
+    "x": 32,
+    "y": 505.08,
+    "width": 140,
+    "height": 114.19
+   },
+   "role": "shape",
+   "shape": "class",
+   "classSpec": {
+    "stereotype": "entity",
+    "attributes": [
+     "productId: ProductId",
+     "quantity: int",
+     "price: Money"
+    ]
+   },
+   "label": {
+    "text": "OrderLine",
+    "x": 102,
+    "y": 562.1744249131945,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "money",
+   "rect": {
+    "x": 32,
+    "y": 721.48,
+    "width": 140,
+    "height": 98.19
+   },
+   "role": "shape",
+   "shape": "class",
+   "classSpec": {
+    "stereotype": "value object",
+    "attributes": [
+     "amount: Decimal",
+     "currency: Currency"
+    ]
+   },
+   "label": {
+    "text": "Money",
+    "x": 102,
+    "y": 770.5747504340278,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "order",
+   "rect": {
+    "x": 216,
+    "y": 242.19,
+    "width": 140,
+    "height": 160.19
+   },
+   "role": "shape",
+   "shape": "class",
+   "classSpec": {
+    "stereotype": "aggregate root",
+    "attributes": [
+     "id: OrderId",
+     "status: OrderStatus",
+     "total: Money"
+    ],
+    "methods": [
+     "place()",
+     "pay(payment)",
+     "cancel(reason)"
+    ]
+   },
+   "description": "주문 애그리거트의 루트다. 더블클릭하면 주문 상태가 어떻게 바뀌는지 볼 수 있다.",
+   "href": "state-sample",
+   "label": {
+    "text": "Order",
+    "x": 286,
+    "y": 322.28798828125,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "payment",
+   "rect": {
+    "x": 400,
+    "y": 506.08,
+    "width": 140,
+    "height": 112.19
+   },
+   "role": "shape",
+   "shape": "class",
+   "classSpec": {
+    "stereotype": "abstract",
+    "attributes": [
+     "amount: Money",
+     "paidAt: Instant"
+    ],
+    "methods": [
+     "refund()"
+    ]
+   },
+   "label": {
+    "text": "Payment",
+    "x": 470,
+    "y": 562.1744249131945,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "toss",
+   "rect": {
+    "x": 400,
+    "y": 915.67,
+    "width": 140,
+    "height": 84.47
+   },
+   "role": "shape",
+   "shape": "class",
+   "classSpec": {
+    "methods": [
+     "approve(req)",
+     "cancel(id)"
+    ]
+   },
+   "label": {
+    "text": "TossGateway",
+    "x": 470,
+    "y": 957.9049262152778,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "transfer",
+   "rect": {
+    "x": 584,
+    "y": 736.34,
+    "width": 140,
+    "height": 68.47
+   },
+   "role": "shape",
+   "shape": "class",
+   "classSpec": {
+    "attributes": [
+     "virtualAccount: string"
+    ]
+   },
+   "label": {
+    "text": "BankTransfer",
+    "x": 654,
+    "y": 770.5747504340278,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   }
+  }
+ ],
+ "markers": [],
+ "flows": [],
+ "icons": [],
+ "texts": [
+  "1 — 0..1",
+  "1 — 1..N",
+  "BankTransfer",
+  "CardPayment",
+  "Customer",
+  "Money",
+  "Order",
+  "OrderLine",
+  "Payment",
+  "PaymentGateway",
+  "TossGateway",
+  "abstract",
+  "aggregate root",
+  "amount: Decimal",
+  "amount: Money",
+  "approvalNo: string",
+  "approve(req)",
+  "cancel(id)",
+  "cancel(reason)",
+  "currency: Currency",
+  "email: Email",
+  "entity",
+  "grade: Grade",
+  "id: CustomerId",
+  "id: OrderId",
+  "interface",
+  "paidAt: Instant",
+  "pay(payment)",
+  "place()",
+  "price: Money",
+  "productId: ProductId",
+  "quantity: int",
+  "refund()",
+  "status: OrderStatus",
+  "total: Money",
+  "value object",
+  "virtualAccount: string",
+  "…«»+",
+  "승인 요청",
+  "주문 · 1 — 0..N",
+  "주문 애그리거트의 루트다. 더블클릭하면 주문 상태가 어떻게 바뀌는지 볼 수 있다."
+ ]
+}

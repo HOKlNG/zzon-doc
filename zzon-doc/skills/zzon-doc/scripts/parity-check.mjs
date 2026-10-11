@@ -20,6 +20,7 @@ import { readFileSync, mkdtempSync, rmSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
+import { runEngine } from "./engine-cli.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RENDER = join(HERE, "render.mjs");
@@ -60,12 +61,12 @@ function legacyRender(sample) {
   return readFileSync(out, "utf8");
 }
 function engineRender(example) {
-  execFileSync("bun", [join(ENGINE, "src", "cli", "index.ts"), "render", join(ENGINE, "examples", `${example}.ts`), "--out", t], { stdio: "pipe", cwd: ENGINE });
+  runEngine(["render", join(ENGINE, "examples", `${example}.ts`), "--out", t]);
   return readFileSync(join(t, `${example}.html`), "utf8");
 }
 /** 같은입력 모드: 레거시 JSON을 엔진 CLI로 렌더 (계약상 slug = json 파일명) */
 function engineRenderJson(sample) {
-  execFileSync("bun", [join(ENGINE, "src", "cli", "index.ts"), "render", join(REFS, `${sample}.json`), "--out", t], { stdio: "pipe", cwd: ENGINE });
+  runEngine(["render", join(REFS, `${sample}.json`), "--out", t]);
   return {
     html: readFileSync(join(t, `${sample}.html`), "utf8"),
     scene: JSON.parse(readFileSync(join(t, `${sample}.scene.json`), "utf8")),

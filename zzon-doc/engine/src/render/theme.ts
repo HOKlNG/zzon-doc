@@ -1,6 +1,9 @@
 /**
  * Light/dark theme tokens shared by the two render variants (DESIGN §8).
  *
+ * Values mirror skills/zzon-doc/scripts/design-tokens.mjs (the single source
+ * for every zzon page); tests/design-tokens.test.ts keeps them in sync.
+ *
  * Interactive variant: tokens are emitted as CSS custom properties (html.ts
  * puts them on :root / :root[data-theme="dark"]) and the SVG references them
  * via var(...) so the theme toggle restyles the diagram live.
@@ -22,8 +25,8 @@ export interface ThemeTokens {
 }
 
 export const THEMES: Record<ThemeName, ThemeTokens> = {
-  light: { canvas: "#FFFFFF", text: "#16191F", edge: "#545B64", dimOpacity: 0.25 },
-  dark: { canvas: "#161E2D", text: "#D5DBDB", edge: "#879596", dimOpacity: 0.25 },
+  light: { canvas: "#ffffff", text: "#09090b", edge: "#52525b", dimOpacity: 0.25 },
+  dark: { canvas: "#09090b", text: "#fafafa", edge: "#a1a1aa", dimOpacity: 0.25 },
 };
 
 /**

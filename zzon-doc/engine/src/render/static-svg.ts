@@ -24,6 +24,7 @@ import { measureWidth, textToPathD } from "../text/metrics.ts";
 import { GROUP_STYLES } from "./group-styles.ts";
 import { renderTableStatic, cardinalityMarkerDefs as cardDefs, edgeCardinalityAttrs } from "./table.ts";
 import { renderCardStatic } from "./card.ts";
+import { renderShapeStatic } from "./shapes.ts";
 import { THEMES, type ThemeName, type ThemeTokens } from "./theme.ts";
 import {
   MARKER_RADIUS,
@@ -58,6 +59,15 @@ function useIcon(icon: IconRef, r: Rect): string {
  * alignment (textToPathD always draws from the left edge). Baseline `y`
  * matches the <text> element of the interactive variant exactly.
  */
+/** pill behind a line label — same geometry as the interactive variant */
+function labelPill(label: SceneLabel, themeName: ThemeName): string {
+  const w = measureWidth(label.text, label.fontSize, label.weight);
+  const x = label.align === "middle" ? label.x - w / 2 : label.align === "end" ? label.x - w : label.x;
+  const ph = label.fontSize + 9;
+  const surf = themeName === "dark" ? { card: "#141417", border: "#2a2a2e" } : { card: "#ffffff", border: "#e4e4e7" };
+  return `<rect x="${x - 7}" y="${label.y - label.fontSize - 1.5}" width="${w + 14}" height="${ph}" rx="${ph / 2}" fill="${surf.card}" stroke="${surf.border}" stroke-width="1"/>`;
+}
+
 function labelPaths(label: SceneLabel, defaultFill: string): string {
   const fill = label.color ?? defaultFill;
   const lines = label.lines && label.lines.length > 0 ? label.lines : [label.text];
@@ -122,7 +132,7 @@ function overlayMarkup(o: SceneOverlay, t: ThemeTokens): string {
   return bits.join("");
 }
 
-function edgeMarkup(e: SceneEdge, t: ThemeTokens): string {
+function edgeMarkup(e: SceneEdge, t: ThemeTokens, themeName: ThemeName): string {
   const geo = edgeGeometry(e);
   const card = edgeCardinalityAttrs(e);
   if (card.markerStart) geo.markerStart = card.markerStart;
@@ -133,13 +143,14 @@ function edgeMarkup(e: SceneEdge, t: ThemeTokens): string {
       `${attr("stroke-dasharray", geo.dash)}${attr("marker-start", geo.markerStart)}` +
       `${attr("marker-end", geo.markerEnd)}/>`,
   ];
-  if (e.label) bits.push(labelPaths(e.label, t.edge));
+  if (e.label) bits.push(labelPill(e.label, themeName), labelPaths(e.label, t.edge));
   bits.push("</g>");
   return bits.join("");
 }
 
 function nodeMarkup(n: SceneNode, t: ThemeTokens, themeName: ThemeName): string {
   if (n.table) return renderTableStatic(n, themeName);
+  if (n.shape && !n.category) return renderShapeStatic(n, themeName);
   if (n.category) return renderCardStatic(n, themeName);
   const bits: string[] = ["<g>"];
   if (n.icon && n.iconRect) bits.push(stackShadows(n.iconRect, n.stack, t, STACK_STROKE), useIcon(n.icon, n.iconRect));
@@ -168,11 +179,11 @@ export function renderStaticSvg(scene: Scene, theme: ThemeName = "light"): strin
     `<svg xmlns="http://www.w3.org/2000/svg"` +
       ` viewBox="0 0 ${fmt(scene.width)} ${fmt(scene.height)}"` +
       ` width="${fmt(scene.width)}" height="${fmt(scene.height)}">`,
-    `<defs>${sceneIconDefs(scene.icons)}\n${arrowMarkerDefs(scene.edges)}${scene.edges.some((e) => e.sourceCardinality || e.targetCardinality) ? cardDefs(scene.edges.find((e) => e.sourceCardinality || e.targetCardinality)!.style.color, t.canvas) : ""}</defs>`,
+    `<defs>${sceneIconDefs(scene.icons)}\n${arrowMarkerDefs(scene.edges, t.canvas)}${scene.edges.some((e) => e.sourceCardinality || e.targetCardinality) ? cardDefs(scene.edges.find((e) => e.sourceCardinality || e.targetCardinality)!.style.color, t.canvas) : ""}</defs>`,
     `<rect x="0" y="0" width="${fmt(scene.width)}" height="${fmt(scene.height)}" fill="${t.canvas}"/>`,
     scene.groups.map((g) => groupMarkup(g, t)).join("\n"),
     scene.overlays.map((o) => overlayMarkup(o, t)).join("\n"),
-    scene.edges.map((e) => edgeMarkup(e, t)).join("\n"),
+    scene.edges.map((e) => edgeMarkup(e, t, theme)).join("\n"),
     scene.nodes.map((n) => nodeMarkup(n, t, theme)).join("\n"),
     scene.markers.map(markerMarkup).join("\n"),
     `</svg>`,

@@ -17,7 +17,7 @@
   "description": "…",                     // 타이틀바 툴팁
   "counts": { "nodes": 0, "edges": 0, "flows": 0, "groups": 0 },  // a11y aria-label
   "warnings": ["…"],                      // 경고 칩 (레이아웃 산출물 — 캔버스가 생산)
-  "nodes": [{ "path": "…", "label": "…", "category": "…", "tech": "…",
+  "nodes": [{ "path": "…", "label": "…", "category": "…", "categoryLabel": "사용자", "tech": "…",
               "description": "…", "href": "…",
               "table": { "columns": [{ "name": "", "type": "", "pk": false,
                         "fk": {"table":"","column":""}, "unique": false, "nullable": false }] } }],
@@ -72,6 +72,8 @@ frame.register({
 - **폰트**: 엔진 캔버스는 Pretendard 서브셋을 임베드한다. **프레임 크롬 문자열은 서브셋
   입력에 포함돼야 한다** — 프레임이 `FRAME_GLYPHS` 상수(크롬 전체 문구)를 export하고,
   엔진 빌드가 이를 scene.texts에 합친다. 프레임 크롬 언어는 **한국어**(레거시 관례).
+- **디자인 토큰**: 프레임 색·글꼴·폭 구간은 `scripts/design-tokens.mjs`(산출물 전체 공용)에서 받는다 —
+  프레임이 import하는 유일한 모듈이다. 640px 이하에서 상세 패널은 아래 시트가 되고 canvasShift는 보내지 않는다.
 
 ## 4. 셸 프로토콜 (iframe ↔ 문서/위키 셸)
 

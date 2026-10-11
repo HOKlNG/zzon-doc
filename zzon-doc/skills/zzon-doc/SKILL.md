@@ -1,81 +1,116 @@
 ---
 name: zzon-doc
-description: 코드베이스나 설명을 분석해 아키텍처/인프라/ERD/Claude 에이전트 다이어그램을 그린다. 동봉 엔진(TS DSL → 자동배치 → 셀프컨테인드 인터랙티브 .html)으로 렌더한다. "아키텍처 그려줘", "인프라 다이어그램", "ERD 만들어줘", "이 시스템 구조를 시각화" 같은 요청에 사용한다.
-argument-hint: '[그릴 대상 — 예: 이 레포의 인프라 / DB 스키마 ERD]'
+description: 코드베이스를 근거로 다이어그램을 그리는 메인 스킬이다. 무엇을 그릴지(뷰)와 얼마나 복잡하게 그릴지(등급)를 객관 기준으로 고른다. 지원하는 뷰는 아키텍처, 시스템 컨텍스트, 컨테이너, 컴포넌트, 인프라·배포 구성도, 쿠버네티스, 네트워크·보안 경계, 데이터·이벤트 흐름, 파이프라인, ERD, 상태 전이도, 플로우차트, 모듈 의존성 그래프, 화면 흐름, 도메인 모델(클래스), 에이전트 구성이다. 시퀀스와 Terraform은 형제 스킬 절차로 넘긴다. 코드가 바뀐 뒤 기존 다이어그램을 대조해 갱신한다. 산출물은 의존성 0 인터랙티브 .html이다.
+when_to_use: 다이어그램·구성도·도식·시각화 요청 전반에 쓴다("~그려줘", "구조 보여줘", "draw/diagram/visualize architecture·ERD·state machine·flowchart·dependency graph"). "다이어그램 업데이트/다시 훑어/최신화/재생성/코드 바뀌었어"처럼 기존 그림을 갱신하는 요청에도 쓴다. 문서 위키 전체를 만들거나 채우는 요청은 zzon-wiki가 맡는다.
+argument-hint: '[그릴 대상 — 예: 이 레포 아키텍처 / 주문 상태 전이 / 모듈 의존성 / 다이어그램 업데이트]'
 ---
 
-# 아키텍처 다이어그램 그리기
+# 다이어그램 메인 (zzon-doc)
 
-코드를 분석해 **엔진 DSL**(`.ts`)을 저작하고 동봉 엔진(`${CLAUDE_PLUGIN_ROOT}/engine`, bun+TS)으로
-의존성 0짜리 단일 `.html`을 만든다. 여러 장이면 `build-docs.mjs`로 통합 문서에 묶는다.
+코드를 근거로 그림을 그린다. 순서는 고정이다.
+**분기 → 신호 → 뷰·등급 → 위임/저작 → 게이트 → 빌드·스탬프 → 보고.** 단계를 건너뛰지 마라.
 
-> 엔진은 진짜 자동 배치(ELK+격자+직교 라우팅)라 **lane/order 수동 조정과 layout-lint가 없다** —
-> 대신 렌더 후 불변식 검사(겹침·관통·라벨 충돌 0)를 통과시킨다.
-> 시간축 왕복(요청/응답·alt/loop)은 여전히 **zzon-seq** 스킬이다. Terraform 클라우드 인프라(프로바이더 무관)는 **terra-form** 스킬이 전문이다.
+경로 표기:
+- `$Z` = `${CLAUDE_PLUGIN_ROOT}`
+- `<docsDir>` = 대상 프로젝트의 `docs/zzon-doc/`. 구버전 루트 `zzon-doc/` 산출 폴더가 이미 있으면 그것을 쓴다.
+- 엔진은 최초 1회 `cd $Z/engine && bun install`이 필요하다. bun이 없으면 설치를 안내하고 멈춘다.
 
-## 1. 범위를 먼저 잡는다 (가장 중요 — 기존 게이트 유지)
+## 0. 분기 — 첫 행동
 
-- **구체적 요청** → 바로 그 한 장.
-- **포괄적 요청** → **① 구조·개수 파악 → ② "문서 목록+장수+뎁스" 제안·승인(3택: 개괄/사다리 세트/풀뎁스 원장) → ③ 작성.**
-  승인 없이 그리지 마라. 큰 프로젝트는 기능·도메인별로 쪼갠다(한 장 ~13노드 내외 권장, 원장은 예외).
+- **`<docsDir>/specs/`가 이미 있으면 재진입이다.** 첫 행동은 무조건 다음 명령이다.
+  `node $Z/skills/zzon-doc/scripts/build-docs.mjs <docsDir> --status`
+  - 요청이 "업데이트·다시 훑어·최신화"류든 새 그림 요청이든 똑같다.
+  - status 출력 없이 "최신이다/반영했다"고 말하지 마라. 판정은 출력이 한다.
+  - **stale** 장: 변경 파일을 실제로 읽고(출력의 `git diff` 명령 포함) DSL을 고친다. 그다음 빌드한다. 빌드가 재스탬프한다.
+    읽어 보니 그림을 바꿀 필요가 없으면 `--stamp <slug>`로 명시하고, 그 이유를 보고한다.
+  - **untracked** 장: 근거 파일을 다시 확인해 스펙 stub의 `sources`를 채운다.
+  - **신호 변화**(테이블·배포 단위·화면 수 등): 출력이 짚는 뷰의 장을 재검토하거나 새 장을 제안한다.
+- `<docsDir>/wiki.json`이 있으면 index.html은 위키 소유다. 이 스킬은 다이어그램만 다루고, 문서 갱신은 zzon-wiki 절차를 따른다.
 
-## 2. 유형 판별 → 저작 방식
+## 1. 신호 — 코드 사실을 센다
 
-**어휘 결정 규칙(정책)** — 판별 후 가장 먼저 정한다:
-- **IaC(Terraform 등) 기반 클라우드/네트워크 아키텍처** → 해당 클라우드 공식 아이콘 (terra-form 절차, 레거시 스펙이면 `"vocabulary": "aws"`)
-- **프로젝트 단위·C4 레이어(컨텍스트/컨테이너/컴포넌트/MSA/도메인)** → 기존 카테고리 카드
-- 한 장 안에서 혼용 금지(validator가 막는다) — 하이브리드는 `allowMixedVocabulary` 명시 시에만
+`node $Z/skills/zzon-doc/scripts/scan.mjs <프로젝트 루트>`
 
-| 유형 | 저작 |
+출력은 IaC 리소스·배포 단위·테이블·라우트·큐·상태 enum·화면·에이전트·소스 모듈 수와 뷰 후보다.
+판단의 입력은 **이 출력 + 요청어 + 독자 + 매체**다. 훑어본 인상으로 정하지 마라.
+
+## 2. 뷰·등급 — `references/selection-rubric.md`를 읽고 따른다
+
+- **뷰**(§2): 요청어(지명 10점, 관심사 5점) + 코드 신호(2점)로 점수를 낸다.
+  최고점이 10 이상이고 2위와 5점 이상 차이 나면 확정한다. 그렇지 않으면 상위 2개를 이유와 함께 한 질문으로 묻는다.
+- **등급**(§3): T1 개괄 ≤9 · T2 표준 10–20 · T3 원장 21–50이다. T3는 세 조건(운영·감사·전체 관심사 / 전체화면 / 상위 T1 장과 드릴다운)을 모두 충족할 때만 쓴다.
+- **포괄 요청**("아키텍처 그려줘", "문서화해줘"): §2.3 기본 세트를 장 목록 + 등급 + 근거 수치로 제안하고, **승인 후** 그린다. 예:
+  > "scan: 배포 단위 4, 테이블 23, 라우트 41, 상태 enum 2. 컨텍스트(T1) + 컨테이너(T2) + ERD 2장(T2, 주문·회원 도메인) + 시퀀스 2장(로그인·결제) + 주문 상태 전이(T2). 진행할까?"
+- **구체 요청**("결제 상태 전이 그려줘"): 바로 그 한 장을 그린다. 뷰와 등급만 밝힌다.
+- **큰 그림과 세부**(§3.4): 같은 리소스를 두 장으로 낼지는 세부 모델을 그린 뒤 `bun ia check`의 "줌 판단"을 따른다. 21개 이상이면 필수, 10~20개면 문서 세트이거나 독자·매체가 섞일 때 낸다. 큰 그림은 따로 그리지 않는다 — 스펙 stub에 `"overview": true`를 쓰면 build-docs가 같은 모델을 접어 만들고, 큰 그림 노드에서 세부로 드릴다운된다. 판단이 "다시 구성하라"면 세부 모델을 묶음(계정·도메인·계층) 단위로 다시 짠다.
+
+## 3. 위임 또는 저작
+
+| 뷰 | 하는 일 |
 |---|---|
-| A 개요(컨텍스트·랜드스케이프), B 구조 중 C4/MSA/도메인 | **카테고리 카드 노드**(`category:`/`tech:`/`description:`, AWS 아이콘 금지 관례) — 참고: `engine/examples/msa-sample.ts` |
-| B 구조 중 클라우드/멀티리전/EKS/계정위계/네트워크 | **AWS 아이콘 + grid/overlay/band** — 참고: `engine/examples/serverless-sample.ts`, `eks-cluster.ts`, `multi-account-lz.ts`, `multi-region-cicd.ts`. tf가 있으면(클라우드 무관) terra-form 스킬 절차로 |
-| C 흐름(기능·이벤트·CI/CD) | 구조 + **`d.flow()`**(엣지 순번+내레이션, 뷰어에서 클릭 하이라이트), `docKind:"data-flow"` |
-| D ERD | **`table:` 노드** + `sourceColumn/targetColumn` + 카디널리티, `docKind:"erd"` — 참고: `engine/examples/erd-sample.ts` |
-| 시퀀스 | zzon-seq로 위임 |
+| 시퀀스 | `$Z/skills/zzon-seq/SKILL.md`를 읽고 그 절차로 SeqSpec을 저작한다 |
+| 배포·인프라이고 `*.tf`가 있음 | `$Z/skills/terra-form/SKILL.md`를 읽고 그 절차를 따른다 |
+| 그 외 전부 | `references/views/README.md`(공통 계약)와 해당 `references/views/<뷰>.md`를 읽고 엔진 DSL을 저작한다 |
 
-## 3. DSL 계약 (틀리기 쉬움)
+뷰 문서 목록:
+- `context`(컨텍스트·랜드스케이프), `container`(컨테이너·컴포넌트), `deployment`(인프라·k8s·네트워크·보안, tf 없음)
+- `flow`(기능 흐름·이벤트·CI/CD·파이프라인), `erd`, `state`, `flowchart`
+- `dependency`(**`scripts/scan-deps.mjs`로 기계 생성**), `screen-flow`, `domain-model`, `agent-topology`
 
-- 소스는 `<docsDir>/terra/<slug>.ts`, **engine/examples에 있는 것처럼** `import { diagram } from "../src/dsl/index.ts"` 로 쓴다(엔진이 임시 복사로 해석).
-- 노드: `icon:`(AWS 838종+lucide, `grep engine/src/icons/manifest.gen.ts`로 실재 확인) **또는** `category:`(31종) **또는** `table:` — 셋 중 하나.
-- **캔버스 텍스트는 절제한다**: `label`은 짧은 이름, `sublabel`은 한 줄 보조까지만. 설명 문장·기능 나열을 캔버스에 그리지 마라 — **상세는 전부 `description:`(클릭 시 우측 사이드바)이 자리다.** 주요 노드에는 `description:`을 기본으로 채운다. `href:`는 형제 slug 드릴다운. 엣지는 `layer:` 필수.
-- **플로우를 빠뜨리지 마라**: 코드에서 대표 경로(요청·배포·이벤트 등)가 읽히면 구조 장에도 `d.flow()` 1~2개를 기본 포함한다(순번 배지·내레이션·단계 사이드바가 flow로만 산다). `docKind:"data-flow"` 장은 flow가 없으면 미완성이다.
-- 격자는 `grid()`+`cell()`, 스팬 그룹은 `overlay()`, 외부 시스템은 `band("right")`, 순번 마커는 `step()`.
-- 넓거나 좁은 그림은 `diagram(id, { aspectRatio })`로 의도 선언. 추측 금지 — 읽은 것만 그린다.
+틀리기 쉬운 계약(상세는 views/README.md):
+- DSL은 `<docsDir>/terra/<slug>.ts`에 둔다. 머리는 `diagram(slug, { title, view, tier, direction? }, d => …)`이다. **view·tier는 게이트 기준**이니 빠뜨리지 마라.
+- **캔버스 텍스트를 절제한다.** 설명 문장은 `description:`(사이드바)에 넣는다. 라벨은 짧게, 엣지 라벨은 2어절 이내로 쓴다.
+- **독자가 읽는 글**(제목, 요약, `description`, 플로우 단계)은 `references/writing-style.md`의 여섯 규칙을 따른다. 필드 이름, 등급 코드, 화살표 사슬, 그림 제작 설명을 넣지 마라.
+- **배치 의도는 힌트로 밝힌다.** 열은 `hints.layer`, 열 안 순서는 `hints.order`, 방향은 `direction`이다.
+- 엣지에는 `layer:`가 필수다. 대표 경로는 `d.flow()`로 넣는다(T3에서는 필수).
+- **축소는 rubric §3.3 사다리 순서로만** 한다. 줄인 내용은 충실도 장부로 보고한다.
 
-## 4. 렌더 + 통합 문서
-
-**산출 폴더(`<docsDir>`) 기본값은 대상 프로젝트의 `docs/zzon-doc/`이다.** 구버전 기본값인
-루트 `zzon-doc/` 산출 폴더가 이미 있으면 그걸 계속 쓴다(이사는 사용자가 요청할 때만).
-
-스펙 stub을 `<docsDir>/specs/<slug>.json`에 두면 build-docs가 엔진을 bun으로 직접 렌더한다:
+스펙 stub `<docsDir>/specs/<slug>.json`:
 
 ```json
-{ "renderer": "terra-form", "kind": "infra|data-flow|erd|agent-topology",
-  "title": "…", "section": "…", "order": 0, "description": "…", "source": "terra/<slug>.ts" }
+{ "renderer": "engine", "kind": "infra", "view": "container", "title": "…", "section": "…", "order": 1,
+  "description": "이 그림이 보여 주는 시스템을 한두 문장으로 쓴다",
+  "source": "terra/<slug>.ts", "sources": ["services/order/**", "docker-compose.yml"] }
 ```
 
-```bash
-node ${CLAUDE_PLUGIN_ROOT}/skills/zzon-doc/scripts/build-docs.mjs <docsDir> --title "<제목>"
-```
+- `kind`: `infra | data-flow | erd | agent-topology | state | flowchart | dependency | screen-flow | class`(시퀀스는 `sequence`)
+- **`sources`** = 이 장을 그리며 실제로 읽은 파일 glob이다(프로젝트 루트 기준). 비우면 코드가 바뀐 뒤 이 장이 낡았는지 판정할 수 없다. 반드시 채운다.
 
-counts는 scene.json에서 자동 산출된다. `wiki.json`이 있으면 build-wiki도 이어서 실행.
-기존 DiagramSpec JSON(`specs/*.json`)도 엔진이 그대로 렌더한다(변환 내장) — 레거시 render.mjs는 `ZZON_LEGACY_RENDER=1`(또는 스펙 `"renderer":"legacy"`) 탈출구로만 쓴다.
+## 4. 게이트 (필수)
 
-**품질 게이트(필수)** — 렌더 후 불변식 0 확인, PNG 육안 확인:
+`cd $Z/engine && bun ia check <docsDir>/terra/<slug>.ts`
 
-```bash
-cd ${CLAUDE_PLUGIN_ROOT}/engine && bun -e 'import { loadDiagram, buildScene } from "./src/pipeline.ts"; import { checkScene } from "./tests/invariants.ts"; const m = await loadDiagram("<abs>/terra/<slug>.ts"); const s = await buildScene(m); console.log(checkScene(s, { aspectRatio: m.aspectRatio })); process.exit(0)'
-```
+- **✗**(불변식, 노드·엣지 예산 초과, 라벨 가림): 고친 뒤에만 전달한다.
+- **!**(선 겹침·교차·꺾임·색 그룹·흐름 방향·종횡비): `references/layout-guide.md` 4절의 처방대로 고친다. 선 겹침과 라벨 가림은 엔진이 간격을 넓혀 한 번 더 배치한 뒤에도 남은 것이니 구조(열·묶음·중간 노드)를 고친다. 그래도 남으면 이유를 보고한다.
+- **배치는 저작할 때 잡는다**: DSL을 쓰기 전에 `references/layout-guide.md` 2절 순서(방향 → 주 경로 열 → 줄 → 묶기 → 횡단 관심사 띠 → 되돌아가는 선 → 몰리는 선 → 라벨 → 진입면)를 따른다.
+- `bun ia export <소스> --png --out <docsDir>/diagrams`로 PNG를 만들어 **열어 보고** 확인한다. 게이트는 충돌을 잡고, 의미가 맞는지는 눈으로 확인한다.
+
+## 5. 빌드·스탬프
+
+`node $Z/skills/zzon-doc/scripts/build-docs.mjs <docsDir> --title "<제목>"`
+
+- 렌더(엔진·시퀀스) + manifest(뷰·등급·게이트 결과) + `diagrams.lock.json` 근거 스탬프를 만든다. 스펙이 바뀐 장은 자동으로 스탬프된다.
+- 빌드 출력의 "품질 게이트 실패"와 "sources 미기록" 줄을 그냥 넘기지 마라.
+- `wiki.json`이 있으면 이어서 `node $Z/skills/zzon-wiki/scripts/build-wiki.mjs <docsDir>`를 실행한다.
+
+## 6. 보고 (장마다)
+
+- 뷰·등급과 그 근거(scan 수치·요청어)
+- 게이트 결과(경고가 남았다면 이유)
+- **충실도 장부**: 원천 X개 → 그림 Y개 (병합 · 접음 · 생략 목록)
+- `sources`
+- 재진입이었다면: stale 장별로 무엇이 바뀌었고(노드·엣지 추가·삭제·변경) 무엇을 스탬프만 했는지
 
 ## 출력 .html에서 되는 것 (사용자에게 안내)
 
-팬/줌 · hover 인접 하이라이트 · **layer 토글** · **플로우 버튼+순번 배지+내레이션 스트립(클릭 포커스)** ·
-**노드 클릭 → 상세 사이드바**(설명·연결 목록·드릴다운) · **`href` 드릴다운**(통합 문서에서 장 이동) ·
-ERD 카디널리티(까마귀발)·컬럼 앵커 엣지 · 자동 범례 · 다크/라이트(`zzon-theme` 동기화) · SVG/PNG 내보내기(CLI `bun ia export --png`).
+- 팬·줌, hover 시 인접 강조, **layer 토글**
+- **플로우 버튼 + 순번 배지 + 단계 스트립**
+- **노드 클릭 → 상세 사이드바**(설명·연결 목록·드릴다운), `href` 드릴다운(통합 문서에서 장 이동)
+- ERD 까마귀발, 자동 범례, 다크·라이트 모드, SVG·PNG 내보내기
 
 ## 절대 규칙
 
-- 그릴 때 엔진 코드를 고치지 마라 — 만드는 건 **DSL `.ts` + 스펙 stub JSON까지**. (엔진 개선은 별도 작업.)
-- 불변식 위반이 남은 채 전달 금지. 추측으로 그리지 마라 — 모르면 물어라.
-- 레거시 DiagramSpec JSON(render.mjs)은 **deprecated** — 기존 문서 호환용으로만 남아 있다. 신규 저작 금지.
+- 그릴 때 엔진 코드를 고치지 마라. 만드는 건 DSL `.ts` + 스펙 stub까지다.
+- 추측하지 마라. 읽은 것만 그리고, `sources`에는 실제로 읽은 파일만 적는다. 모르면 묻는다.
+- 게이트 ✗가 남은 채 전달하지 마라. 재진입에서 `--status` 없이 "최신"이라고 단정하지 마라.
+- 레거시 DiagramSpec JSON은 신규 저작 금지다(deprecated — 기존 스펙은 그대로 렌더된다).

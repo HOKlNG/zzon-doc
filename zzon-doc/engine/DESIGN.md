@@ -365,6 +365,18 @@ test_infra_architect/
 4. **폰트: OFL 폰트 vendored 커밋** — 측정·렌더 동일 폰트, 서브셋 임베드
 5. **라우팅: libavoid-js 전역 패스가 v1** (v1.5에서 승격) — ELK는 배치 전용
 6. 기각된 대안 (재론 방지 기록): ELK INCLUDE_CHILDREN 일괄 라우팅(모순), ELK 고정 포트를 1차 라우팅으로(열등, side 힌트 매핑에만 잔존 후보), canvas 폴리필/satori 텍스트 측정(형상 부적합), sharp PNG(비적합), 아이콘 fetch-only 정책(결정론 모순)
+7. **v0.9 배치 힌트·감기 결정 (2026-10-04, 코퍼스 22장 실측)**
+   - `hints.layer/order`는 2패스로 구현했다. 1패스(자동) → 시드 좌표 → INTERACTIVE 순환 처리·레이어링·교차 최소화, `separateConnectedComponents: false`.
+   - 기각:
+     - `layerChoiceConstraint`/`positionChoiceConstraint`: 비대화형에서 무효과
+     - `cycleBreaking: MODEL_ORDER`: 비순환 그래프에서도 선언 순서를 거스르는 엣지를 뒤집는다. 4장이 회귀했다.
+     - 부분 힌트의 pred+1 즉시 전파: 끝 노드가 다른 선행 노드보다 앞으로 당겨졌다. 위상 순서로 모든 선행 노드를 기다리는 전파로 대체했다.
+     - 최상위 RIGHT 줄바꿈에 ELK MULTI_EDGE를 쓰는 안: 작은 그래프에서 절단점이 1/1/1…로 흩어졌다. 글줄식 wrapRows로 대체했다.
+   - 되돌아가는 엣지는 작성자가 `back: true`(`Edge.layoutReverse`)로 밝힌다.
+   - 품질 게이트(`src/quality/metrics.ts`)는 불변식(충돌)과 별개로 가독성을 판정한다.
+     - ✗: 예산 초과·라벨 가림·의미 오류
+     - !: 교차·꺾임·색 그룹·흐름 방향·종횡비
+     - 수치 근거는 skills/zzon-doc/references/selection-rubric.md §4·§5에 있다.
 
 ---
 

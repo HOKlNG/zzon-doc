@@ -146,7 +146,7 @@ export function planBundles(
   const candidates = new Map<string, Candidate>();
   for (const edge of edges) {
     const eps = endpoints.get(edge.id);
-    if (!eps) continue;
+    if (!eps || edge.from === edge.to) continue; // self-loops never bundle
     for (const end of ["target", "source"] as const) {
       const endpoint = end === "target" ? eps.target : eps.source;
       const side = approachSide(edge, end, eps);

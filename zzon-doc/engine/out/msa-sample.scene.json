@@ -1,22 +1,22 @@
 {
  "id": "msa-sample",
- "title": "MSA Sample — Category Cards",
- "width": 883.26,
- "height": 336.45,
+ "title": "MSA 서비스 구성",
+ "width": 836.17,
+ "height": 308,
  "groups": [
   {
    "kind": "group",
    "path": "services",
    "rect": {
-    "x": 316,
+    "x": 307,
     "y": 52,
-    "width": 248,
-    "height": 232.45
+    "width": 220,
+    "height": 204
    },
    "groupKind": "generic",
    "label": {
     "text": "Domain Services",
-    "x": 324,
+    "x": 315,
     "y": 68,
     "fontSize": 13,
     "weight": "semibold",
@@ -34,36 +34,35 @@
    "to": "services/order",
    "points": [
     {
-     "x": 252,
-     "y": 168.22
+     "x": 224,
+     "y": 154
     },
     {
-     "x": 291,
-     "y": 168.22
+     "x": 272.5,
+     "y": 154
     },
     {
-     "x": 291,
-     "y": 134.22
+     "x": 272.5,
+     "y": 120
     },
     {
-     "x": 330,
-     "y": 134.22
+     "x": 321,
+     "y": 120
     }
    ],
    "style": {
     "preset": "default",
-    "color": "#545B64",
+    "color": "#52525b",
     "arrowhead": "end"
    },
    "layer": "http",
    "label": {
     "text": "REST",
-    "x": 297,
-    "y": 155.13,
+    "x": 248.25,
+    "y": 145.35,
     "fontSize": 11,
     "weight": "regular",
-    "align": "start",
-    "color": "#545B64"
+    "align": "middle"
    }
   },
   {
@@ -73,25 +72,25 @@
    "to": "services/payment",
    "points": [
     {
-     "x": 252,
-     "y": 168.22
+     "x": 224,
+     "y": 154
     },
     {
-     "x": 291,
-     "y": 168.22
+     "x": 272.5,
+     "y": 154
     },
     {
-     "x": 291,
-     "y": 244.45
+     "x": 272.5,
+     "y": 216
     },
     {
-     "x": 330,
-     "y": 244.45
+     "x": 321,
+     "y": 216
     }
    ],
    "style": {
     "preset": "default",
-    "color": "#545B64",
+    "color": "#52525b",
     "arrowhead": "end"
    },
    "layer": "http"
@@ -103,36 +102,35 @@
    "to": "pg-api",
    "points": [
     {
-     "x": 522,
-     "y": 244.45
+     "x": 513,
+     "y": 216
     },
     {
-     "x": 583.63,
-     "y": 244.45
+     "x": 557.92,
+     "y": 216
     },
     {
-     "x": 583.63,
-     "y": 168.22
+     "x": 557.92,
+     "y": 154
     },
     {
-     "x": 631.26,
-     "y": 168.22
+     "x": 612.17,
+     "y": 154
     }
    ],
    "style": {
     "preset": "dashed",
-    "color": "#545B64",
+    "color": "#52525b",
     "arrowhead": "end"
    },
    "layer": "http",
    "label": {
     "text": "결제 승인",
-    "x": 536.84,
-    "y": 217.25,
+    "x": 511.13,
+    "y": 176.02,
     "fontSize": 11,
     "weight": "regular",
-    "align": "start",
-    "color": "#545B64"
+    "align": "start"
    }
   },
   {
@@ -142,25 +140,25 @@
    "to": "orders-db",
    "points": [
     {
-     "x": 550,
-     "y": 134.22
+     "x": 513,
+     "y": 120
     },
     {
-     "x": 597.63,
-     "y": 134.22
+     "x": 571.92,
+     "y": 120
     },
     {
-     "x": 597.63,
-     "y": 278.45
+     "x": 571.92,
+     "y": 250
     },
     {
-     "x": 645.26,
-     "y": 278.45
+     "x": 612.17,
+     "y": 250
     }
    ],
    "style": {
     "preset": "default",
-    "color": "#545B64",
+    "color": "#52525b",
     "arrowhead": "end"
    },
    "layer": "data"
@@ -172,25 +170,25 @@
    "to": "session-cache",
    "points": [
     {
-     "x": 550,
-     "y": 134.22
+     "x": 513,
+     "y": 120
     },
     {
-     "x": 590.63,
-     "y": 134.22
+     "x": 562.58,
+     "y": 120
     },
     {
-     "x": 590.63,
+     "x": 562.58,
      "y": 58
     },
     {
-     "x": 645.26,
+     "x": 612.17,
      "y": 58
     }
    ],
    "style": {
     "preset": "dotted",
-    "color": "#545B64",
+    "color": "#52525b",
     "arrowhead": "end"
    },
    "layer": "data"
@@ -202,25 +200,25 @@
    "to": "orders-db",
    "points": [
     {
-     "x": 522,
-     "y": 244.45
+     "x": 513,
+     "y": 216
     },
     {
-     "x": 583.63,
-     "y": 244.45
+     "x": 557.92,
+     "y": 216
     },
     {
-     "x": 583.63,
-     "y": 278.45
+     "x": 557.92,
+     "y": 250
     },
     {
-     "x": 645.26,
-     "y": 278.45
+     "x": 612.17,
+     "y": 250
     }
    ],
    "style": {
     "preset": "default",
-    "color": "#545B64",
+    "color": "#52525b",
     "arrowhead": "end"
    },
    "layer": "data"
@@ -233,8 +231,8 @@
    "rect": {
     "x": 32,
     "y": 128,
-    "width": 220,
-    "height": 80.45
+    "width": 192,
+    "height": 52
    },
    "role": "card",
    "category": "gateway",
@@ -242,8 +240,8 @@
    "description": "모든 외부 트래픽의 단일 진입점. 인증 토큰 검증과 서비스별 라우팅을 담당한다.",
    "label": {
     "text": "API Gateway",
-    "x": 32,
-    "y": 128,
+    "x": 84,
+    "y": 152,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
@@ -253,8 +251,8 @@
    "kind": "node",
    "path": "orders-db",
    "rect": {
-    "x": 645.26,
-    "y": 252.45,
+    "x": 612.17,
+    "y": 224,
     "width": 192,
     "height": 52
    },
@@ -263,8 +261,8 @@
    "tech": "PostgreSQL 16",
    "label": {
     "text": "Orders DB",
-    "x": 645.2569885253906,
-    "y": 252.447265625,
+    "x": 664.1686746987953,
+    "y": 248,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
@@ -274,18 +272,18 @@
    "kind": "node",
    "path": "pg-api",
    "rect": {
-    "x": 631.26,
+    "x": 612.17,
     "y": 128,
-    "width": 220,
-    "height": 80.45
+    "width": 192,
+    "height": 52
    },
    "role": "card",
    "category": "external",
-   "description": "외부 결제 대행사 (Toss Payments). 장애 시 재시도 큐로 우회한다.",
+   "description": "외부 결제대행사인 Toss Payments로, 장애가 나면 재시도 큐로 돌려 다시 시도한다.",
    "label": {
     "text": "PG API",
-    "x": 631.2569885253906,
-    "y": 128,
+    "x": 664.1686746987953,
+    "y": 152,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
@@ -295,19 +293,19 @@
    "kind": "node",
    "path": "services/order",
    "rect": {
-    "x": 330,
+    "x": 321,
     "y": 94,
-    "width": 220,
-    "height": 80.45
+    "width": 192,
+    "height": 52
    },
    "role": "card",
    "category": "service",
    "tech": "NestJS 10",
-   "description": "주문 생성/조회 도메인. 결제 승인 후 주문 상태를 확정한다.",
+   "description": "주문을 만들고 조회하며, 결제가 승인되면 주문 상태를 확정한다.",
    "label": {
     "text": "Order Service",
-    "x": 330,
-    "y": 94,
+    "x": 373,
+    "y": 118,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
@@ -317,8 +315,8 @@
    "kind": "node",
    "path": "services/payment",
    "rect": {
-    "x": 330,
-    "y": 218.45,
+    "x": 321,
+    "y": 190,
     "width": 192,
     "height": 52
    },
@@ -327,8 +325,8 @@
    "tech": "Spring Boot 3",
    "label": {
     "text": "Payment Service",
-    "x": 330,
-    "y": 218.447265625,
+    "x": 373,
+    "y": 214,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
@@ -338,7 +336,7 @@
    "kind": "node",
    "path": "session-cache",
    "rect": {
-    "x": 645.26,
+    "x": 612.17,
     "y": 32,
     "width": 192,
     "height": 52
@@ -348,8 +346,8 @@
    "tech": "Redis 7",
    "label": {
     "text": "Session Cache",
-    "x": 645.2569885253906,
-    "y": 32,
+    "x": 664.1686746987953,
+    "y": 56,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
@@ -384,9 +382,9 @@
   "데이터베이스",
   "모든 외부 트래픽의 단일 진입점. 인증 토큰 검증과 서비스별 라우팅을 담당한다.",
   "서비스",
-  "외부 결제 대행사 (Toss Payments). 장애 시 재시도 큐로 우회한다.",
+  "외부 결제대행사인 Toss Payments로, 장애가 나면 재시도 큐로 돌려 다시 시도한다.",
   "외부 서비스",
-  "주문 생성/조회 도메인. 결제 승인 후 주문 상태를 확정한다.",
+  "주문을 만들고 조회하며, 결제가 승인되면 주문 상태를 확정한다.",
   "캐시"
  ]
 }

@@ -2,12 +2,12 @@
 
 문서·다이어그램 작성을 돕는 Claude Code 플러그인 묶음(suite).
 
-- **`/zzon-doc:zzon-doc`** — 코드를 분석해 아키텍처/인프라/ERD/Claude 에이전트 다이어그램을 그린다
+- **`/zzon-doc:zzon-doc`** — **다이어그램 메인**. 코드 사실 스캔 + 선택 기준으로 뷰(13종)와 등급(T1/T2/T3)을 고르고, 품질 게이트를 통과시킨다. 시퀀스·Terraform은 형제 스킬 절차로 넘기고, 재진입 시 근거 대조(`--status`)로 낡은 그림을 갱신한다
 - **`/zzon-doc:zzon-seq`** — 코드를 추적해 액터 간 시간축 상호작용을 시퀀스 다이어그램으로 그린다
 - **`/zzon-doc:terra-form`** — `*.tf`를 읽어 클라우드 인프라를 그린다 (AWS는 공식 아이콘 838종·AZ×티어 격자·스팬 overlay, 타 클라우드는 카테고리 카드+확장 아이콘)
 - **`/zzon-doc:zzon-wiki`** — 프로젝트 개발 문서 위키를 만들고, 코드 스캔 + 질문으로 채운다 (문서에 다이어그램 임베드)
 
-Claude가 (1) 소스를 읽어 스펙 JSON(**DiagramSpec**/**SeqSpec**)을 저작하고 (2) 렌더러로 **단일 self-contained `.html`** 을 렌더링한다.
+Claude가 (1) 소스를 읽어 **엔진 DSL(.ts)**·**SeqSpec JSON**을 저작하고(모듈 의존성은 스크립트가 생성) (2) 렌더러로 **단일 self-contained `.html`** 을 렌더링한다.
 출력 `.html`은 서버·React·CDN·외부 라이브러리 **없이** 브라우저로 열면 인터랙티브하게 동작한다.
 산출물은 대상 프로젝트의 **`docs/zzon-doc/`** 하위에 모인다(specs/·diagrams/·index.html·wiki.json — 구버전 기본값인 루트 `zzon-doc/`가 이미 있으면 그걸 유지).
 
@@ -20,8 +20,14 @@ Claude가 (1) 소스를 읽어 스펙 JSON(**DiagramSpec**/**SeqSpec**)을 저�
 | `sequence` | 액터 간 시간축 상호작용 — 요청/응답 왕복·활성 구간·alt/opt/loop/par (zzon-seq) |
 | `erd` | DB 테이블 관계 (FK 컬럼 앵커) |
 | `agent-topology` | `.claude` 에이전트/스킬/훅 구조 |
+| `state` | 대상 하나의 상태 전이 (UML: 시작·상태·선택·종료, 전이 "이벤트 [가드] / 액션") |
+| `flowchart` | 판단 분기를 따르는 절차 (시작/끝·처리·판단, 출구 조건 라벨) |
+| `dependency` | 모듈 의존성 — `scan-deps.mjs`가 import에서 기계 생성 (순환 강조) |
+| `screen-flow` | 화면 간 이동 (라우트 + 사용자 행동) |
+| `class` | 도메인 모델 (클래스 칸·합성·집약·상속·구현) |
 
 > Terraform(`*.tf`)이 있는 클라우드 인프라는 프로바이더와 무관하게 **terra-form** 스킬이 담당한다. tf가 없으면 `infra` kind로 그린다.
+> 무엇을·얼마나 복잡하게 그릴지는 `skills/zzon-doc/references/selection-rubric.md`(뷰 점수·등급·축소 사다리·게이트)가 정한다.
 
 ## 사용
 
@@ -99,17 +105,21 @@ zzon-doc/
 ├── README.md
 ├── engine/                       # 내장 TS 다이어그램 엔진 (ELK 자동배치 · 직교 라우팅 · AWS 아이콘 838종)
 │                                 #   준비: cd engine && bun install (bun 없으면 레거시 렌더러 폴백)
-├── skills/zzon-doc/              # 스킬 1 — 아키텍처 다이어그램
-│   ├── SKILL.md                  # 유형 판별 → DiagramSpec 저작 → 렌더 절차
+├── evals/                        # 트리거(라우팅) 평가 — claude plugin eval .
+├── skills/zzon-doc/              # 스킬 1 — 다이어그램 메인
+│   ├── SKILL.md                  # 분기(--status) → scan → 뷰·등급 → 위임/저작 → bun ia check → 빌드 → 보고
 │   ├── references/
-│   │   ├── document-types.md     # 유형 카탈로그 (4계열 + 추상화 사다리)
-│   │   ├── diagram-spec.md       # 스펙 명세 + 레이아웃 가이드
-│   │   └── sample-*.json         # 모범 답안 13종 (컨텍스트·컨테이너·컴포넌트·인프라·
-│   │                             #   EKS·MSA·멀티리전·이벤트·파이프라인·ERD·원장·에이전트 …)
+│   │   ├── selection-rubric.md   # 선택 기준 정본 (뷰 점수·등급·축소 사다리·게이트 수치·근거 추적)
+│   │   ├── views/*.md            # 뷰별 작도 문법 11종 + 공통 계약
+│   │   ├── diagram-spec.md       # (레거시) DiagramSpec 명세
+│   │   └── sample-*.json         # (레거시) DiagramSpec 모범 답안 14종 — 변환 내장으로 렌더
 │   └── scripts/
-│       ├── render.mjs            # DiagramSpec JSON → 단일 .html (Node 20+ 내장만)
-│       ├── build-docs.mjs        # 여러 스펙 → 통합 문서 index.html (kind:"sequence"는 zzon-seq로 라우팅)
-│       └── layout-lint.mjs       # 렌더 전 배치 검사 (그룹 겹침·삼킴 검출)
+│       ├── scan.mjs              # 코드 사실 스캐너 (선택 기준 입력)
+│       ├── scan-deps.mjs         # 모듈 의존성 기계 추출 → DSL 생성
+│       ├── build-docs.mjs        # 여러 스펙 → 통합 문서 (--status 근거 대조 · --stamp · 게이트 수집)
+│       ├── sources-lock.mjs      # diagrams.lock.json (근거 해시·git 커밋·scan 요약)
+│       ├── engine-cli.mjs        # bun 해석 + 엔진 호출 타임아웃
+│       └── render.mjs            # (레거시 폴백) DiagramSpec JSON → 단일 .html
 ├── skills/zzon-seq/              # 스킬 2 — 시퀀스 다이어그램
 │   ├── SKILL.md                  # 판별(vs data-flow) → 코드 추적 → SeqSpec 저작 → 렌더
 │   ├── references/
@@ -133,8 +143,9 @@ zzon-doc/
 
 ## 엔진 노트
 
-구조·데이터 다이어그램(infra/data-flow/erd/agent-topology)은 `engine/`의 **내장 TS 엔진**이 렌더한다
-(ELK 자동배치 + 직교 라우팅 + 겹침·관통 불변식 — lane/order 수동 조정·layout-lint 불필요).
+구조·데이터·표기 다이어그램(infra/data-flow/erd/agent-topology/state/flowchart/dependency/screen-flow/class)은 `engine/`의 **내장 TS 엔진**이 렌더한다
+(ELK 자동배치 + 작성자 배치 힌트(`hints.layer/order`) + 직교 라우팅 + 겹침·관통 불변식).
+렌더 후 `bun ia check`가 불변식 + 등급별 가독성 게이트 + 표기 의미 검사를 판정한다.
 기존 DiagramSpec JSON은 변환이 내장돼 그대로 렌더되며, `ZZON_LEGACY_RENDER=1` 또는 스펙에
 `"renderer":"legacy"`를 주면 레거시 렌더러를 쓴다(bun이 없어도 자동으로 이 경로로 폴백).
 단, 엔진 DSL(.ts)로 저작한 다이어그램과 terra-form은 엔진 전용이라 **bun이 필수**다 — 폴백은 레거시 DiagramSpec JSON에만 해당한다.

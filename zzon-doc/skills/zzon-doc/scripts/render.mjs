@@ -15,6 +15,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { basename, resolve, dirname, join } from "node:path";
+import { FONT_STACK, themeCss } from "./design-tokens.mjs";
 
 /* =========================================================================
  * 1. CLI 파싱
@@ -259,36 +260,29 @@ const ICONS_JSON = JSON.stringify(ICONS);
 
 /* ---- CSS (info-hub globals.css 다이어그램 관련 토큰/키프레임 + shadcn 토큰 축약) ---- */
 const CSS = String.raw`
+${themeCss({ bg: "--background", fg: "--foreground", card: "--card", muted: "--muted", "muted-fg": "--muted-foreground", border: "--border", ring: "--ring", accent: "--diagram-flow" }, { light: ":root", dark: ".dark" })}
 :root {
-  --background:#ffffff; --foreground:#0a0a0a;
-  --card:#ffffff; --card-foreground:#0a0a0a;
-  --muted:#f4f4f5; --muted-foreground:#71717a;
-  --border:#e4e4e7; --ring:#a1a1aa;
+  --card-foreground:var(--foreground);
   --cat-user:#64748b; --cat-frontend:#0ea5e9; --cat-backend:#8b5cf6;
   --cat-compute:#f59e0b; --cat-data:#10b981; --cat-data-aux:#14b8a6;
   --cat-edge:#f43f5e; --cat-external:#71717a; --cat-claude:#a855f7;
-  --cat-neutral:#6b7280; --diagram-flow:#4f46e5;
+  --cat-neutral:#6b7280;
   --color-background:var(--background); --color-foreground:var(--foreground);
   --color-card:var(--card); --color-card-foreground:var(--card-foreground);
   --color-muted:var(--muted); --color-muted-foreground:var(--muted-foreground);
   --color-border:var(--border);
 }
 .dark {
-  --background:#0a0a0a; --foreground:#fafafa;
-  --card:#171717; --card-foreground:#fafafa;
-  --muted:#262626; --muted-foreground:#a1a1aa;
-  --border:#2a2a2a; --ring:#52525b;
   --cat-user:#94a3b8; --cat-frontend:#38bdf8; --cat-backend:#a78bfa;
   --cat-compute:#fbbf24; --cat-data:#34d399; --cat-data-aux:#2dd4bf;
   --cat-edge:#fb7185; --cat-external:#a1a1aa; --cat-claude:#c084fc;
-  --cat-neutral:#9ca3af; --diagram-flow:#818cf8;
+  --cat-neutral:#9ca3af;
 }
 
 * { box-sizing:border-box; }
 html, body { margin:0; height:100%; }
 body {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-family: ${FONT_STACK};
   background:var(--background); color:var(--foreground);
   -webkit-font-smoothing:antialiased;
 }

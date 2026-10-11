@@ -6,7 +6,7 @@
  */
 import { diagram } from "../src/dsl/index.ts";
 
-export default diagram("eks-cluster", { title: "Production EKS Cluster" }, (d) => {
+export default diagram("eks-cluster", { title: "운영 EKS 클러스터" }, (d) => {
   const devops = d.actor("devops", { icon: "users", label: "DevOps / Platform Engineers", side: "left" });
   const users = d.actor("users", { icon: "res.users", label: "Users", side: "left" });
   const terraform = d.node("terraform", { icon: "res.source-code", label: "Terraform" });

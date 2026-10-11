@@ -9,7 +9,10 @@
  *
  * Overlap avoidance: a few candidate positions are probed along the polyline
  * (and on both sides of the segment) and the first label box that clears
- * every scene node rect wins; if none clears, the base position is kept.
+ * every scene node rect, every placed label AND every FOREIGN edge segment
+ * wins (a line drawn through a label reads as strike-through — measured by
+ * the label-occlusion gate in src/quality/metrics.ts); if none clears, the
+ * candidate with the fewest hits is kept.
  */
 import { measure } from "../text/metrics.ts";
 import type { SceneEdge, SceneLabel } from "../layout/scene.ts";
@@ -19,7 +22,16 @@ import { rectsOverlap } from "../model/geometry.ts";
 import type { BundlePlan, Bundle } from "./bundle.ts";
 
 export const EDGE_LABEL_FONT_SIZE = 11;
-const EDGE_LABEL_COLOR = "#545B64";
+/**
+ * Label text color. Unset = the theme edge color (readable in light and dark).
+ * Branch answers read at a glance: yes = green, no = red.
+ */
+function labelColor(text: string): string | undefined {
+  const t = text.trim().toLowerCase();
+  if (/^(예|네|yes|y|true|참|성공)$/.test(t)) return "#059669";
+  if (/^(아니오|아니요|no|n|false|거짓|실패)$/.test(t)) return "#e11d48";
+  return undefined;
+}
 /** gap between the polyline and the label box */
 const LABEL_GAP = 6;
 /** t offsets probed (in order) around the base placement */
@@ -89,7 +101,7 @@ function labelAt(text: string, at: AnchorInfo, flip: boolean, gapMul = 1): Label
         fontSize: EDGE_LABEL_FONT_SIZE,
         weight: "regular",
         align: "middle",
-        color: EDGE_LABEL_COLOR,
+        color: labelColor(text),
       },
       box: { x: at.point.x - m.width / 2, y: baseline - m.ascent, width: m.width, height: h },
     };
@@ -104,14 +116,34 @@ function labelAt(text: string, at: AnchorInfo, flip: boolean, gapMul = 1): Label
       fontSize: EDGE_LABEL_FONT_SIZE,
       weight: "regular",
       align: "start",
-      color: EDGE_LABEL_COLOR,
+      color: labelColor(text),
     },
     box: { x, y: baseline - m.ascent, width: m.width, height: h },
   };
 }
 
-function clears(box: Rect, obstacles: readonly Rect[]): boolean {
-  return !obstacles.some((r) => rectsOverlap(box, r, 1));
+/**
+ * Obstacles in two weights: HARD = node rects, group/overlay titles, placed
+ * labels (overlap = invariant violation); SOFT = edge runs (overlap reads as
+ * strike-through but is not a collision). Fallback scoring keeps any soft
+ * overlap cheaper than a single hard one.
+ */
+export interface LabelObstacles {
+  hard: readonly Rect[];
+  soft: readonly Rect[];
+}
+
+const HARD_WEIGHT = 1000;
+
+function hitScore(box: Rect, obs: LabelObstacles): number {
+  let n = 0;
+  for (const r of obs.hard) if (rectsOverlap(box, r, 1)) n += HARD_WEIGHT;
+  for (const r of obs.soft) if (rectsOverlap(box, r, 1)) n += 1;
+  return n;
+}
+
+function clears(box: Rect, obstacles: LabelObstacles): boolean {
+  return hitScore(box, obstacles) === 0;
 }
 
 /**
@@ -119,7 +151,7 @@ function clears(box: Rect, obstacles: readonly Rect[]): boolean {
  * If nothing clears, take the candidate overlapping the FEWEST obstacles —
  * never the blind base position (dense flow graphs defeat the ring search).
  */
-function placeAlong(text: string, points: Point[], baseT: number, obstacles: readonly Rect[]): LabelBox {
+function placeAlong(text: string, points: Point[], baseT: number, obstacles: LabelObstacles): LabelBox {
   let best: LabelBox | undefined;
   let bestHits = Infinity;
   for (const gapMul of [1, 2.4, 4.2]) {
@@ -127,7 +159,7 @@ function placeAlong(text: string, points: Point[], baseT: number, obstacles: rea
       const t = Math.min(Math.max(baseT + dt, 0.03), 0.97);
       for (const flip of [false, true]) {
         const cand = labelAt(text, pointAt(points, t), flip, gapMul);
-        const hits = obstacles.reduce((n, r) => n + (rectsOverlap(cand.box, r, 1) ? 1 : 0), 0);
+        const hits = hitScore(cand.box, obstacles);
         if (hits === 0) return cand;
         if (hits < bestHits) {
           bestHits = hits;
@@ -139,7 +171,7 @@ function placeAlong(text: string, points: Point[], baseT: number, obstacles: rea
   return best!;
 }
 
-function resolveT(placement: Edge["labelPlacement"], bundle: Bundle | undefined): number {
+function resolveT(placement: Edge["labelPlacement"], bundle: Bundle | undefined, points: Point[]): number {
   if (typeof placement === "number") return Math.min(Math.max(placement, 0), 1);
   switch (placement) {
     case "source": return 0.15;
@@ -149,12 +181,43 @@ function resolveT(placement: Edge["labelPlacement"], bundle: Bundle | undefined)
       // bundled default: the edge's DISTINCT end (spec: source for fan-in;
       // fan-out is symmetric), so per-edge labels avoid the shared trunk
       if (bundle) return bundle.end === "target" ? 0.15 : 0.85;
-      return 0.5;
+      return longestRunT(points);
   }
 }
 
+/** t of the midpoint of the longest run — the polyline midpoint can land on a tiny jog */
+function longestRunT(points: Point[]): number {
+  const total = polylineLength(points);
+  if (total === 0) return 0.5;
+  let acc = 0;
+  let best = { len: -1, t: 0.5 };
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1]!;
+    const b = points[i]!;
+    const len = Math.abs(b.x - a.x) + Math.abs(b.y - a.y);
+    if (len > best.len) best = { len, t: (acc + len / 2) / total };
+    acc += len;
+  }
+  return best.t;
+}
+
+type Seg = [Point, Point];
+
+/** two orthogonal segments lying on the same line with overlapping extent (a shared run) */
+export function collinearOverlap(p: Seg, q: Seg): boolean {
+  const ph = Math.abs(p[0].y - p[1].y) < 0.5;
+  const qh = Math.abs(q[0].y - q[1].y) < 0.5;
+  if (ph !== qh) return false;
+  if (ph) {
+    if (Math.abs(p[0].y - q[0].y) > 0.5) return false;
+    return Math.min(Math.max(p[0].x, p[1].x), Math.max(q[0].x, q[1].x)) - Math.max(Math.min(p[0].x, p[1].x), Math.min(q[0].x, q[1].x)) > 1;
+  }
+  if (Math.abs(p[0].x - q[0].x) > 0.5) return false;
+  return Math.min(Math.max(p[0].y, p[1].y), Math.max(q[0].y, q[1].y)) - Math.max(Math.min(p[0].y, p[1].y), Math.min(q[0].y, q[1].y)) > 1;
+}
+
 /** Trunk midpoint label for a collapsed bundle (trunk = segment at the shared end). */
-function placeOnTrunk(bundle: Bundle, points: Point[], obstacles: readonly Rect[]): LabelBox {
+function placeOnTrunk(bundle: Bundle, points: Point[], obstacles: LabelObstacles): LabelBox {
   const mid: Point = {
     x: (bundle.junction.x + bundle.attach.x) / 2,
     y: (bundle.junction.y + bundle.attach.y) / 2,
@@ -183,7 +246,31 @@ export function placeEdgeLabels(opts: {
   // labels already placed become obstacles for the ones that follow, so edge
   // labels never overlap each other (placement order = edge input order)
   const placed: Rect[] = [];
-  const all = () => [...obstacles, ...placed];
+  // every routed segment as a thin rect. A label must clear every line —
+  // including its OWN edge's other segments (a label parked on a jog would sit
+  // on the next run: strike-through) — except runs it SHARES with its own edge
+  // (fan-bundle trunks). Labels never touch their anchor run: labelAt offsets
+  // the box by LABEL_GAP.
+  const segs: { edgeId: string; seg: Seg; rect: Rect }[] = [];
+  for (const [id, e] of routed) {
+    for (let i = 1; i < e.points.length; i++) {
+      const a = e.points[i - 1]!;
+      const b = e.points[i]!;
+      segs.push({
+        edgeId: id,
+        seg: [a, b],
+        rect: { x: Math.min(a.x, b.x) - 1, y: Math.min(a.y, b.y) - 1, width: Math.abs(b.x - a.x) + 2, height: Math.abs(b.y - a.y) + 2 },
+      });
+    }
+  }
+  const lineObstacles = (ids: ReadonlySet<string>): Rect[] => {
+    const own = segs.filter((s) => ids.has(s.edgeId)).map((s) => s.seg);
+    return segs.filter((s) => ids.has(s.edgeId) || !own.some((o) => collinearOverlap(o, s.seg))).map((s) => s.rect);
+  };
+  const all = (ids: ReadonlySet<string> = new Set()): LabelObstacles => ({
+    hard: [...obstacles, ...placed],
+    soft: lineObstacles(ids),
+  });
 
   // collapsed-bundle labels: one label on the trunk of the first member
   const suppressed = new Set<string>();
@@ -193,7 +280,7 @@ export function placeEdgeLabels(opts: {
     const carrierId = bundle.edgeIds.find((id) => routed.has(id));
     if (carrierId === undefined) continue;
     const carrier = routed.get(carrierId)!;
-    const lb = placeOnTrunk(bundle, carrier.points, all());
+    const lb = placeOnTrunk(bundle, carrier.points, all(new Set(bundle.edgeIds)));
     carrier.label = lb.label;
     placed.push(lb.box);
   }
@@ -202,8 +289,17 @@ export function placeEdgeLabels(opts: {
     if (edge.label === undefined || suppressed.has(edge.id)) continue;
     const sceneEdge = routed.get(edge.id);
     if (!sceneEdge || sceneEdge.points.length < 2) continue;
-    const t = resolveT(edge.labelPlacement, plan.byEdge.get(edge.id));
-    const lb = placeAlong(edge.label, sceneEdge.points, t, all());
+    if (edge.from === edge.to && sceneEdge.points.length === 5) {
+      // self-loop: centred ABOVE the loop's top run, never on its own verticals
+      const [, , a, b] = sceneEdge.points as [Point, Point, Point, Point, Point];
+      const lb = labelAt(edge.label, { point: { x: (a.x + b.x) / 2, y: a.y }, horizontal: true }, false);
+      sceneEdge.label = lb.label;
+      placed.push(lb.box);
+      continue;
+    }
+    const bundle = plan.byEdge.get(edge.id);
+    const t = resolveT(edge.labelPlacement, bundle, sceneEdge.points);
+    const lb = placeAlong(edge.label, sceneEdge.points, t, all(new Set([edge.id])));
     sceneEdge.label = lb.label;
     placed.push(lb.box);
   }

@@ -1,9 +1,9 @@
 {
   "specVersion": 1,
-  "title": "커머스 플랫폼 인프라 (대규모·균형 그리드)",
+  "title": "커머스 플랫폼 인프라",
   "kind": "infra",
   "section": "인프라",
-  "description": "클라이언트 → 엣지 → 서비스 → 데이터로 흐르는 14노드 대규모 구성. 5열 그리드 + 4개 세로 밴드 그룹으로 lane을 고정해 박스가 겹치지 않고 공간을 고르게 쓴다.",
+  "description": "웹과 모바일 요청이 CDN과 게이트웨이를 지나 BFF에 모이고, BFF가 주문 서비스와 상품 서비스를 불러 응답을 만든다. 서비스는 각자의 DB와 공용 캐시를 쓰고, 결제는 PG사에 맡긴다.",
   "layout": { "direction": "RIGHT" },
   "groups": [
     { "id": "clients", "label": "Clients", "kind": "zone" },
@@ -16,10 +16,10 @@
     { "id": "mobile", "label": "모바일", "category": "mobile", "tech": "RN", "parentId": "clients", "lane": 0, "order": 1 },
 
     { "id": "cdn", "label": "CDN", "category": "cdn", "tech": "CloudFront", "parentId": "edge", "lane": 1, "order": 0 },
-    { "id": "gw", "label": "게이트웨이", "category": "gateway", "tech": "ALB+APIGW", "parentId": "edge", "lane": 1, "order": 1, "description": "라우팅·레이트리밋·TLS 종단." },
+    { "id": "gw", "label": "게이트웨이", "category": "gateway", "tech": "ALB+APIGW", "parentId": "edge", "lane": 1, "order": 1, "description": "요청을 서비스로 보내고 호출량 제한과 TLS 종료를 맡는다." },
     { "id": "auth", "label": "인증", "category": "auth", "tech": "Cognito", "parentId": "edge", "lane": 1, "order": 2 },
 
-    { "id": "bff", "label": "BFF", "category": "backend", "tech": "NestJS", "parentId": "svc", "lane": 2, "order": 0, "description": "프런트 전용 집계 API." },
+    { "id": "bff", "label": "BFF", "category": "backend", "tech": "NestJS", "parentId": "svc", "lane": 2, "order": 0, "description": "프런트엔드를 위해 여러 서비스의 응답을 모아 주는 API다." },
     { "id": "order", "label": "주문 서비스", "category": "service", "tech": "NestJS", "parentId": "svc", "lane": 2, "order": 1 },
     { "id": "catalog", "label": "상품 서비스", "category": "service", "tech": "Go", "parentId": "svc", "lane": 2, "order": 2 },
     { "id": "payment", "label": "결제 서비스", "category": "service", "tech": "Go", "parentId": "svc", "lane": 2, "order": 3 },
@@ -69,7 +69,7 @@
         { "edge": "e-bff-order", "text": "BFF가 주문 서비스를 호출한다." },
         { "edge": "e-order-db", "text": "주문을 DB에 저장한다." },
         { "edge": "e-order-payment", "text": "결제 서비스에 결제를 요청한다." },
-        { "edge": "e-payment-pg", "text": "PG에 승인을 요청한다." }
+        { "edge": "e-payment-pg", "text": "결제 서비스가 PG사에 승인을 요청한다." }
       ]
     }
   ]

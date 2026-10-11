@@ -4,3 +4,9 @@ node_modules/
 
 # 결과물 테스트용 개인 작업 공간 (플러그인에 영향 없음)
 playground/
+
+# plugin eval 결과
+zzon-doc/evals/results/
+
+# Playwright MCP 스크린샷 임시 폴더
+.playwright-mcp/

@@ -7,7 +7,7 @@
  */
 import { diagram } from "../src/dsl/index.ts";
 
-export default diagram("multi-account-lz", { title: "AWS Multi-Account Landing Zone" }, (d) => {
+export default diagram("multi-account-lz", { title: "AWS 멀티 계정 랜딩 존" }, (d) => {
   const internet = d.actor("internet", { icon: "internet", label: "Internet", side: "right" });
   const onprem = d.actor("on-premises", {
     icon: "on-premises",

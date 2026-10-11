@@ -1,8 +1,8 @@
 {
   "specVersion": 1,
-  "title": "링크 서비스 ERD (다수 테이블·FK)",
+  "title": "링크 서비스 ERD",
   "kind": "erd",
-  "description": "사용자·링크·태그·컬렉션·댓글이 FK로 얽힌 큰 스키마 예시.",
+  "description": "사용자, 링크, 태그, 컬렉션, 댓글 테이블이 서로 어떻게 이어지는지 보여 준다.",
   "layout": {
     "direction": "RIGHT"
   },

@@ -1,0 +1,570 @@
+{
+ "id": "flowchart-sample",
+ "title": "환불 판단 절차",
+ "docKind": "flowchart",
+ "width": 599,
+ "height": 900.43,
+ "groups": [],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "start",
+   "to": "receive",
+   "points": [
+    {
+     "x": 246,
+     "y": 84
+    },
+    {
+     "x": 246,
+     "y": 153
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "flow"
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "receive",
+   "to": "within",
+   "points": [
+    {
+     "x": 246,
+     "y": 205
+    },
+    {
+     "x": 246,
+     "y": 274
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "flow"
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "within",
+   "to": "shipped",
+   "points": [
+    {
+     "x": 246,
+     "y": 326
+    },
+    {
+     "x": 246,
+     "y": 362.99
+    },
+    {
+     "x": 128,
+     "y": 362.99
+    },
+    {
+     "x": 128,
+     "y": 399.99
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "flow",
+   "label": {
+    "text": "예",
+    "x": 187,
+    "y": 354.34,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle",
+    "color": "#059669"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "within",
+   "to": "reject",
+   "points": [
+    {
+     "x": 342,
+     "y": 300
+    },
+    {
+     "x": 364,
+     "y": 300
+    },
+    {
+     "x": 364,
+     "y": 399.99
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "flow",
+   "label": {
+    "text": "아니오",
+    "x": 370,
+    "y": 353.91,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#e11d48"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "shipped",
+   "to": "pickup",
+   "points": [
+    {
+     "x": 224,
+     "y": 425.99
+    },
+    {
+     "x": 246,
+     "y": 425.99
+    },
+    {
+     "x": 246,
+     "y": 568.72
+    },
+    {
+     "x": 375,
+     "y": 568.72
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "flow",
+   "label": {
+    "text": "예",
+    "x": 252,
+    "y": 501.27,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#059669"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e5",
+   "from": "shipped",
+   "to": "approve",
+   "points": [
+    {
+     "x": 128,
+     "y": 451.99
+    },
+    {
+     "x": 128,
+     "y": 685.46
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "flow",
+   "label": {
+    "text": "아니오",
+    "x": 134,
+    "y": 572.64,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start",
+    "color": "#e11d48"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e6",
+   "from": "pickup",
+   "to": "approve",
+   "points": [
+    {
+     "x": 471,
+     "y": 594.72
+    },
+    {
+     "x": 471,
+     "y": 640.09
+    },
+    {
+     "x": 128,
+     "y": 640.09
+    },
+    {
+     "x": 128,
+     "y": 685.46
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "flow",
+   "label": {
+    "text": "회수 완료",
+    "x": 299.5,
+    "y": 631.44,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e7",
+   "from": "approve",
+   "to": "done",
+   "points": [
+    {
+     "x": 128,
+     "y": 737.46
+    },
+    {
+     "x": 128,
+     "y": 776.95
+    },
+    {
+     "x": 160,
+     "y": 776.95
+    },
+    {
+     "x": 160,
+     "y": 816.43
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "flow"
+  },
+  {
+   "kind": "edge",
+   "id": "e8",
+   "from": "reject",
+   "to": "done",
+   "points": [
+    {
+     "x": 364,
+     "y": 451.99
+    },
+    {
+     "x": 364,
+     "y": 776.95
+    },
+    {
+     "x": 160,
+     "y": 776.95
+    },
+    {
+     "x": 160,
+     "y": 816.43
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "flow"
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "approve",
+   "rect": {
+    "x": 32,
+    "y": 685.46,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "process",
+   "category": "n-process-done",
+   "tech": "PG 부분/전체 취소",
+   "label": {
+    "text": "환불 승인",
+    "x": 84,
+    "y": 709.463768115942,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "done",
+   "rect": {
+    "x": 64,
+    "y": 816.43,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "terminal",
+   "category": "n-end",
+   "label": {
+    "text": "종료",
+    "x": 116,
+    "y": 840.4347826086956,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "pickup",
+   "rect": {
+    "x": 375,
+    "y": 542.72,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "process",
+   "category": "n-process",
+   "tech": "물류 API",
+   "label": {
+    "text": "회수 접수",
+    "x": 427,
+    "y": 566.7246376811595,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "receive",
+   "rect": {
+    "x": 150,
+    "y": 153,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "process",
+   "category": "n-process",
+   "tech": "주문·결제 조회",
+   "description": "주문 상태와 결제 일시를 읽는다.",
+   "label": {
+    "text": "요청 접수",
+    "x": 202,
+    "y": 177,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "reject",
+   "rect": {
+    "x": 268,
+    "y": 399.99,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "process",
+   "category": "n-process-fail",
+   "tech": "사유 메일",
+   "label": {
+    "text": "반려 안내",
+    "x": 320,
+    "y": 423.9855072463768,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "shipped",
+   "rect": {
+    "x": 32,
+    "y": 399.99,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "decision",
+   "category": "n-decision",
+   "label": {
+    "text": "이미 출고?",
+    "x": 84,
+    "y": 423.9855072463768,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "start",
+   "rect": {
+    "x": 150,
+    "y": 32,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "terminal",
+   "category": "n-start",
+   "label": {
+    "text": "환불 요청",
+    "x": 202,
+    "y": 56,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "within",
+   "rect": {
+    "x": 150,
+    "y": 274,
+    "width": 192,
+    "height": 52
+   },
+   "role": "card",
+   "shape": "decision",
+   "category": "n-decision",
+   "label": {
+    "text": "결제 후 7일 이내?",
+    "x": 202,
+    "y": 298,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "start"
+   }
+  }
+ ],
+ "markers": [],
+ "flows": [
+  {
+   "id": "fast",
+   "title": "출고 전 환불",
+   "steps": [
+    {
+     "edgeId": "e0",
+     "text": "고객이 환불을 요청한다",
+     "badge": {
+      "x": 246,
+      "y": 118.5
+     },
+     "n": 1
+    },
+    {
+     "edgeId": "e1",
+     "text": "주문과 결제 정보를 조회한다",
+     "badge": {
+      "x": 246,
+      "y": 239.5
+     },
+     "n": 2
+    },
+    {
+     "edgeId": "e2",
+     "text": "결제 후 7일 이내다",
+     "badge": {
+      "x": 187,
+      "y": 362.99
+     },
+     "n": 3
+    },
+    {
+     "edgeId": "e5",
+     "text": "아직 출고 전이다",
+     "badge": {
+      "x": 128,
+      "y": 568.73
+     },
+     "n": 4
+    },
+    {
+     "edgeId": "e7",
+     "text": "PG 취소로 환불을 마친다",
+     "badge": {
+      "x": 143.99,
+      "y": 776.95
+     },
+     "n": 5
+    }
+   ]
+  }
+ ],
+ "icons": [
+  "x.lucide-circle-check",
+  "x.lucide-circle-x",
+  "x.lucide-cog",
+  "x.lucide-flag",
+  "x.lucide-play",
+  "x.lucide-split"
+ ],
+ "texts": [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "PG 부분/전체 취소",
+  "PG 취소로 환불을 마친다",
+  "…«»+",
+  "결제 후 7일 이내?",
+  "결제 후 7일 이내다",
+  "고객이 환불을 요청한다",
+  "끝",
+  "물류 API",
+  "반려 안내",
+  "사유 메일",
+  "시작",
+  "아니오",
+  "아직 출고 전이다",
+  "예",
+  "예외 처리",
+  "완료 처리",
+  "요청 접수",
+  "이미 출고?",
+  "종료",
+  "주문 상태와 결제 일시를 읽는다.",
+  "주문·결제 조회",
+  "주문과 결제 정보를 조회한다",
+  "처리",
+  "출고 전 환불",
+  "판단",
+  "환불 승인",
+  "환불 요청",
+  "회수 완료",
+  "회수 접수"
+ ]
+}

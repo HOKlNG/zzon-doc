@@ -49,11 +49,13 @@ describe("convertDiagramSpec — 레퍼런스 샘플 전수", () => {
       expect(nodeCount).toBe((spec.nodes ?? []).length);
 
       // 레이아웃 + 라우팅 + 불변식.
-      // 레거시 스펙엔 종횡비 의도가 없으므로 aspect는 극단 형상만 차단(±75%),
-      // 겹침·관통·라벨 규칙은 엄격 유지한다.
+      // 방향(layout.direction)+lane을 선언한 스펙은 그 열 구조가 의도라 넓을 수 있다 —
+      // 종횡비는 불변식이 아니라 등급 게이트(bun ia check)의 경고 몫이다. 미선언 스펙만
+      // 극단 형상을 차단(±75%)하고, 겹침·관통·라벨 규칙은 언제나 엄격 유지한다.
       const scene = await layoutDiagram(model);
       await routeEdges(scene, model.edges);
-      const violations = checkScene(scene, { aspectRatio: model.aspectRatio, aspectTolerance: 0.75 });
+      const violations = checkScene(scene, { aspectRatio: model.aspectRatio, aspectTolerance: 0.75 })
+        .filter((x) => !(model.direction && x.rule === "aspect"));
       expect(violations.map((x) => `${x.rule}: ${x.detail.slice(0, 80)}`)).toEqual([]);
     });
   }

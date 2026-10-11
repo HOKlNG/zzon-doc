@@ -59,13 +59,27 @@ export function validate(model: DiagramModel): ValidationResult {
       if (!iconExists(badge)) err(`unknown badge icon "${String(badge)}" on ${el.path}`, el.site);
     }
     if (el.type === "node") {
-      // mirror the renderer's precedence: table > category (card) > icon
-      if (el.table) {
-        // ERD table nodes are vocabulary-exempt
+      const drivers = (["table", "shape", "category", "icon"] as const).filter((k) => el[k] !== undefined);
+      if (drivers.length > 1) {
+        err(`${el.path}: one visual driver per node — got ${drivers.join(" + ")} (precedence table > shape > category > icon)`, el.site);
+      }
+      if (el.classSpec && el.shape !== "class") warn(`${el.path}: classSpec is only drawn for shape "class"`, el.site);
+      // mirror the renderer's precedence: table > shape > category (card) > icon
+      if (el.table || el.shape) {
+        // ERD tables and notation shapes are vocabulary-exempt
       } else if (el.category) {
         cardVocab.push({ path: el.path, site: el.site });
       } else if (el.icon !== undefined) {
         iconVocab.push({ path: el.path, site: el.site });
+      }
+    }
+    // hints that are declared in the DSL but have no layout effect must not
+    // fail silently — the author would believe they steered the layout
+    const h = el.hints;
+    if (h) {
+      const dead = (["rank", "minWidth", "minHeight", "onBorder"] as const).filter((k) => h[k] !== undefined);
+      if (dead.length) {
+        warn(`${el.path}: hints ${dead.join(", ")} have no layout effect — use hints.layer / hints.order (layered containers) or rails`, el.site);
       }
     }
     if (el.type === "group") visitGroup(el);
@@ -163,7 +177,14 @@ export function validate(model: DiagramModel): ValidationResult {
     const to = resolvePath(edge.to, `edge ${edge.id} to`, edge.site);
     if (from) edge.from = from;
     if (to) edge.to = to;
-    if (from && to && from === to) warn(`edge ${edge.id} is a self-loop`, edge.site);
+    // state machines and flowcharts loop on purpose ("stay", "retry"); elsewhere a
+    // self-loop is usually a typo
+    if (from && to && from === to && model.docKind !== "state" && model.docKind !== "flowchart") {
+      warn(`edge ${edge.id} is a self-loop`, edge.site);
+    }
+    if (edge.hints?.waypoints?.length) {
+      warn(`edge ${edge.id}: hints.waypoints has no routing effect — use sourceSide/targetSide`, edge.site);
+    }
   }
 
   // ---- overlays

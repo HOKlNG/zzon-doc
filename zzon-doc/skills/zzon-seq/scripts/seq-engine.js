@@ -10,7 +10,9 @@
  */
 (() => {
   // ── measure — canvas measureText 기반 라벨 측정·말줄임·줄바꿈 ──
-  var FONT_STACK = `-apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif`;
+  // 글꼴은 render-seq가 넣는 공용 토큰(--z-font)을 따른다 — 모든 zzon 화면이 같은 글꼴
+  var FONT_STACK = (getComputedStyle(document.documentElement).getPropertyValue("--z-font") || "").trim() ||
+    'Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic","Segoe UI",Roboto,sans-serif';
   var FONTS = {
     msgLabel: `500 12.5px ${FONT_STACK}`,
     note: `400 12px ${FONT_STACK}`,
@@ -771,14 +773,14 @@
       const name = text(x + 47, y + 25, pa.actor.name, "");
       name.setAttribute("style", `font: ${FONTS.actorName}; fill: ${tokens["--text-1"] ?? "#111"}`);
       const badge = text(x + 47, y + 42, ACTOR_TYPE_LABEL[pa.actor.type].toUpperCase(), "");
-      badge.setAttribute("style", `font: 600 9px ${"-apple-system, system-ui, sans-serif"}; letter-spacing: .06em; fill: ${main}`);
+      badge.setAttribute("style", `font: 600 9px ${FONT_STACK}; letter-spacing: .06em; fill: ${main}`);
       cg.append(name, badge);
       g.append(cg);
     }
     return g;
   }
   var SVG_RULES = `
-.diagram { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+.diagram { font-family: ${FONT_STACK}; }
 .lifeline { stroke: var(--lifeline); stroke-width: 1; }
 .lifeline-hit { stroke: transparent; stroke-width: 14; cursor: pointer; }
 .lifeline-g.sel .lifeline { stroke: var(--hl); stroke-width: 1.5; }
@@ -816,7 +818,7 @@
 .note-text { font-size: 12px; fill: var(--note-text); }
 .frag-fill { fill: var(--frag); opacity: .04; }
 .frag-border { fill: none; stroke: var(--frag-border-c); stroke-width: 1; }
-.frag-alt { --frag: var(--cat-edge); }
+.frag-alt { --frag: var(--hl); }
 .frag-loop { --frag: var(--cat-client); }
 .frag-opt { --frag: var(--text-2); }
 .frag-par { --frag: var(--cat-app); }
@@ -882,27 +884,28 @@
 
   // ── embed — 뷰어 셸(툴바·패널·둘러보기)·zzon 셸 프로토콜·내보내기 ──
   var EMBED_CSS = `
+/* 색은 공용 토큰(--z-*, design-tokens.mjs)을 따르고, 범주 색은 구조 다이어그램 엔진과 같다 */
 :root[data-theme="light"] {
-  --canvas: #ffffff; --surface: #ffffff; --surface-2: #f4f4f5;
-  --border: #e4e4e7; --border-2: #ececee; --lifeline: #d4d4d8;
-  --text-1: #09090b; --text-2: #71717a;
+  --canvas: var(--z-bg, #ffffff); --surface: var(--z-card, #ffffff); --surface-2: var(--z-muted, #f4f4f5);
+  --border: var(--z-border, #e4e4e7); --border-2: var(--z-border, #e4e4e7); --lifeline: #d4d4d8;
+  --text-1: var(--z-fg, #09090b); --text-2: var(--z-muted-fg, #71717a);
   --arrow: #52525b; --arrow-reply: #8e8e96;
-  --hl: #4F46E5; --hl-wash: #EEF2FF;
+  --hl: var(--z-accent, #4f46e5); --hl-wash: var(--z-accent-soft, #eef2ff);
   --note-fill: #FFFBEB; --note-border: #FDE68A; --note-text: #78350F;
-  --cat-client: #2a78d6; --cat-app: #1baf7a; --cat-data: #eda100;
-  --cat-messaging: #008300; --cat-edge: #4a3aa7;
+  --cat-client: #0ea5e9; --cat-app: #8b5cf6; --cat-data: #10b981;
+  --cat-messaging: #14b8a6; --cat-edge: #f43f5e;
   --badge-mix: black; --badge-pct: 68%;
   --shadow-card: 0 1px 2px rgba(0,0,0,.05);
 }
 :root[data-theme="dark"] {
-  --canvas: #09090b; --surface: #0f0f11; --surface-2: #1c1c1f;
-  --border: #27272a; --border-2: #202023; --lifeline: #33363c;
-  --text-1: #fafafa; --text-2: #a1a1aa;
-  --arrow: #a1a7b0; --arrow-reply: #6b7078;
-  --hl: #7B87E0; --hl-wash: #2A2E4A;
+  --canvas: var(--z-bg, #09090b); --surface: var(--z-card, #141417); --surface-2: var(--z-muted, #1f1f23);
+  --border: var(--z-border, #2a2a2e); --border-2: var(--z-border, #2a2a2e); --lifeline: #3f3f46;
+  --text-1: var(--z-fg, #fafafa); --text-2: var(--z-muted-fg, #a1a1aa);
+  --arrow: #a1a1aa; --arrow-reply: #71717a;
+  --hl: var(--z-accent, #6366f1); --hl-wash: var(--z-accent-soft, #23244a);
   --note-fill: #FBBF2414; --note-border: #FBBF243D; --note-text: #FDE68A;
-  --cat-client: #3987e5; --cat-app: #199e70; --cat-data: #c98500;
-  --cat-messaging: #008300; --cat-edge: #9085e9;
+  --cat-client: #38bdf8; --cat-app: #a78bfa; --cat-data: #34d399;
+  --cat-messaging: #2dd4bf; --cat-edge: #fb7185;
   --badge-mix: white; --badge-pct: 78%;
   --shadow-card: none;
 }
@@ -913,42 +916,59 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; }
 body {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", Roboto, sans-serif;
+  font-family: ${FONT_STACK};
   color: var(--text-1); background: var(--canvas); font-size: 13px; line-height: 1.45;
   overflow: hidden; -webkit-font-smoothing: antialiased;
 }
 button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
-code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; }
+code { font-family: var(--z-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace); }
 
 #seq-app { display: flex; flex-direction: column; height: 100vh; }
 
 /* ── 툴바 (컴팩트 — iframe 440px 높이 고려) ── */
 #seq-toolbar {
-  flex: none; height: 44px; display: flex; align-items: center; gap: 8px;
-  padding: 0 10px; background: var(--surface); border-bottom: 1px solid var(--border-2);
+  flex: none; min-height: 48px; display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px; background: var(--surface); border-bottom: 1px solid var(--border-2);
 }
-#seq-title { min-width: 0; margin-right: auto; }
-#seq-title h1 { font-size: 13px; font-weight: 650; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#seq-title p { font-size: 10.5px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.seg { display: flex; background: var(--surface-2); border-radius: 7px; padding: 2px; flex: none; }
-.seg button { padding: 2.5px 9px; font-size: 11.5px; border-radius: 5px; color: var(--text-2); }
-.seg button.on { background: var(--surface); color: var(--text-1); font-weight: 600; box-shadow: var(--shadow-card); }
+#seq-title { min-width: 0; margin-right: auto; display: flex; align-items: center; gap: 8px; }
+#seq-title .tt { min-width: 0; }
+#seq-title h1 { font-size: 13px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#seq-title p { font-size: 11px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kind-chip {
+  display: inline-flex; align-items: center; gap: 4px; flex: none; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface-2); padding: 1px 7px; font-size: 10px; font-weight: 600; color: var(--text-2);
+}
+.kind-chip svg { width: 11px; height: 11px; }
+.seg { display: flex; border: 1px solid var(--border); background: var(--surface-2); border-radius: 6px; padding: 2px; flex: none; }
+.seg button { height: 24px; padding: 0 10px; font-size: 12px; font-weight: 500; border-radius: 4px; color: var(--text-2); }
+.seg button.on { background: var(--surface); color: var(--text-1); font-weight: 600; box-shadow: var(--z-shadow, 0 1px 2px rgba(0,0,0,.05)); }
 .tbtn {
-  height: 26px; min-width: 26px; padding: 0 6px; border-radius: 6px; display: inline-flex;
-  align-items: center; justify-content: center; gap: 4px; color: var(--text-2); flex: none;
+  height: 30px; min-width: 30px; padding: 0 8px; border-radius: 6px; display: inline-flex;
+  align-items: center; justify-content: center; gap: 4px; color: var(--text-1); flex: none;
+  border: 1px solid var(--border); background: var(--surface); box-shadow: var(--z-shadow, none);
   transition: background .12s, color .12s;
 }
-.tbtn:hover { background: var(--surface-2); color: var(--text-1); }
-.tbtn.txt { font-size: 10.5px; font-weight: 600; }
-.tbtn.on { color: var(--hl); background: var(--hl-wash); }
-#zoom-val { font-size: 10.5px; color: var(--text-2); min-width: 34px; text-align: center; font-variant-numeric: tabular-nums; flex: none; }
-.tb-sep { width: 1px; height: 16px; background: var(--border); flex: none; }
-@media (max-width: 640px) { #seq-title p, #zoom-val { display: none; } }
+.tbtn:hover { background: var(--surface-2); }
+.tbtn svg { width: 14px; height: 14px; }
+.tbtn.txt { font-size: 9.5px; font-weight: 700; letter-spacing: .02em; }
+.tbtn.on { color: var(--z-accent-fg, #fff); background: var(--hl); border-color: transparent; }
+#zoom-val { font-size: 11px; color: var(--text-2); min-width: 36px; text-align: center; font-variant-numeric: tabular-nums; flex: none; }
+.tb-sep { width: 1px; height: 18px; background: var(--border); flex: none; margin: 0 2px; }
+/* 휴대폰: 제목 한 줄, 컨트롤은 다음 줄로 내려간다 */
+@media (max-width: 640px) {
+  #seq-toolbar { flex-wrap: wrap; row-gap: 8px; padding: 8px 10px; }
+  #seq-title { flex: 1 0 100%; margin-right: 0; }
+  #seq-title p, #zoom-val, .tb-sep, #btn-export-svg, #btn-export-png { display: none; }
+}
+@media (pointer: coarse) {
+  .tbtn { height: 36px; min-width: 36px; }
+  .seg button { height: 30px; }
+}
 
 /* ── 캔버스 ── */
-#seq-stage { flex: 1; position: relative; min-height: 0; }
+#seq-stage { flex: 1; position: relative; min-height: 0; overflow: hidden; }
 #canvas { position: absolute; inset: 0; overflow: auto; transition: right .2s ease; }
-#seq-stage.drawer-open #canvas { right: min(320px, 88%); }
+#seq-stage.drawer-open #canvas { right: min(304px, 88%); }
 #diagram-w { position: relative; width: max-content; min-width: 100%; }
 .actor-layer {
   position: sticky; top: 0; z-index: 10;
@@ -991,13 +1011,19 @@ code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, mo
 
 /* ── 상세 패널 (오버레이) ── */
 #drawer {
-  position: absolute; top: 0; right: 0; bottom: 0; width: min(320px, 88%); z-index: 30;
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(304px, 88%); z-index: 30;
   background: var(--surface); border-left: 1px solid var(--border-2);
   display: flex; flex-direction: column;
   transform: translateX(102%); transition: transform .2s ease;
-  box-shadow: -10px 0 28px rgba(0,0,0,.12);
+  box-shadow: none;
 }
-#drawer.open { transform: translateX(0); }
+#drawer.open { transform: translateX(0); box-shadow: -10px 0 28px rgba(0,0,0,.12); }
+@media (max-width: 640px) {
+  #drawer { top: auto; left: 0; width: auto; height: min(52vh, 480px); border-left: 0; border-top: 1px solid var(--border);
+    border-radius: 12px 12px 0 0; box-shadow: none; transform: translateY(105%); }
+  #drawer.open { transform: none; box-shadow: 0 -10px 30px rgba(0,0,0,.14); }
+  #seq-stage.drawer-open #canvas { right: 0; bottom: min(52vh, 480px); }
+}
 @media (prefers-reduced-motion: reduce) { #drawer { transition: none; } }
 #drawer-head {
   flex: none; height: 40px; display: flex; align-items: center; justify-content: space-between;
@@ -1079,8 +1105,11 @@ code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, mo
   <div id="seq-app">
     <div id="seq-toolbar">
       <div id="seq-title">
-        <h1>${esc(spec.title)}</h1>
-        ${spec.subtitle ? `<p>${esc(spec.subtitle)}</p>` : ""}
+        <span class="kind-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>시퀀스</span>
+        <div class="tt">
+          <h1>${esc(spec.title)}</h1>
+          ${spec.subtitle ? `<p>${esc(spec.subtitle)}</p>` : ""}
+        </div>
       </div>
       <div class="seg" id="mode-seg">
         <button data-mode="full" class="on" title="모든 단계 표시">전체</button>
@@ -1115,13 +1144,15 @@ code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, mo
       </aside>
     </div>
   </div>`;
+    setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light", false); // 툴바가 생긴 뒤 테마 아이콘을 그린다
     bindToolbar();
     bindKeyboard();
     bindShellProtocol();
     renderFlow();
-    // 뷰포트보다 다이어그램이 넓으면 자동 fit-to-width — 임베드(작은 iframe)에서 처음부터 전체 폭이 보이게
+    // 뷰포트보다 다이어그램이 넓으면 자동 fit-to-width — 임베드(작은 iframe)에서 처음부터 전체 폭이 보이게.
+    // 휴대폰 폭에서는 글자를 읽을 수 있는 배율(0.6) 아래로 줄이지 않고 가로 스크롤로 넘긴다.
     const vw = $("#canvas").clientWidth;
-    if (vw > 0 && layout && layout.width > vw) setZoom(vw / layout.width);
+    if (vw > 0 && layout && layout.width > vw) setZoom(Math.max(vw / layout.width, vw <= 640 ? 0.6 : 0));
   }
   function renderFlow() {
     layout = layoutFlow(spec, state.mode);
@@ -1565,5 +1596,9 @@ code { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, mo
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   }
-  boot();
+  // 인라인 글꼴이 준비된 뒤에 잰다 — 아니면 대체 글꼴 폭으로 배치돼 글자가 넘친다
+  if (document.fonts && document.fonts.load) {
+    const faces = ["400 12px", "600 13px"].map((w) => document.fonts.load(w + " Pretendard"));
+    Promise.all(faces).catch(() => {}).then(boot);
+  } else boot();
 })();

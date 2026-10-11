@@ -8,7 +8,7 @@
 |---|---|---|
 | 마켓플레이스 | `zzon` | `.claude-plugin/marketplace.json` (레포 루트) |
 | 플러그인(우산) | `zzon-doc` | `zzon-doc/.claude-plugin/plugin.json` |
-| 스킬 1 | `zzon-doc` | → `/zzon-doc:zzon-doc` (플러그인 스킬은 `플러그인명:스킬명` 네임스페이스). 아키텍처 다이어그램 |
+| 스킬 1 | `zzon-doc` | → `/zzon-doc:zzon-doc` (플러그인 스킬은 `플러그인명:스킬명` 네임스페이스). **다이어그램 메인**(v0.9) — 선택 기준으로 뷰 13종·등급을 고르고, 시퀀스·Terraform은 형제 스킬 절차로 넘기며, 재진입 시 근거 대조로 갱신 |
 | 스킬 2 | `zzon-wiki` | → `/zzon-doc:zzon-wiki`. 프로젝트 문서 위키 (질문 기반 채움 + 다이어그램 임베드) |
 | 스킬 3 | `zzon-seq` | → `/zzon-doc:zzon-seq`. 시퀀스 다이어그램 (액터 간 시간축 상호작용, `kind:"sequence"`) |
 | 스킬 4 | `terra-form` | → `/zzon-doc:terra-form`. Terraform 클라우드 인프라 (*.tf → 엔진 DSL, AWS 공식 아이콘 838종) |
@@ -28,18 +28,29 @@ plugins-zzon-doc/
     ├── engine/                         # 내장 TS 다이어그램 엔진 (v0.8.1 통합 — 구조·데이터 다이어그램의 정본 렌더러)
     │   ├── CLAUDE.md / DESIGN.md       # 엔진 인수인계·설계 근거 — 레이아웃/라우팅 수정 전 필독 (§12 기각 대안 재제안 금지)
     │   ├── src/                        # TS DSL·ELK 자동배치·libavoid 직교 라우팅·렌더러·CLI (bun+TS)
-    │   ├── examples/*.ts               # DSL API 정본 7종 (serverless/eks/multi-account/multi-region/msa/erd/flow)
+    │   ├── examples/*.ts               # DSL API 정본 11종 (AWS 4 + msa/erd/flow + v0.9 표기 4: state/flowchart/screen-flow/domain-model)
+    │   ├── src/quality/metrics.ts      # 등급별 품질 게이트(교차·꺾임·라벨 가림·색 그룹·흐름 방향·예산) — `bun ia check`
+    │   ├── src/render/shapes.ts        # 표기 모양(상태·시작·종료·선택·처리·판단·터미널·화면·클래스·모듈)
+    │   ├── src/model/semantics.ts      # 표기 의미 검사(상태 도달성·판단 라벨·상속 순환)
     │   ├── tests/                      # 불변식 검사(invariants.ts) 등 — bun test
     │   └── package.json / bun.lock     # elkjs·libavoid-js·resvg 등 (node_modules는 gitignore, bun install 1회)
-    ├── skills/zzon-doc/                # 스킬 1 — 아키텍처 다이어그램
-    │   ├── SKILL.md                    # 범위 게이트 → 유형 판별·어휘 결정 → 엔진 DSL(.ts) 저작 → build-docs 렌더
+    ├── skills/zzon-doc/                # 스킬 1 — 다이어그램 메인 (v0.9)
+    │   ├── SKILL.md                    # 메인 허브: 분기(재진입 --status) → scan 신호 → 뷰·등급(rubric) → 위임(seq/terra-form)·views 저작 → bun ia check → build-docs → 보고(충실도 장부)
     │   ├── references/
-    │   │   ├── document-types.md       # 유형 카탈로그 4계열(개요/구조·인프라/흐름/데이터) + 추상화 사다리
+    │   │   ├── selection-rubric.md     # ★ 선택 기준 정본 — 뷰(관심사 점수)·등급(T1/T2/T3)·축소 사다리·게이트 수치·근거 추적
+    │   │   ├── views/*.md              # 뷰별 작도 문법 11종(엔진 DSL 용어) + README(공통 계약)
+    │   │   ├── writing-style.md        # 독자용 문장 규칙 정본 — 필드명·내부 코드·번호·기호 나열 금지 (스킬 4종이 참조)
+    │   │   ├── document-types.md       # (이전됨 안내) → selection-rubric + views
     │   │   ├── diagram-spec.md         # (레거시) DiagramSpec 스펙 + 레이아웃 가이드
     │   │   ├── viewer-frame-contract.md# 뷰어 프레임 계약 v1 (payload/adapter/셸 프로토콜/glyph/드릴다운)
     │   │   └── sample-*.json           # (레거시) DiagramSpec 모범 답안 14종 — 변환 내장으로 여전히 렌더됨
     │   └── scripts/
-    │       ├── build-docs.mjs          # 여러 스펙 → 통합 문서 index.html (기본: 엔진 CLI(bun), sequence→render-seq, 폴백: legacy / wiki.json 있으면 index 양보)
+    │       ├── build-docs.mjs          # 여러 스펙 → 통합 문서 index.html (기본: 엔진 CLI(bun), sequence→render-seq, 폴백: legacy / wiki.json 있으면 index 양보) · --status(근거 대조) · --stamp · 게이트 수집
+    │       ├── scan.mjs                # 코드 사실 스캐너(선택 기준 입력) — IaC·배포 단위·테이블·라우트·큐·상태·화면·에이전트·모듈
+    │       ├── scan-deps.mjs           # 모듈 의존성 기계 추출 → DSL 생성(JS/TS·Python·Go·JVM, 순환·공용 모듈·추이 간선)
+    │       ├── sources-lock.mjs        # diagrams.lock.json — 장별 근거 파일 해시·git 커밋·scan 요약(갱신 판정)
+    │       ├── engine-cli.mjs          # bun 해석(Windows npm 셤 포함) + 엔진 호출 타임아웃 + fontFaceCss(셸용 Pretendard 서브셋)
+    │       ├── design-tokens.mjs       # ★ 산출물 전체 디자인 토큰 정본 — 색(zinc)·글꼴·모서리·컨트롤 높이·폭 구간(서랍 960/휴대폰 640)
     │       ├── render.mjs              # (레거시 폴백) DiagramSpec JSON → 단일 .html — ZZON_LEGACY_RENDER=1·renderer:"legacy"·bun 부재 시
     │       ├── viewer-frame.js         # 공용 뷰어 프레임 (+ viewer-frame.test.mjs)
     │       ├── parity-check.mjs        # 레거시 vs 엔진 프레임 기능 패리티 게이트
@@ -74,6 +85,9 @@ plugins-zzon-doc/
 5. **index.html 소유권**: 출력 폴더에 `wiki.json`이 있으면 index.html은 **build-wiki 소유** — build-docs는 다이어그램·manifest만 갱신하고 index를 건너뛴다(가드 내장). build-wiki는 build-docs를 자식 프로세스로 호출해 렌더를 위임한다.
 6. **wiki.json이 위키의 단일 상태 소스.** 스키마는 `skills/zzon-wiki/references/wiki-spec.md`가 정본. todo 문서는 빈 md를 만들지 않는다. 상태를 md frontmatter에 이중화하지 않는다.
 7. **시퀀스 엔진(zzon-seq)도 순수 JS가 정본이다 — 레포에 빌드 도구 0.** `skills/zzon-seq/scripts/seq-engine.js`는 render.mjs와 같은 규칙으로 직접 수정하고 반드시 브라우저 렌더로 재검증한다(샘플 2종 렌더, 겹침 없음·pageerror 0). SeqSpec 스키마 정본은 `skills/zzon-seq/references/seq-spec.md`. `kind:"sequence"` 스펙은 build-docs가 render-seq.mjs로 라우팅하며(형제 스킬 경로 참조), DiagramSpec과 스키마가 다르다(actors/steps — nodes/edges 아님). 뷰어는 zzon 셸 프로토콜(zzon:sidebar/zzon:sidebar-close, zzon-theme)을 구현한다. 최초 이식 출처는 ~/Documents/src/test_sequence_diagram(FlowScope TS를 1회 트랜스파일) — render.mjs의 info-hub 전례처럼 **이식 후 독립**, 다시 포팅하지 않는다.
+8. **선택 기준이 판단의 정본이다(v0.9).** 무엇을(뷰)·얼마나 복잡하게(등급) 그릴지는 `references/selection-rubric.md` + `scripts/scan.mjs` 수치로 정하고, 렌더 후 `bun ia check`(불변식 + 등급 게이트 + 의미 검사)를 통과시킨다. 게이트 수치를 바꾸면 rubric §4·§5와 engine `TIER_BUDGETS`를 같이 바꾸고 샘플 코퍼스를 다시 잰다.
+9. **근거 추적 — `diagrams.lock.json`은 build-docs 소유.** 스펙 stub의 `sources`(근거 glob)를 해시로 스탬프하고, `--status`가 fresh/stale/untracked/edited와 scan 신호 변화를 보고한다. 재진입 첫 행동은 `--status`다(zzon-doc·zzon-wiki 둘 다).
+10. **디자인은 하나다 — `scripts/design-tokens.mjs`가 정본.** 통합 문서·위키·뷰어 프레임·시퀀스 뷰어·레거시 render.mjs가 여기서 색·글꼴·모서리·폭 구간을 받는다. 엔진 캔버스(theme/adapter/card/shapes/table.ts)는 값을 복제하고 `engine/tests/design-tokens.test.ts`가 일치를 지킨다. 화면 하나에만 새 팔레트·글꼴을 하드코딩하지 마라. 모든 페이지는 390/768/1440 폭·라이트/다크에서 가로 넘침 0이어야 하고, 960px 이하에선 셸 메뉴가 서랍, 640px 이하에선 상세 패널이 아래 시트다. 독자용 문장은 `references/writing-style.md`를 따르고, 추적용 id(q-001 등)는 원문에만 두고 화면에선 숨긴다.
 
 ## 최초 이식 출처 (역사적 참고 — 이제 독립)
 
@@ -143,9 +157,42 @@ plugins-zzon-doc/
   - **플로우 해제 잔상(viewer-frame.js syncHighlight)**: 활성 모드만 어댑터에 보내 꺼진 모드(flow/select)가 캔버스에 누적 잔류(배지 표시·dim 유지). 수정: 꺼진 모드에 target null 해제(§2)를 명시 송신 후 활성 모드 적용. 같은 뿌리의 "플로우 중 노드 선택" 잔상도 함께 해소.
   - 검증: bun test 165 pass + viewer-frame node --test 통과 + **실제 헤드리스 Chrome 차분 회귀**(수정 전 코드로 실패 재현 → 수정 후 전 항목 통과: 리타깃 클릭에 사이드바 열림·플레인 클릭 캡처 0회·플로우 해제 후 active/dim/fade 0, 에러 0). 하니스는 scratchpad(세션 한정).
   - **저작 정책(SKILL.md)**: ① 캔버스 텍스트 절제 — 설명 문장은 전부 `description:`(우측 사이드바), 라벨은 짧게(zzon-doc·terra-form 양쪽 명문화, "아키텍처에 글이 너무 많다" 교정) ② 구조 장에도 대표 경로 `d.flow()` 1~2개 기본 포함(플로우 누락 경향 교정).
-- 남은 엔진 백로그는 P2~P3(같은 레인 좌측 C자 우회·접근 세그먼트 회피·lint 엣지/라벨 검사·그룹 접기·시맨틱 줌) — 메모리 `zzon-engine-priorities` 참조. (레거시 render.mjs 개선 백로그는 폴백 강등으로 우선순위 하락.)
+- **v0.9.0 — 다이어그램 메인화 + 선택 기준 + 표기 뷰 5종 + 근거 추적** (2026-10-04, 소유자 지시 "순차적으로 모두 진행"):
+  - **진단 출발점**: 경쟁 스킬 13종 원문·방법론(C4·ISO 42010·arc42)·가독성 연구(Purchase·Ware·Störrle·Moody) 조사 → "복잡하다"의 대부분이 **부수 복잡도**(엔진 퇴행·카드 속 문장·교차·라벨 관통)였음을 샘플 코퍼스로 실측.
+  - **0단계 기반**: Windows 엔진 무한 대기(elk-loader `URL.pathname`) 수정, npm bun 셤 해석(engine-cli.mjs) + 엔진 호출 타임아웃, 카드 설명 옵트인 복원(`nodeDescriptions`), 배치 힌트 실구현(`hints.layer/order` 2패스, 레거시 lane/order/direction 변환 복원), 방향 선언 존중, 같은 열 C자 우회·역방향 S/N·판단 출구 분리, 라벨이 다른 선을 피함, 그룹 제목 장애물, 글줄식 줄바꿈, 미구현 힌트 경고. 하드 게이트 위반 코퍼스 0.
+  - **1단계 선택**: selection-rubric.md(뷰 점수·등급·축소 사다리·게이트·보정 기록) + views/*.md + scan.mjs + `bun ia check`(등급 게이트) + build-docs `--status/--stamp`(diagrams.lock.json) + 위키 `--status`에 그림 대조 포함. zzon-doc SKILL.md를 메인 허브로 재작성(description+when_to_use에 모든 차트 이름 한·영), 형제 스킬 3종은 지명형으로 좁힘.
+  - **2~4단계 표기 뷰**: 상태 전이도·플로우차트·화면 흐름·도메인 모델(클래스)·모듈 의존성 — 엔진 모양 10종 + UML 화살촉 + 자기 루프 + 의미 검사 + DSL 헬퍼(`d.state/transition/decision/screen/classNode/inherits/…`, `back` 엣지) + scan-deps.mjs(기계 생성). 프레임·통합 문서 종류 칩 등록. bun test 181 pass.
+  - **트리거 평가**(`zzon-doc/evals/`, `claude plugin eval . --model opus`): 요청 10종(메인 7·지명 3·무관 1). v0.8.3 = 8/10("상태 전이도"·"플로우차트" 요청에 스킬 0회 호출) → v0.9.0 = 30/30(3회 반복). 스킬 설명을 바꾸면 다시 돌린다.
+- **v0.9.0 후속 — 디자인 통일·반응형·문체** (2026-10-04, 소유자 지적 "디자인 통일성이 없음, 전체 페이지가 반응형이 아님", "문서 말투 — 쓸데없는 변수·번호·기호"):
+  - **진단**: 글꼴 3종 혼재(셸 Inter→OS 폴백, 엔진 Pretendard 인라인, 시퀀스 ui-sans-serif), 엔진 캔버스만 slate/navy 팔레트(다크 #161E2D), 컨트롤 높이 26/28/34 제각각, 휴대폰에서 셸 메뉴가 본문을 짓누르고 시퀀스 툴바가 가로로 넘침, 화면 밖 패널 그림자가 데스크톱 오른쪽에 회색 띠로 비침, 시퀀스 테마 버튼 아이콘 누락(기존 버그).
+  - **토큰 단일화**: design-tokens.mjs 신설 → 5개 화면이 import, 엔진은 복제 + 동기화 테스트. 엔진 `bun ia font-css`로 셸·시퀀스에도 같은 Pretendard 서브셋을 인라인(bun 없으면 OS 글꼴). 시퀀스 범주 색을 엔진 팔레트로, 버튼·칩·제목 칩을 프레임과 같은 모양으로.
+  - **반응형**: 셸(통합 문서·위키) 960px 이하 서랍 메뉴+스크림(링크 누르면 닫힘), 휴대폰 상단 바 축약. 뷰어 프레임·시퀀스는 640px 이하에서 상세가 아래 시트가 되고 그림이 시트 위 칸에 다시 맞춰짐, 손가락 입력 36px 컨트롤, 캔버스 두 손가락 핀치 줌(interactions.ts). 시퀀스 툴바는 휴대폰에서 두 줄.
+  - **문체**: writing-style.md(규칙 6개, 나쁨/좋음 예) + 스킬 4종 참조, 모범 답안 전부 재작성(위키 샘플 문서·sample-wiki·레거시 샘플 14·시퀀스 2·엔진 예제 11·뷰 템플릿 7, 캔버스 라벨은 불변). 셸 UI에서 섹션 번호·개수 배지·노드/엣지 수·q-id·[actor/action] 제거, 질문 콜아웃은 "확인 필요" 표식, 사이드바 부제는 범주 id 대신 한국어 이름(payload `categoryLabel`).
+  - 검증: bun test 184 pass(+토큰 동기화), viewer-frame 24 pass, 패리티 게이트 통과, 실제 Chrome(Playwright)에서 통합 문서·위키 홈/문서/진행·뷰어·시퀀스를 390/768/1440 × 라이트/다크로 찍어 가로 넘침 0·pageerror 0, 서랍·아래 시트·핀치(뷰박스 5배) 동작 확인.
+- **v0.9.0 후속 2 — 표기 뷰 카드화·아이콘 세트·저작권 고지** (2026-10-04, 소유자 지적 "상태전이·플로우차트가 성의 없다, 기존 것과 맞춰라", "사용자가 파일 받는 프로세스는 하지 마라", "terra-form 이름 유지"):
+  - **표기 노드 = 아키텍처 카드**: state·process·decision·terminal·module을 기존 카드 컴포넌트(아이콘 칸·제목·회색 칩·왼쪽 색 띠)로 그린다(card.ts CARD_SHAPES → 가상 카테고리 n-*). `tone`(wait/done/fail, 모듈은 shared)이 색과 아이콘을 정한다. initial·final·choice·screen·class는 표기 모양 유지. scene 노드는 shape를 유지해 판단 출구 분리·의미 검사가 그대로 동작.
+  - **선 라벨 알약**(카드 배경+테두리, 양 끝 둥금), 예·아니오는 초록·빨강, 기본 선·라벨 색이 테마를 따름(다크에서 선이 사라지던 문제), 범례의 헬퍼 레이어 이름 한국어(전이·흐름·의존·상속…). 의존 선은 실선, 공용 모듈은 회색 카드, scan-deps는 "(root)" 대신 파일 이름·캔버스 숫자 제거.
+  - **아이콘 세트 추가(재배포 허락된 것만)**: Azure V24 636종 `azure.*`, 쿠버네티스 39종 `k8s.*`(Apache-2.0), SAP BTP 125종 `sap.*`(Apache-2.0) — scripts/import-icon-packs.ts, 별칭 79개, 예제 azure-aks-sample. GCP·국내 클라우드·데이터/SaaS 업체는 재배포 불가 → 카테고리 카드. **아이콘을 사용자가 내려받는 절차는 만들지 않는다(소유자 지시).** 업체 로고는 레포에 넣지 않는다.
+  - **저작권 고지 정비**: NOTICE 재작성(Lucide·AWS·Pretendard·CNCF·Karpenter·Azure·K8s·SAP), 폰트 옆 OFL.txt, LICENSES/Apache-2.0.txt, README 한/영 라이선스 절에 "MIT는 이 프로젝트 코드에만" 명시. 스킬 이름 terra-form은 유지(소유자 결정).
+  - 검증: bun test 188 pass, viewer-frame 24, 패리티 통과, plugin validate 통과, 트리거 평가 10/10(wiki 1회는 평가 도구의 claude.exe 경로 오류 — 단독 재실행 3/3).
+- **v0.9.0 후속 3 — 큰 그림·세부 판단** (2026-10-04, 소유자 지적 "큰 뷰로 그린 아키텍처와 세밀한 아키텍처는 다르다, 같은 리소스로 둘 다 그릴 수 있다, 그걸 판단해야지" / 첫 결과에 "정렬도 선도 없다, 너무 약식"):
+  - **판단(zoomPlan, rubric §3.4)**: 세부 노드 ≤9 한 장 · 10~20 큰 그림 권장(문서 세트·독자/매체 혼합) · 21+ 큰 그림 필수. 큰 그림이 9개 이하도 절반 이하도 못 되거나, 선 없는 노드가 4분의 1을 넘으면 "다시 구성하라". `bun ia check`가 "줌 판단"을 출력.
+  - **생성(foldModel, `--fold`)**: 큰 그림은 따로 그리지 않고 세부 모델을 접는다 — 같은 이름 잇기 → 같은 종류 합치기 → 횡단 관심사 빼기 → 리소스 묶음 접기(계정·OU·VPC는 공식 컨테이너 아이콘) → 끝 노드 흡수(접은 계정·OU는 제외) → 그래도 넘치면 리전·계정·OU를 노드로(시스템 전체 틀은 접지 않음) → 선 기준 열 배치. 접은 노드는 세부로 드릴다운. 스펙 stub `"overview": true` → build-docs가 `<slug>-overview`를 만들어 세부 바로 앞에 둔다.
+  - 검증: tests/fold.test.ts 4개, 랜딩 존·서버리스·Azure 큰 그림 실제 렌더 + 통합 문서에서 더블클릭 드릴다운 확인.
+- **v0.9.0 후속 4 — 캔버스 크기·선 겹침·배치 가이드** (2026-10-04, 소유자 요청 "캔버스 크기도 크기에 따라 맞춰서 선이 안 겹치게, 배치도 신경 쓰게 하는 가이드까지"):
+  - **선 겹침 측정**(metrics `crowded`): 끝점을 공유하지 않는 두 선이 6px 안으로 16px 넘게 나란히 달리면 겹침. 게이트 "선 겹침"(경고).
+  - **캔버스는 필요할 때만 커진다**(pipeline buildScene): 선 겹침이나 라벨 가림이 있으면 간격 1.35배 → 1.7배로 다시 배치하고 가장 깨끗한 결과를 쓴다(elk-adapter `setSpacingScale`, 통로 폭도 비례). 깨끗한 그림은 원래 크기. 서버리스 예제: 겹침 3 → 0(1793×896 → 1974×945). 격자 배치(EKS)는 배율이 먹지 않아 경고로 남는다.
+  - **위키 임베드 높이**: build-docs가 manifest에 그림 크기(`size`)를 적고, build-wiki가 그 비율로 창을 잡는다(320–720px, 휴대폰은 70vh 한도).
+  - **배치 가이드** `skills/zzon-doc/references/layout-guide.md`: 작성 순서 9단계(방향 → 주 경로 열 → 줄 → 묶기 → 횡단 관심사 띠 → back 선 → 몰리는 선 bundle·중간 노드 → 라벨 2어절 → 진입면) + 엔진이 하는 일 + `bun ia check` 항목별 처방표. SKILL.md 4단계·views/README·rubric 게이트 표에서 참조.
+  - 검증: tests/spacing.test.ts 3개(겹침 측정, 재배치로 0, 깨끗한 그림은 기본 크기), bun test 195 pass.
+- **v0.9.0 후속 5 — 개발 문서 확장 제안 + 임베드 반응형** (2026-10-04, 소유자 요청 "estel의 IA·디자인 가이드 구조를 차용, 바로 반영보다 가이드와 예시 화면" / 지적 "IA·스토리보드에 화면이 하나도 없다", "반응형으로 만들라고 했지"):
+  - **제안서** `proposals/dev-docs-extension.md`: 새 문서 9종(기능 목록·핵심 흐름·IA·화면 설계·스토리보드·디자인 시스템·하위 시스템·개인정보·비용)의 노출 조건과 틀, **화면 정의 파일(`screens.json`)** 하나에서 라우트 트리·와이어프레임·흐름별 프레임을 만드는 화면 렌더러, 블록 어휘, 도입 순서. **스킬에는 아직 넣지 않았다** — 소유자 승인 후. estel은 틀만 참고했고 내용은 가상의 데모숍이다.
+  - **예시 위키** `playground/demo-dev-docs/`(gitignore): 회색조 폰 프레임 와이어프레임(시트는 부모 화면 위에), 라우트 트리(앱 시작 분기·영역별 썸네일·딥링크), 스토리보드(누르는 곳 번호), 토큰 시각판. 생성 스크립트는 세션 임시 폴더에 있었다(사라짐) — 렌더러를 스킬에 넣을 때 제안서 기준으로 다시 만든다.
+  - **플러그인 반영(반응형 수정)**: build-wiki — 본문 `word-break:keep-all`(한글 낱자 줄바꿈 방지), 표 머리 줄바꿈 금지·휴대폰에서 칸 최소 폭+가로 스크롤, 글처럼 흐르는 임베드가 보내는 `zzon:height`로 iframe 높이 맞춤(테두리 포함), 휴대폰 임베드 최소 높이. 엔진 interactions.ts — 640px 이하 캔버스에서 첫 맞춤만 읽을 수 있는 배율(0.6)로 왼쪽 위부터(맞춤 버튼·더블클릭은 전체). seq-engine — 휴대폰 폭 자동 맞춤 하한 0.6 + 가로 스크롤.
+  - 검증: bun test 196 pass, viewer-frame 24 pass, 시퀀스 샘플 2종 브라우저 확인, 위키 7개 문서 390/768/1440에서 가로 넘침 0·pageerror 0. README 미리보기 스크린샷 전면 갱신(큰 그림·세부, Azure, 휴대폰, 개발 문서 미리보기 추가).
+- 남은 엔진 백로그: 그룹 접기·시맨틱 줌·검색(T3 원장 필수 장치 — rubric §3.1), 짝꿍 표(인벤토리) 자동 생성, 접근 세그먼트 회피. (레거시 render.mjs 개선은 폴백 강등으로 하지 않는다.)
 - 소유자 표준은 **메모리**에 기록됨(무의존/문서 디자인/레이아웃 품질) — 로컬, 레포 밖.
-- git: main에 v0.8.3까지 커밋·푸시됨(0.8.2 통합 후속 커밋 → README 재작성 → 뷰어 버그픽스 → 0.8.3 릴리스). **push는 소유자가 지시할 때만** — 이 시점까지는 소유자 지시로 푸시 완료. 사용처 프로젝트는 `/plugin update`로 0.8.3을 받는다.
+- git: main에 v0.9.0까지 커밋·푸시됨(v0.9.0과 후속 1~5를 0.9.0 하나로 통합, 2026-10-12 소유자 지시). **push는 소유자가 지시할 때만.** 사용처 프로젝트는 `/plugin update`로 0.9.0을 받는다.
 
 ## 다음 작업 (TODO)
 
@@ -155,6 +202,14 @@ plugins-zzon-doc/
 ## 테스트 방법
 
 ```bash
+# (Windows) bun이 npm 설치본이면 실바이너리를 PATH 앞에: export PATH="$APPDATA/npm/node_modules/bun/bin:$PATH"
+
+# 선택 기준 입력·게이트·근거 대조 (v0.9)
+node zzon-doc/skills/zzon-doc/scripts/scan.mjs <프로젝트>                 # 코드 사실 + 뷰 후보
+node zzon-doc/skills/zzon-doc/scripts/scan-deps.mjs <프로젝트> --out /tmp/deps.ts   # 의존성 DSL 생성
+(cd zzon-doc/engine && bun ia check examples/state-sample.ts)           # 불변식 + 등급 게이트 + 의미 검사
+node zzon-doc/skills/zzon-doc/scripts/build-docs.mjs <docsDir> --status  # 근거 대조(쓰기 없음)
+
 # 엔진 준비(1회) + 엔진 단독 렌더·테스트
 cd zzon-doc/engine && bun install
 bun ia render examples/eks-cluster.ts    # → out/eks-cluster.html (+ .svg, .scene.json)

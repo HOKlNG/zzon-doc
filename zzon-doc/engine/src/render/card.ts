@@ -37,7 +37,46 @@ import {
 export const CARD_CATEGORY_META: Record<string, CategoryMeta> = {
   ...CATEGORY_META,
   external: { labelKo: "외부 서비스", icon: "x.lucide-external-link", colorGroup: "external" },
+  // notation nodes (state machine, flowchart, module graph) are drawn with the
+  // same card as architecture nodes; compose picks one of these per node
+  "n-state": { labelKo: "진행 상태", icon: "x.lucide-circle-dot", colorGroup: "backend" },
+  "n-state-wait": { labelKo: "대기 상태", icon: "x.lucide-clock", colorGroup: "compute" },
+  "n-state-done": { labelKo: "완료 상태", icon: "x.lucide-circle-check", colorGroup: "data" },
+  "n-state-fail": { labelKo: "실패 상태", icon: "x.lucide-circle-x", colorGroup: "edge" },
+  "n-process": { labelKo: "처리", icon: "x.lucide-cog", colorGroup: "backend" },
+  "n-process-wait": { labelKo: "대기 처리", icon: "x.lucide-clock", colorGroup: "compute" },
+  "n-process-done": { labelKo: "완료 처리", icon: "x.lucide-circle-check", colorGroup: "data" },
+  "n-process-fail": { labelKo: "예외 처리", icon: "x.lucide-circle-x", colorGroup: "edge" },
+  "n-decision": { labelKo: "판단", icon: "x.lucide-split", colorGroup: "compute" },
+  "n-start": { labelKo: "시작", icon: "x.lucide-play", colorGroup: "user" },
+  "n-end": { labelKo: "끝", icon: "x.lucide-flag", colorGroup: "user" },
+  "n-module": { labelKo: "모듈", icon: "x.lucide-package", colorGroup: "backend" },
+  "n-module-shared": { labelKo: "공용 모듈", icon: "x.lucide-layers", colorGroup: "neutral" },
 };
+
+/** notation shapes that render as architecture cards (the rest keep their notation glyph) */
+export const CARD_SHAPES = new Set(["state", "process", "decision", "terminal", "module"]);
+
+/**
+ * Card category for a notation node. `isStart` only matters for terminals
+ * (a terminal nothing points at is the start).
+ */
+export function notationCategory(shape: string, tone: string | undefined, isStart: boolean): string {
+  if (shape === "state") return tone ? `n-state-${tone}` : "n-state";
+  if (shape === "process") return tone ? `n-process-${tone}` : "n-process";
+  if (shape === "decision") return "n-decision";
+  if (shape === "terminal") return isStart ? "n-start" : "n-end";
+  return tone === "shared" ? "n-module-shared" : "n-module";
+}
+
+/** UML activity prefixes read as Korean on the card chip */
+export function activityText(sublabel: string | undefined): string | undefined {
+  if (!sublabel) return undefined;
+  return sublabel
+    .replace(/^entry\s*\/\s*/i, "들어갈 때 ")
+    .replace(/^do\s*\/\s*/i, "머무는 동안 ")
+    .replace(/^exit\s*\/\s*/i, "나갈 때 ");
+}
 
 /** categories drawn with a dashed card border (legacy `meta.dashed`) */
 const DASHED_CATEGORIES = new Set(["external"]);
@@ -225,7 +264,7 @@ export function renderCardSvg(n: SceneNode, opts: { interactive: boolean }): str
     muted: "var(--muted,#f1f5f9)",
     mutedFg: "var(--muted-foreground,#64748b)",
   };
-  const s = sizeCard({ label: cardLabelText(n), category: n.category, tech: n.tech, description: n.description });
+  const s = sizeCard({ label: cardLabelText(n), category: n.category, tech: n.tech, description: n.descriptionOnCanvas ? n.description : undefined });
   const { x, y } = n.rect;
   const w = n.rect.width;
   const h = n.rect.height;
@@ -292,8 +331,8 @@ export function renderCardSvg(n: SceneNode, opts: { interactive: boolean }): str
 
 /** static-only surface tokens (theme.ts has no card/muted tokens) */
 const STATIC_SURFACES: Record<ThemeName, { card: string; border: string; muted: string; mutedFg: string }> = {
-  light: { card: "#FFFFFF", border: "#E2E8F0", muted: "#F1F5F9", mutedFg: "#64748B" },
-  dark: { card: "#1F2937", border: "#334155", muted: "#2B3648", mutedFg: "#94A3B8" },
+  light: { card: "#ffffff", border: "#e4e4e7", muted: "#f4f4f5", mutedFg: "#71717a" },
+  dark: { card: "#141417", border: "#2a2a2e", muted: "#1f1f23", mutedFg: "#a1a1aa" },
 };
 
 /**
@@ -313,7 +352,7 @@ export function renderCardStatic(n: SceneNode, theme: ThemeName = "light"): stri
     muted: surface.muted,
     mutedFg: surface.mutedFg,
   };
-  const s = sizeCard({ label: cardLabelText(n), category: n.category, tech: n.tech, description: n.description });
+  const s = sizeCard({ label: cardLabelText(n), category: n.category, tech: n.tech, description: n.descriptionOnCanvas ? n.description : undefined });
   const { x, y } = n.rect;
   const w = n.rect.width;
   const h = n.rect.height;

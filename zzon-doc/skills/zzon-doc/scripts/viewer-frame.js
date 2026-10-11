@@ -3,8 +3,8 @@
  *
  * 계약: skills/zzon-doc/references/viewer-frame-contract.md (v1)
  *   - 프레임은 payload(계약 §1)만 읽고, 캔버스는 adapter(계약 §2)로만 대화한다.
- *   - 캔버스 내부 상수·모델 임포트 금지(§8) — 이 파일은 어떤 것도 import하지 않는다.
- *   - 크롬 언어는 한국어, 시각 스타일은 레거시 render.mjs(shadcn 풍 토큰)를 정본으로 한다.
+ *   - 캔버스 내부 상수·모델 임포트 금지(§8) — 이 파일이 import하는 것은 옆의 design-tokens.mjs 하나다.
+ *   - 크롬 언어는 한국어. 색·글꼴·모서리·화면 폭 구간은 design-tokens.mjs(산출물 전체 공용)가 정본이다.
  *
  * Node 20 ESM · zero deps.
  *
@@ -15,6 +15,8 @@
  *   FRAME_GLYPHS: string  // 크롬 전체 문구(라벨·버튼·단위 포함) — 엔진 폰트 서브셋 입력(§3)
  */
 
+import { BREAKPOINT, FONT_STACK, MONO_STACK, themeCss } from "./design-tokens.mjs";
+
 /* =========================================================================
  * 1. 크롬 문자열 (전부 여기 — 빌드타임 크롬과 런타임이 같은 표를 쓴다)
  * ========================================================================= */
@@ -24,6 +26,11 @@ const STR = {
   kindDataFlow: "데이터 흐름",
   kindErd: "ERD",
   kindAgentTopology: "에이전트 구조",
+  kindState: "상태 전이",
+  kindFlowchart: "플로우차트",
+  kindDependency: "모듈 의존성",
+  kindScreenFlow: "화면 흐름",
+  kindClass: "도메인 모델",
   fit: "화면 맞춤",
   reset: "보기 초기화",
   labelAlways: "라벨 항상 표시 (줌아웃해도 유지)",
@@ -73,6 +80,11 @@ const KIND_META = {
   "data-flow": { label: STR.kindDataFlow, icon: "Webhook" },
   "erd": { label: STR.kindErd, icon: "Database" },
   "agent-topology": { label: STR.kindAgentTopology, icon: "Bot" },
+  "state": { label: STR.kindState, icon: "Route" },
+  "flowchart": { label: STR.kindFlowchart, icon: "Workflow" },
+  "dependency": { label: STR.kindDependency, icon: "Network" },
+  "screen-flow": { label: STR.kindScreenFlow, icon: "Monitor" },
+  "class": { label: STR.kindClass, icon: "Boxes" },
 };
 
 /* 크롬 전용 아이콘 (lucide 24px 패스, 레거시 render.mjs와 동일 도형) */
@@ -82,6 +94,10 @@ const FRAME_ICONS = {
   Database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
   Bot: '<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
   Route: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+  Workflow: '<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>',
+  Network: '<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
+  Monitor: '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
+  Boxes: '<path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85"/><path d="m7 16.5 5-3"/><path d="M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3"/><path d="m17 16.5 4.74-2.85"/><path d="M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15"/><path d="m12 8 4.74-2.85"/><path d="M12 13.5V8"/>',
   Maximize: '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>',
   RotateCcw: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
   Tag: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
@@ -116,35 +132,42 @@ function safeJson(v) {
  * 3. 프레임 CSS — --frame-* 토큰, 라이트 + 다크([data-theme] 정본, prefers 폴백)
  * ========================================================================= */
 
+/** 공용 토큰 → 프레임 변수 이름 */
+const FRAME_TOKENS = {
+  bg: "--frame-bg", fg: "--frame-fg", card: "--frame-card", muted: "--frame-muted",
+  "muted-fg": "--frame-muted-fg", border: "--frame-border", ring: "--frame-ring",
+  accent: "--frame-accent", "accent-fg": "--frame-accent-fg", "accent-soft": "--frame-accent-soft",
+  shadow: "--frame-shadow", "shadow-lg": "--frame-shadow-lg",
+};
+
+/** 프레임에만 있는 값(경고 칩·ERD 키 색) */
 const LIGHT_VARS =
-  "--frame-bg:#ffffff;--frame-fg:#0a0a0a;--frame-card:#ffffff;--frame-card-fg:#0a0a0a;" +
-  "--frame-muted:#f4f4f5;--frame-muted-fg:#71717a;--frame-border:#e4e4e7;--frame-ring:#a1a1aa;" +
-  "--frame-accent:#4f46e5;--frame-warn-fg:#b45309;--frame-warn-bg:rgba(245,158,11,.1);" +
+  "--frame-card-fg:var(--frame-fg);--frame-warn-fg:#b45309;--frame-warn-bg:rgba(245,158,11,.1);" +
   "--frame-warn-border:rgba(245,158,11,.5);--frame-fk:#0284c7;--frame-pk:#f59e0b;";
 
 const DARK_VARS =
-  "--frame-bg:#0a0a0a;--frame-fg:#fafafa;--frame-card:#171717;--frame-card-fg:#fafafa;" +
-  "--frame-muted:#262626;--frame-muted-fg:#a1a1aa;--frame-border:#2a2a2a;--frame-ring:#52525b;" +
-  "--frame-accent:#818cf8;--frame-warn-fg:#fbbf24;--frame-warn-bg:rgba(245,158,11,.12);" +
+  "--frame-card-fg:var(--frame-fg);--frame-warn-fg:#fbbf24;--frame-warn-bg:rgba(245,158,11,.12);" +
   "--frame-warn-border:rgba(245,158,11,.45);--frame-fk:#38bdf8;--frame-pk:#fbbf24;";
+const NARROW = BREAKPOINT.narrow;
 
 const FRAME_CSS = `/* ---- frame tokens ---- */
+${themeCss(FRAME_TOKENS)}
 :root{${LIGHT_VARS}}
 :root[data-theme="dark"]{${DARK_VARS}}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){${DARK_VARS}}}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{font-family:Pretendard,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;background:var(--frame-bg);color:var(--frame-fg);-webkit-font-smoothing:antialiased}
+body{font-family:${FONT_STACK};background:var(--frame-bg);color:var(--frame-fg);-webkit-font-smoothing:antialiased}
 #frame-root{position:fixed;inset:0;overflow:hidden}
 .frame-viewport{position:absolute;inset:0;overflow:hidden;background-image:radial-gradient(color-mix(in oklab,var(--frame-border) 72%,transparent) 1px,transparent 1px);background-size:16px 16px}
 .frame-icon{display:inline-flex;vertical-align:middle}
 .frame-icon svg{display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .frame-ui{position:absolute;z-index:30}
-.frame-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;border-radius:6px;border:1px solid var(--frame-border);background:var(--frame-card);color:var(--frame-fg);font:inherit;font-size:12px;font-weight:500;cursor:pointer;padding:0 10px;height:28px;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:background .12s,color .12s,border-color .12s}
+.frame-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;border-radius:6px;border:1px solid var(--frame-border);background:var(--frame-card);color:var(--frame-fg);font:inherit;font-size:12px;font-weight:500;cursor:pointer;padding:0 10px;height:30px;white-space:nowrap;box-shadow:var(--frame-shadow);transition:background .12s,color .12s,border-color .12s}
 .frame-btn:hover{background:var(--frame-muted)}
-.frame-btn.icon{width:28px;height:28px;padding:0}
-.frame-btn.mini{width:28px;height:22px;padding:0;font-size:9px;font-weight:700;letter-spacing:.02em}
-.frame-btn.active{border-color:transparent;color:#fff;background:var(--frame-accent)}
+.frame-btn.icon{width:30px;height:30px;padding:0}
+.frame-btn.mini{width:30px;height:30px;padding:0;font-size:9.5px;font-weight:700;letter-spacing:.02em}
+.frame-btn.active{border-color:transparent;color:var(--frame-accent-fg);background:var(--frame-accent)}
 .frame-btn.active:hover{background:var(--frame-accent);filter:brightness(1.05)}
 .frame-titlebar{left:12px;top:12px;display:flex;align-items:center;gap:8px;max-width:64%;border-radius:8px;border:1px solid var(--frame-border);background:color-mix(in oklab,var(--frame-card) 95%,transparent);padding:5px 10px;box-shadow:0 1px 2px rgba(0,0,0,.05);backdrop-filter:blur(6px)}
 .frame-kind-chip{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;border-radius:6px;border:1px solid var(--frame-border);background:var(--frame-muted);padding:1px 7px;font-size:10px;font-weight:600;color:var(--frame-muted-fg)}
@@ -171,8 +194,8 @@ body{font-family:Pretendard,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Rob
 .frame-legend .sep{width:1px;height:12px;background:var(--frame-border)}
 .frame-legend .sw{flex-shrink:0}
 .frame-legend .sw.dot{width:8px;height:8px;border-radius:9999px;display:inline-block}
-.frame-side{position:absolute;z-index:40;top:0;right:0;bottom:0;width:304px;display:flex;flex-direction:column;border-left:1px solid var(--frame-border);background:color-mix(in oklab,var(--frame-card) 96%,transparent);backdrop-filter:blur(10px);box-shadow:-10px 0 30px rgba(0,0,0,.1);transform:translateX(105%);transition:transform .2s ease}
-.frame-side.open{transform:translateX(0)}
+.frame-side{position:absolute;z-index:40;top:0;right:0;bottom:0;width:304px;display:flex;flex-direction:column;border-left:1px solid var(--frame-border);background:color-mix(in oklab,var(--frame-card) 96%,transparent);backdrop-filter:blur(10px);box-shadow:none;transform:translateX(105%);transition:transform .2s ease}
+.frame-side.open{transform:translateX(0);box-shadow:-10px 0 30px rgba(0,0,0,.1)}
 .frame-side-head{display:flex;align-items:flex-start;gap:10px;padding:14px;border-bottom:1px solid var(--frame-border)}
 .frame-panel-title{font-size:14px;font-weight:600;line-height:1.2}
 .frame-panel-sub{font-size:12px;color:var(--frame-muted-fg);margin-top:2px}
@@ -192,7 +215,7 @@ body{font-family:Pretendard,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Rob
 .frame-conn .dir{flex-shrink:0;width:14px;text-align:center;font-weight:700;color:var(--frame-muted-fg)}
 .frame-conn .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .frame-conn .kind{margin-left:auto;flex-shrink:0;padding-left:8px;font-size:10px;color:var(--frame-muted-fg)}
-.frame-side-col{display:flex;align-items:center;gap:6px;padding:3px 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--frame-fg)}
+.frame-side-col{display:flex;align-items:center;gap:6px;padding:3px 0;font-family:${MONO_STACK};font-size:11px;color:var(--frame-fg)}
 .frame-side-col .pk-ic{flex-shrink:0;display:inline-flex}
 .frame-side-col .t{margin-left:auto;padding-left:8px;font-size:10px;color:color-mix(in oklab,var(--frame-muted-fg) 80%,transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .frame-tags{display:flex;flex-shrink:0;gap:2px}
@@ -203,8 +226,23 @@ body{font-family:Pretendard,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Rob
 .frame-href a:hover{background:var(--frame-muted)}
 #dg-tip{position:fixed;z-index:1000;left:0;top:0;pointer-events:none;opacity:0;max-width:260px;padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:500;line-height:1.45;white-space:pre-line;background:var(--frame-fg);color:var(--frame-bg);box-shadow:0 4px 16px rgba(0,0,0,.22);transition:opacity 120ms}
 #dg-tip.show{opacity:1}
-/* ---- 440px 위키 엠베드: 컴팩트 툴바(≤44px) ---- */
-@media (max-height:460px){
+/* ---- 휴대폰: 떠 있는 크롬은 툴바 열을 피하고, 상세는 아래에서 올라오는 시트 ---- */
+@media (max-width:${NARROW}px){
+.frame-titlebar,.frame-flowcol,.frame-legend{max-width:calc(100% - 66px)}
+.frame-side{top:auto;left:0;width:auto;height:min(52vh,480px);border-left:0;border-top:1px solid var(--frame-border);border-radius:12px 12px 0 0;transform:translateY(105%)}
+.frame-side.open{transform:none;box-shadow:0 -10px 30px rgba(0,0,0,.14)}
+#frame-root.side-open .frame-toolbar{right:12px}
+#frame-root.side-open .frame-viewport{bottom:min(52vh,480px)} /* 그림은 시트 위 남은 칸에 다시 맞춰진다 */
+#frame-root.side-open .frame-legend{display:none}
+}
+/* ---- 손가락 입력: 누르기 쉬운 크기 ---- */
+@media (pointer:coarse){
+.frame-btn{height:36px}
+.frame-btn.icon,.frame-btn.mini{width:36px;height:36px}
+.frame-stepchip{width:28px;height:28px}
+}
+/* ---- 440px 위키 엠베드: 컴팩트 툴바(≤44px) — 폭이 좁으면 세로 열을 유지한다 ---- */
+@media (max-height:460px) and (min-width:${NARROW + 1}px){
 .frame-toolbar{flex-direction:row;gap:4px}
 #frame-root.side-open .frame-toolbar{right:316px}
 .frame-btn{height:24px}
@@ -352,13 +390,15 @@ const FRAME_RUNTIME = String.raw`"use strict";
   }
 
   /* ---- 우측 사이드바: 열림/닫힘 + canvasShift(±152) + zzon:sidebar 통지 ---- */
+  var NARROW_PX = window.__zzonFrameNarrow || 640, shifted = false; // 휴대폰 폭에선 상세가 아래 시트라 캔버스를 옆으로 밀지 않는다
   function setSideOpen(open) {
     open = !!open;
     if (sideOpen === open) return;
     sideOpen = open;
     side.classList.toggle("open", open);
     frameRoot.classList.toggle("side-open", open);
-    callAdapter("canvasShift", open ? -152 : 152);
+    var wantShift = open && window.innerWidth > NARROW_PX;
+    if (wantShift !== shifted) { callAdapter("canvasShift", wantShift ? -152 : 152); shifted = wantShift; }
     postMsg({ type: "zzon:sidebar", open: open });
   }
   function sideHead(title, sub, onClose) {
@@ -379,7 +419,8 @@ const FRAME_RUNTIME = String.raw`"use strict";
   /* 노드 패널 — payload.nodes + edges[].from/to 파생 연결 목록 (§1: 없는 endpoint는 건너뜀) */
   function renderNodeSide(node) {
     side.innerHTML = "";
-    var sub = [node.category, node.tech].filter(Boolean).join(" · ");
+    // 부제는 읽는 사람의 말로: 범주 이름(한국어)과 기술. 범주 id(user 등)는 보이지 않는다
+    var sub = [node.categoryLabel, node.tech].filter(Boolean).join(" · ");
     side.appendChild(sideHead(node.label || node.path, sub, function () {
       st.selected = null;
       setSideOpen(false);
@@ -416,7 +457,7 @@ const FRAME_RUNTIME = String.raw`"use strict";
       rows.push({ edge: e, other: other, outgoing: outgoing });
     });
     if (rows.length) {
-      body.appendChild(el("div", "frame-side-sec", S.connections + " " + rows.length));
+      body.appendChild(el("div", "frame-side-sec", S.connections));
       rows.forEach(function (r) {
         var row = el("div", "frame-conn");
         row.appendChild(el("span", "dir", r.outgoing ? S.dirOut : S.dirIn));
@@ -870,6 +911,7 @@ export function buildViewerHtml({ payload, canvas } = {}) {
     "window.__zzonFramePayload = " + safeJson(payload) + ";",
     "window.__zzonFrameStr = " + safeJson(STR) + ";",
     "window.__zzonFrameIcons = " + safeJson(FRAME_ICONS) + ";",
+    "window.__zzonFrameNarrow = " + NARROW + ";",
     "</script>",
     "<script>",
     FRAME_RUNTIME,

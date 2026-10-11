@@ -1,0 +1,852 @@
+{
+ "id": "azure-aks-sample",
+ "title": "Azure 쇼핑몰 서비스 (AKS)",
+ "width": 1350.91,
+ "height": 444.38,
+ "groups": [
+  {
+   "kind": "group",
+   "path": "sub",
+   "rect": {
+    "x": 140,
+    "y": 32,
+    "width": 1178.91,
+    "height": 380.38
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "운영 구독",
+    "x": 148,
+    "y": 48,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "sub/vnet",
+   "rect": {
+    "x": 330.9,
+    "y": 74,
+    "width": 792.09,
+    "height": 324.38
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "VNet 10.0.0.0/16",
+    "x": 338.89829691274156,
+    "y": 90,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "sub/vnet/aks",
+   "rect": {
+    "x": 546.48,
+    "y": 180.1,
+    "width": 324,
+    "height": 140.19
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "AKS 클러스터",
+    "x": 554.4764219127416,
+    "y": 196.09599609375,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "sub/vnet/data",
+   "rect": {
+    "x": 953.48,
+    "y": 116,
+    "width": 155.51,
+    "height": 268.38
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "데이터",
+    "x": 961.4764219127416,
+    "y": 132,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  }
+ ],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "user",
+   "to": "sub/fd",
+   "points": [
+    {
+     "x": 84,
+     "y": 222.19
+    },
+    {
+     "x": 129.51,
+     "y": 222.19
+    },
+    {
+     "x": 129.51,
+     "y": 175.53
+    },
+    {
+     "x": 175.01,
+     "y": 175.53
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "요청",
+   "label": {
+    "text": "HTTPS",
+    "x": 135.51,
+    "y": 202.77,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "sub/fd",
+   "to": "sub/vnet/agw",
+   "points": [
+    {
+     "x": 240.5,
+     "y": 175.53
+    },
+    {
+     "x": 292.7,
+     "y": 175.53
+    },
+    {
+     "x": 292.7,
+     "y": 250.19
+    },
+    {
+     "x": 344.9,
+     "y": 250.19
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "요청"
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "sub/vnet/agw",
+   "to": "sub/vnet/aks/ing",
+   "points": [
+    {
+     "x": 463.48,
+     "y": 250.19
+    },
+    {
+     "x": 511.98,
+     "y": 250.19
+    },
+    {
+     "x": 511.98,
+     "y": 264.19
+    },
+    {
+     "x": 560.48,
+     "y": 264.19
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "요청"
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "sub/vnet/aks/ing",
+   "to": "sub/vnet/aks/svc",
+   "points": [
+    {
+     "x": 616.48,
+     "y": 264.19
+    },
+    {
+     "x": 680.48,
+     "y": 264.19
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "요청"
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "sub/vnet/aks/svc",
+   "to": "sub/vnet/aks/dep",
+   "points": [
+    {
+     "x": 736.48,
+     "y": 264.19
+    },
+    {
+     "x": 800.48,
+     "y": 264.19
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "요청"
+  },
+  {
+   "kind": "edge",
+   "id": "e5",
+   "from": "sub/vnet/aks/dep",
+   "to": "sub/vnet/data/sql",
+   "points": [
+    {
+     "x": 856.48,
+     "y": 264.19
+    },
+    {
+     "x": 880.48,
+     "y": 264.19
+    },
+    {
+     "x": 880.48,
+     "y": 200.1
+    },
+    {
+     "x": 998.84,
+     "y": 200.1
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "요청",
+   "bundle": "bundle:out:sub/vnet/aks/dep:E",
+   "label": {
+    "text": "주문 저장",
+    "x": 967.87,
+    "y": 191.45,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e6",
+   "from": "sub/vnet/aks/dep",
+   "to": "sub/vnet/data/redis",
+   "points": [
+    {
+     "x": 856.48,
+     "y": 264.19
+    },
+    {
+     "x": 880.48,
+     "y": 264.19
+    },
+    {
+     "x": 880.48,
+     "y": 328.29
+    },
+    {
+     "x": 967.48,
+     "y": 328.29
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "요청",
+   "bundle": "bundle:out:sub/vnet/aks/dep:E",
+   "label": {
+    "text": "세션",
+    "x": 941.22,
+    "y": 319.64,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e7",
+   "from": "sub/vnet/aks/dep",
+   "to": "sub/kv",
+   "points": [
+    {
+     "x": 856.48,
+     "y": 264.19
+    },
+    {
+     "x": 880.48,
+     "y": 264.19
+    },
+    {
+     "x": 1127.89,
+     "y": 264.19
+    },
+    {
+     "x": 1127.89,
+     "y": 178.96
+    },
+    {
+     "x": 1219.07,
+     "y": 178.96
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "설정",
+   "bundle": "bundle:out:sub/vnet/aks/dep:E",
+   "label": {
+    "text": "비밀 읽기",
+    "x": 1151.9,
+    "y": 170.31,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e8",
+   "from": "sub/acr",
+   "to": "sub/vnet/aks/dep",
+   "points": [
+    {
+     "x": 207.76,
+     "y": 332.09
+    },
+    {
+     "x": 207.76,
+     "y": 340.09
+    },
+    {
+     "x": 828.48,
+     "y": 340.09
+    },
+    {
+     "x": 828.48,
+     "y": 306.29
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "배포",
+   "label": {
+    "text": "이미지",
+    "x": 518.12,
+    "y": 331.44,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e9",
+   "from": "sub/vnet/aks/dep",
+   "to": "sub/ai",
+   "points": [
+    {
+     "x": 856.48,
+     "y": 264.19
+    },
+    {
+     "x": 880.48,
+     "y": 264.19
+    },
+    {
+     "x": 1143.58,
+     "y": 264.19
+    },
+    {
+     "x": 1143.58,
+     "y": 293.43
+    },
+    {
+     "x": 1192.17,
+     "y": 293.43
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "관측",
+   "bundle": "bundle:out:sub/vnet/aks/dep:E",
+   "label": {
+    "text": "추적",
+    "x": 1118.57,
+    "y": 291.19,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start"
+   }
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "sub/acr",
+   "rect": {
+    "x": 154,
+    "y": 261.62,
+    "width": 107.52,
+    "height": 70.47
+   },
+   "icon": "azure.acr",
+   "iconRect": {
+    "x": 183.76,
+    "y": 261.62,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Container Registry",
+    "x": 207.7578125,
+    "y": 326.797587890625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Container Registry"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "sub/ai",
+   "rect": {
+    "x": 1192.17,
+    "y": 258.19,
+    "width": 112.74,
+    "height": 70.47
+   },
+   "icon": "azure.app-insights",
+   "iconRect": {
+    "x": 1224.54,
+    "y": 258.19,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Application Insights",
+    "x": 1248.5391068463164,
+    "y": 323.3666796875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Application Insights"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "sub/fd",
+   "rect": {
+    "x": 175.01,
+    "y": 133.43,
+    "width": 65.49,
+    "height": 84.19
+   },
+   "icon": "azure.front-door",
+   "iconRect": {
+    "x": 183.76,
+    "y": 133.43,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Front Door",
+    "x": 207.7578125,
+    "y": 198.605595703125,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Front Door"
+    ]
+   },
+   "sublabel": {
+    "text": "전역 진입점",
+    "x": 207.7578125,
+    "y": 212.878173828125,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "전역 진입점"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "sub/kv",
+   "rect": {
+    "x": 1219.07,
+    "y": 143.72,
+    "width": 58.94,
+    "height": 70.47
+   },
+   "icon": "azure.key-vault",
+   "iconRect": {
+    "x": 1224.54,
+    "y": 143.72,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Key Vault",
+    "x": 1248.5391068463164,
+    "y": 208.8983203125,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Key Vault"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "sub/vnet/agw",
+   "rect": {
+    "x": 344.9,
+    "y": 208.1,
+    "width": 118.58,
+    "height": 84.19
+   },
+   "icon": "azure.appgw",
+   "iconRect": {
+    "x": 380.19,
+    "y": 208.1,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Application Gateway",
+    "x": 404.18735941274156,
+    "y": 273.27068359375,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Application Gateway"
+    ]
+   },
+   "sublabel": {
+    "text": "WAF",
+    "x": 404.18735941274156,
+    "y": 287.54326171875,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "WAF"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "sub/vnet/aks/dep",
+   "rect": {
+    "x": 800.48,
+    "y": 222.1,
+    "width": 56,
+    "height": 84.19
+   },
+   "icon": "k8s.deployment",
+   "iconRect": {
+    "x": 804.48,
+    "y": 222.1,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "shop-api",
+    "x": 828.4764219127416,
+    "y": 287.27068359375,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "shop-api"
+    ]
+   },
+   "sublabel": {
+    "text": "파드 3개",
+    "x": 828.4764219127416,
+    "y": 301.54326171875,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "파드 3개"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "sub/vnet/aks/ing",
+   "rect": {
+    "x": 560.48,
+    "y": 228.96,
+    "width": 56,
+    "height": 70.47
+   },
+   "icon": "k8s.ingress",
+   "iconRect": {
+    "x": 564.48,
+    "y": 228.96,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "ingress",
+    "x": 588.4764219127416,
+    "y": 294.1325,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "ingress"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "sub/vnet/aks/svc",
+   "rect": {
+    "x": 680.48,
+    "y": 228.96,
+    "width": 56,
+    "height": 70.47
+   },
+   "icon": "k8s.service",
+   "iconRect": {
+    "x": 684.48,
+    "y": 228.96,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "shop-api",
+    "x": 708.4764219127416,
+    "y": 294.1325,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "shop-api"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "sub/vnet/data/redis",
+   "rect": {
+    "x": 967.48,
+    "y": 286.19,
+    "width": 127.51,
+    "height": 84.19
+   },
+   "icon": "azure.redis",
+   "iconRect": {
+    "x": 1007.23,
+    "y": 286.19,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Azure Cache for Redis",
+    "x": 1031.2303281627414,
+    "y": 351.3666796875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Azure Cache for Redis"
+    ]
+   },
+   "sublabel": {
+    "text": "세션",
+    "x": 1031.2303281627414,
+    "y": 365.6392578125,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "세션"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "sub/vnet/data/sql",
+   "rect": {
+    "x": 998.84,
+    "y": 158,
+    "width": 64.78,
+    "height": 84.19
+   },
+   "icon": "azure.sql",
+   "iconRect": {
+    "x": 1007.23,
+    "y": 158,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Azure SQL",
+    "x": 1031.2303281627414,
+    "y": 223.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Azure SQL"
+    ]
+   },
+   "sublabel": {
+    "text": "주문",
+    "x": 1031.2303281627414,
+    "y": 237.447265625,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "주문"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "user",
+   "rect": {
+    "x": 32,
+    "y": 188.96,
+    "width": 52,
+    "height": 66.47
+   },
+   "icon": "res.users",
+   "iconRect": {
+    "x": 36,
+    "y": 188.96,
+    "width": 44,
+    "height": 44
+   },
+   "role": "actor",
+   "label": {
+    "text": "사용자",
+    "x": 58,
+    "y": 250.1325,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "사용자"
+    ]
+   }
+  }
+ ],
+ "markers": [],
+ "flows": [],
+ "icons": [
+  "azure.acr",
+  "azure.app-insights",
+  "azure.appgw",
+  "azure.front-door",
+  "azure.key-vault",
+  "azure.redis",
+  "azure.sql",
+  "k8s.deployment",
+  "k8s.ingress",
+  "k8s.service",
+  "res.users"
+ ],
+ "texts": [
+  "AKS 클러스터",
+  "Application Gateway",
+  "Application Insights",
+  "Azure Cache for Redis",
+  "Azure SQL",
+  "Container Registry",
+  "Front Door",
+  "HTTPS",
+  "Key Vault",
+  "VNet 10.0.0.0/16",
+  "WAF",
+  "ingress",
+  "shop-api",
+  "데이터",
+  "비밀 읽기",
+  "사용자",
+  "세션",
+  "운영 구독",
+  "이미지",
+  "전역 진입점",
+  "주문",
+  "주문 저장",
+  "추적",
+  "파드 3개"
+ ]
+}

@@ -1,14 +1,23 @@
 zzon-doc — Third-Party Notices
 ================================
 
-This project inlines icon artwork as SVG path data (no runtime dependency,
-no bundled files) inside:
+The MIT License in LICENSE covers this project's own code only. The assets
+below are bundled in this repository under their own terms, and generated
+diagrams embed some of them (icon artwork and a font subset).
+
+All product names, logos and brands are property of their respective owners
+and are used only to identify the products they stand for. Their use does not
+imply affiliation with or endorsement by those owners.
+
+
+1. Lucide and Feather icons
+---------------------------
+Inlined as SVG path data in:
   - zzon-doc/skills/zzon-doc/scripts/render.mjs
   - zzon-doc/skills/zzon-doc/scripts/build-docs.mjs
-
-The icons come from the Lucide icon set (a fork of Feather Icons). Their
-copyright and license notices are retained below as required.
-
+  - zzon-doc/skills/zzon-doc/scripts/viewer-frame.js
+  - zzon-doc/skills/zzon-wiki/scripts/build-wiki.mjs
+  - zzon-doc/engine/src/icons/svg/x.lucide-*.svg
 
 Lucide — ISC License
 --------------------
@@ -26,7 +35,6 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
-
 
 Feather Icons — MIT License
 ---------------------------
@@ -52,7 +60,81 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-Fonts
------
-The generated HTML references the "Inter" typeface by name only and falls back
-to the system font stack. No font files are bundled or redistributed.
+2. AWS Architecture Icons
+-------------------------
+zzon-doc/engine/src/icons/svg/ (every file except x.*.svg)
+© Amazon Web Services, Inc. or its affiliates.
+Source: https://aws.amazon.com/architecture/icons/ (Icon-package_04302026).
+Used unmodified to create architecture diagrams, as AWS permits ("We allow
+customers and partners to use these toolkits and assets to create architecture
+diagrams."). Only the XML declaration and <title> were removed. Not covered by
+this repository's MIT License. AWS and AWS service names are trademarks of
+Amazon.com, Inc. or its affiliates.
+
+
+3. Pretendard font
+------------------
+zzon-doc/engine/assets/fonts/Pretendard-Regular.otf, Pretendard-SemiBold.otf
+Copyright (c) 2021, Kil Hyung-jin (https://github.com/orioncactus/pretendard),
+with Reserved Font Name Pretendard.
+Licensed under the SIL Open Font License, Version 1.1 — full text in
+zzon-doc/engine/assets/fonts/OFL.txt.
+Each generated HTML page embeds a subset of this font for that document only.
+
+
+4. CNCF project logos (Kubernetes, cert-manager, external-secrets)
+------------------------------------------------------------------
+zzon-doc/engine/assets/extra-icons/{kubernetes,cert-manager,external-secrets}.svg
+and the matching x.*.svg in zzon-doc/engine/src/icons/svg/
+Source: https://github.com/cncf/artwork — "All artwork in this repo is made
+available under the Linux Foundation trademark usage guidelines."
+Used unmodified in appearance to refer to the respective projects. Kubernetes is
+a registered trademark of The Linux Foundation.
+See https://www.linuxfoundation.org/legal/trademark-usage.
+
+
+5. Karpenter icon
+-----------------
+zzon-doc/engine/assets/extra-icons/karpenter.svg, zzon-doc/engine/src/icons/svg/x.karpenter.svg
+Source: https://github.com/aws/karpenter-provider-aws (website/static/favicon.svg)
+Licensed under the Apache License, Version 2.0 — full text in LICENSES/Apache-2.0.txt.
+Original NOTICE: "Karpenter / Copyright Amazon.com, Inc. or its affiliates."
+Modified: metadata removed and inline styles converted to attributes in x.karpenter.svg.
+
+
+6. Microsoft Azure Architecture Icons
+-------------------------------------
+zzon-doc/engine/src/icons/svg/azure.*.svg
+Source: https://learn.microsoft.com/azure/architecture/icons/ (Azure_Public_Service_Icons_V24)
+"Microsoft permits the use of these icons in architectural diagrams, training
+materials, or documentation. You can copy, distribute, and display the icons
+only for the permitted use unless granted explicit permission by Microsoft.
+Microsoft reserves all other rights."
+Included unmodified in appearance (no cropping, flipping, rotation or
+distortion); only <title>, the XML prologue and editor metadata were removed and
+element ids were prefixed so several icons can share one document. Used only to
+represent the Microsoft products they were designed for. Not covered by this
+repository's MIT License. Microsoft and Azure are trademarks of the Microsoft
+group of companies.
+
+
+7. Kubernetes Icons Set
+-----------------------
+zzon-doc/engine/src/icons/svg/k8s.*.svg
+Source: https://github.com/kubernetes/community/tree/b0e9e677be6c9b178368d57b86e9f548fcbd575f/icons
+"The Kubernetes Icons Set is licensed under a choice of either Apache-2.0 or
+CC-BY-4.0." This project uses it under Apache-2.0 (full text: LICENSES/Apache-2.0.txt).
+Modified: editor metadata (Inkscape/Sodipodi) removed and element ids prefixed.
+The Kubernetes logo is a registered trademark of The Linux Foundation; use is
+subject to https://www.linuxfoundation.org/legal/trademark-usage.
+
+
+8. SAP BTP Solution Diagrams icons
+----------------------------------
+zzon-doc/engine/src/icons/svg/sap.*.svg
+Source: https://github.com/SAP/btp-solution-diagrams (release btpsd-v1.0.43)
+Copyright 2024 SAP SE or an SAP affiliate company and btp-solution-diagrams contributors.
+Licensed under the Apache License, Version 2.0 (full text: LICENSES/Apache-2.0.txt).
+Modified: XML prologue and <title> removed, element ids prefixed.
+SAP, SAP BTP and other SAP product names are trademarks or registered trademarks
+of SAP SE (or an SAP affiliate company). The SAP corporate logo is not included.

@@ -1,6 +1,6 @@
 {
  "id": "erd-sample",
- "title": "linkonn — ERD (core tables)",
+ "title": "북마크 서비스 핵심 테이블",
  "docKind": "erd",
  "width": 916.43,
  "height": 362,
@@ -32,7 +32,7 @@
    ],
    "style": {
     "preset": "default",
-    "color": "#545B64",
+    "color": "#52525b",
     "arrowhead": "end"
    },
    "sourceCardinality": "0..N",
@@ -63,7 +63,7 @@
    ],
    "style": {
     "preset": "default",
-    "color": "#545B64",
+    "color": "#52525b",
     "arrowhead": "end"
    },
    "sourceCardinality": "N",
@@ -90,7 +90,7 @@
    ],
    "style": {
     "preset": "default",
-    "color": "#545B64",
+    "color": "#52525b",
     "arrowhead": "end"
    },
    "sourceCardinality": "1..N",
@@ -136,13 +136,13 @@
    },
    "label": {
     "text": "link_tags",
-    "x": 32,
-    "y": 117.5,
+    "x": 60,
+    "y": 137.5,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
    },
-   "description": "링크·태그 M:N 조인 테이블"
+   "description": "링크와 태그를 다대다로 잇는 조인 테이블"
   },
   {
    "kind": "node",
@@ -194,8 +194,8 @@
    },
    "label": {
     "text": "links",
-    "x": 340.42708333333326,
-    "y": 164,
+    "x": 368.42708333333326,
+    "y": 184,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
@@ -232,8 +232,8 @@
    },
    "label": {
     "text": "tags",
-    "x": 340.42708333333326,
-    "y": 32,
+    "x": 368.42708333333326,
+    "y": 52,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
@@ -281,8 +281,8 @@
    },
    "label": {
     "text": "users",
-    "x": 644.4270833333333,
-    "y": 177,
+    "x": 672.4270833333333,
+    "y": 197,
     "fontSize": 12,
     "weight": "semibold",
     "align": "start"
@@ -313,7 +313,7 @@
   "uuid",
   "가입 사용자 계정",
   "링크 분류 태그",
-  "링크·태그 M:N 조인 테이블",
+  "링크와 태그를 다대다로 잇는 조인 테이블",
   "사용자가 수집한 링크"
  ]
 }

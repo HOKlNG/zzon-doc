@@ -2,7 +2,7 @@
   "specVersion": 1,
   "title": "행동 로그 데이터 파이프라인",
   "kind": "data-flow",
-  "description": "GCP/데이터 플랫폼 관례의 스테이지 밴드 패턴. 수집→처리→적재(메달리온)→서빙을 단계 밴드로 나누고, 거버넌스는 하단 횡단 띠, 실패 재처리는 본선 아래 곁가지로 그린다.",
+  "description": "앱 행동 로그와 운영 DB 변경분이 수집, 처리, 적재, 서빙 단계를 거쳐 대시보드와 추천 모델에 쓰이기까지를 보여 준다. 검증에 실패한 이벤트는 실패 큐에 모았다가 다시 적재한다.",
   "layout": {
     "direction": "RIGHT",
     "align": "start"
@@ -39,7 +39,7 @@
       "id": "app-events",
       "label": "앱 이벤트",
       "category": "external",
-      "description": "웹·모바일 클라이언트가 발생시키는 행동 로그",
+      "description": "웹과 모바일 앱이 남기는 사용자 행동 로그다.",
       "lane": 0,
       "order": 0
     },
@@ -48,7 +48,7 @@
       "label": "운영 DB CDC",
       "category": "external",
       "order": 1,
-      "description": "운영 데이터베이스 변경 스트림",
+      "description": "운영 DB의 변경 내역을 실시간으로 흘려보낸다.",
       "lane": 0
     },
     {
@@ -57,7 +57,7 @@
       "category": "topic",
       "tech": "Kafka",
       "parentId": "g-ingest",
-      "description": "원천 이벤트를 토픽별로 버퍼링한다",
+      "description": "원천 이벤트를 토픽별로 잠시 쌓아 둔다.",
       "lane": 1,
       "order": 0
     },
@@ -67,7 +67,7 @@
       "category": "pipeline",
       "tech": "Flink",
       "parentId": "g-process",
-      "description": "정제·중복 제거·스키마 검증을 수행한다",
+      "description": "이벤트를 정제하고 중복을 없애고 스키마를 검증한다.",
       "lane": 2,
       "order": 0
     },
@@ -87,7 +87,7 @@
       "category": "storage",
       "tech": "S3 Parquet",
       "parentId": "g-store",
-      "description": "가공 전 원본 적재층",
+      "description": "가공하지 않은 원본을 쌓는 층이다.",
       "lane": 3,
       "order": 0
     },
@@ -98,7 +98,7 @@
       "tech": "Delta Lake",
       "parentId": "g-store",
       "order": 0,
-      "description": "정제·조인 완료된 신뢰 계층",
+      "description": "정제와 조인을 마친 믿을 수 있는 데이터 층이다.",
       "lane": 4
     },
     {
@@ -108,7 +108,7 @@
       "tech": "BigQuery",
       "parentId": "g-store",
       "order": 0,
-      "description": "지표·마트 등 소비 최적화 계층",
+      "description": "지표와 마트처럼 바로 쓰기 좋게 집계한 층이다.",
       "lane": 5
     },
     {
@@ -117,7 +117,7 @@
       "category": "analytics",
       "tech": "Looker",
       "parentId": "g-serve",
-      "description": "경영·운영 지표 시각화",
+      "description": "경영 지표와 운영 지표를 보여 준다.",
       "lane": 6,
       "order": 0
     },
@@ -128,7 +128,7 @@
       "tech": "Vertex AI",
       "parentId": "g-serve",
       "order": 1,
-      "description": "Gold 피처로 학습·서빙되는 추천 모델",
+      "description": "Gold 층의 피처로 학습하고 추천 결과를 내놓는다.",
       "lane": 6
     },
     {
@@ -139,7 +139,7 @@
       "parentId": "g-gov",
       "lane": 3,
       "order": 8,
-      "description": "배치 변환·재처리 DAG 스케줄링"
+      "description": "배치 변환과 재처리 작업을 일정에 맞춰 돌린다."
     },
     {
       "id": "catalog",
@@ -149,7 +149,7 @@
       "parentId": "g-gov",
       "lane": 3,
       "order": 9,
-      "description": "스키마·리니지·품질 메타데이터 관리"
+      "description": "스키마, 데이터 계보, 품질 정보를 관리한다."
     }
   ],
   "edges": [
@@ -239,7 +239,7 @@
     {
       "id": "hot-path",
       "label": "실시간 적재 경로",
-      "description": "이벤트 발생부터 대시보드 반영까지의 본선",
+      "description": "이벤트가 생겨 대시보드에 반영되기까지의 기본 경로",
       "steps": [
         {
           "edge": "e-app-stream",
@@ -270,7 +270,7 @@
     {
       "id": "replay",
       "label": "실패 재처리 경로",
-      "description": "검증 실패 이벤트의 격리와 재투입",
+      "description": "검증에 실패한 이벤트를 따로 모았다가 다시 넣는 경로",
       "steps": [
         {
           "edge": "e-etl-dlq",

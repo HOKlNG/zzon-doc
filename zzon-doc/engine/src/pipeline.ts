@@ -7,6 +7,8 @@ import { validate, formatIssues } from "./model/validate.ts";
 import { validateErd } from "./model/erd.ts";
 import { resolveFlows } from "./render/flows.ts";
 import { layoutDiagram } from "./layout/compose.ts";
+import { setSpacingScale } from "./layout/elk-adapter.ts";
+import { measureScene } from "./quality/metrics.ts";
 import { routeEdges } from "./route/router.ts";
 import { buildPayload, type PayloadAssets, type ViewerPayload } from "./render/payload.ts";
 import { buildCanvas, type CanvasBundle } from "./render/adapter.ts";
@@ -14,6 +16,9 @@ import { renderStaticSvg } from "./render/static-svg.ts";
 import { canonicalScene, type Scene } from "./layout/scene.ts";
 
 export class DiagramError extends Error {}
+
+/** spacing multipliers tried in order (see buildScene) */
+const SPACING_STEPS = [1, 1.35, 1.7];
 
 export async function buildScene(model: DiagramModel): Promise<Scene> {
   const v = validate(model);
@@ -23,8 +28,25 @@ export async function buildScene(model: DiagramModel): Promise<Scene> {
   if (!v.ok || erdIssues.some((i) => i.severity === "error")) {
     throw new DiagramError(`diagram "${model.id}" failed validation`);
   }
-  const scene = await layoutDiagram(model);
-  await routeEdges(scene, model.edges);
+  // The canvas grows only when it has to: if routed lines crowd each other or
+  // run through labels, lay out again with wider spacing (at most twice) and
+  // keep the cleanest pass. Deterministic — same input, same passes.
+  let scene: Scene | null = null;
+  let best = Infinity;
+  for (const scale of SPACING_STEPS) {
+    setSpacingScale(scale);
+    const s = await layoutDiagram(model);
+    await routeEdges(s, model.edges);
+    const m = measureScene(s);
+    const bad = m.crowded.length + 2 * m.occludedLabels.length;
+    if (bad < best) {
+      scene = s;
+      best = bad;
+    }
+    if (bad === 0) break;
+  }
+  setSpacingScale(1);
+  scene = scene!;
   resolveFlows(scene, model.flows);
   // edge labels arrive during routing — extend the subsetting text set
   const texts = new Set(scene.texts);
@@ -68,13 +90,13 @@ export async function renderAll(model: DiagramModel, opts: RenderOptions = {}): 
  * files are copied into examples/.tmp/ so those imports resolve, then removed.
  */
 export async function loadDiagram(file: string): Promise<DiagramModel> {
-  const { resolve, join, basename } = await import("node:path");
+  const { resolve, join, basename, sep } = await import("node:path");
   const { copyFileSync, rmSync, statSync } = await import("node:fs");
   const engineRoot = resolve(join(import.meta.dir, ".."));
   const abs = resolve(file);
   let importPath = abs;
   let tmp: string | null = null;
-  if (!abs.startsWith(engineRoot + "/")) {
+  if (!abs.startsWith(engineRoot + sep)) {
     // examples/ 바로 아래여야 소스의 "../src/..." 상대 import가 풀린다
     // (mtime in the name busts the ESM cache when the source changes)
     tmp = join(engineRoot, "examples", `.tmp-${statSync(abs).mtimeMs}-${basename(abs)}`);

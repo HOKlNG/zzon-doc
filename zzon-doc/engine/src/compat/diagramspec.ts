@@ -27,9 +27,11 @@
  *   - flows              -> steps[].edge legacy ids resolved through the Refs
  *                           returned by d.edge() while edges are emitted
  *   - ordering           -> nodes/groups emitted sorted by (lane ?? 0,
- *                           order ?? 0, spec index); lane/order then DROPPED
- *                           (the engine auto-layouts)
- *   - layout.direction   -> ignored; recorded in notes, warning when "DOWN"
+ *                           order ?? 0, spec index)
+ *   - lane / order       -> ElementHints.layer / .order (layered containers
+ *                           honor them via the interactive second pass)
+ *   - layout.direction   -> model.direction (declared = no aspect flip)
+ *   - layout.nodeDescriptions -> model.nodeDescriptions (card text on canvas)
  *   - kind "sequence"    -> rejected (zzon-seq renders sequence diagrams)
  */
 import {
@@ -192,15 +194,20 @@ export function convertDiagramSpec(spec: unknown, opts: ConvertOptions = {}): Co
   }
   const erd = docKind === "erd";
 
-  // ---- layout hints (ignored: the engine auto-layouts)
+  // ---- layout intent: direction + on-canvas descriptions carry over
   const layout = isDict(spec["layout"]) ? spec["layout"] : undefined;
-  const direction = layout && str(layout["direction"]);
-  if (direction !== undefined) {
-    notes.push(`layout.direction "${direction}" ignored — the engine auto-layouts`);
-    if (direction === "DOWN") {
-      warnings.push('layout.direction "DOWN" is not supported yet — rendered with auto orientation');
-    }
-  }
+  const rawDirection = layout && str(layout["direction"]);
+  let direction: "RIGHT" | "DOWN" | undefined;
+  if (rawDirection === "RIGHT" || rawDirection === "DOWN") direction = rawDirection;
+  else if (rawDirection !== undefined) warnings.push(`unknown layout.direction "${rawDirection}" — auto orientation`);
+  const nodeDescriptions = layout ? bool(layout["nodeDescriptions"]) : undefined;
+  /** legacy lane/order -> engine layout hints */
+  const hintsOf = (raw: Dict) => {
+    const lane = num(raw["lane"]);
+    const order = num(raw["order"]);
+    if (lane === undefined && order === undefined) return {};
+    return { hints: { ...(lane !== undefined ? { layer: lane } : {}), ...(order !== undefined ? { order } : {}) } };
+  };
 
   const title = str(spec["title"]);
   const id = opts.id ?? slugify(title ?? "diagram");
@@ -233,6 +240,8 @@ export function convertDiagramSpec(spec: unknown, opts: ConvertOptions = {}): Co
       ...(title !== undefined ? { title } : {}),
       ...(str(spec["description"]) !== undefined ? { description: str(spec["description"]) } : {}),
       docKind,
+      ...(direction !== undefined ? { direction } : {}),
+      ...(nodeDescriptions === true ? { nodeDescriptions: true } : {}),
       // 스펙이 의도를 선언하면 그게 우선 (multi-region 예제와 같은 메커니즘)
       aspectRatio: typeof spec["aspectRatio"] === "number" && spec["aspectRatio"] > 0
         ? (spec["aspectRatio"] as number)
@@ -264,6 +273,7 @@ export function convertDiagramSpec(spec: unknown, opts: ConvertOptions = {}): Co
         const built = parent.group(gid, {
           kind: rawGroupKind !== undefined ? (GROUP_KIND_MAP[rawGroupKind] ?? "generic") : "generic",
           ...(str(g["label"]) !== undefined ? { label: str(g["label"]) } : {}),
+          ...hintsOf(g),
         });
         groupBuilders.set(gid, built);
         return built;
@@ -315,6 +325,7 @@ export function convertDiagramSpec(spec: unknown, opts: ConvertOptions = {}): Co
               ...(description !== undefined ? { description } : {}),
               ...(href !== undefined ? { href } : {}),
               table: tableSpec(table),
+              ...hintsOf(n),
             }),
           );
           continue;
@@ -332,6 +343,7 @@ export function convertDiagramSpec(spec: unknown, opts: ConvertOptions = {}): Co
               ...(tech !== undefined ? { sublabel: tech } : badge !== undefined ? { sublabel: badge } : {}),
               ...(description !== undefined ? { description } : {}),
               ...(href !== undefined ? { href } : {}),
+              ...hintsOf(n),
             }),
           );
           continue;
@@ -354,6 +366,7 @@ export function convertDiagramSpec(spec: unknown, opts: ConvertOptions = {}): Co
             ...(label !== undefined ? { label } : {}),
             // legacy annotation badge ("×3", "Primary") -> card sublabel
             ...(str(n["badge"]) !== undefined ? { sublabel: str(n["badge"]) } : {}),
+            ...hintsOf(n),
           }),
         );
       }

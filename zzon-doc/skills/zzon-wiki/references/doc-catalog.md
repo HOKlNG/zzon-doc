@@ -58,7 +58,7 @@ na 판별 우선: "개인/소규모 프로젝트라 착수 문서가 불필요�
 | concept | 서비스 컨셉 / 가치 제안 | 2 | 핵심 가치·차별점 |
 | usecase | 핵심 시나리오 / 유스케이스 | 2 | 대표 사용 흐름 — **왕복·분기가 본질이면 zzon-seq 시퀀스를 기본으로 임베드**(아키텍처 seq-flows와 상호 링크) |
 | feature-spec | 기능 명세 | 2 | 기능 단위 상세 |
-| policy | 정책·비즈니스 룰 | 2 | 운영 정책·규칙 |
+| policy | 정책·비즈니스 룰 | 2 | 운영 정책·규칙 (`@diagram` `flowchart·T2` 가능 — 코드의 분기·검증 로직) |
 | persona / journey | 페르소나 / 사용자 여정 | 3 | 사용자 정의·접점 |
 | kpi | 지표 / KPI | 3 | 성공 측정 |
 
@@ -67,7 +67,7 @@ na 판별 우선: "개인/소규모 프로젝트라 착수 문서가 불필요�
 ### 04 design — UX/UI 설계
 | slug | 제목 | tier | 목적 |
 |---|---|---|---|
-| ia | 정보 구조 (IA) | 3 | 화면 계층·내비게이션 |
+| ia | 정보 구조 (IA) | 3 | 화면 계층·내비게이션 (`@diagram` `screen-flow·T2` — 라우터·페이지 파일에서 추출) |
 | screen-spec | 화면 설계서 | 3 | 화면별 요소·동작 |
 | design-system | 디자인 시스템 / 토큰 | 3 | 색·타이포·간격 |
 | principles / wireframe / components / interaction | 원칙·와이어프레임·컴포넌트·모션 | 3 | — |
@@ -78,29 +78,31 @@ na 판별 우선: **"디자인 산출물을 별도 도구(Figma 등)로 관리�
 | slug | 제목 | tier | 목적 · 연동 |
 |---|---|---|---|
 | overview | 아키텍처 개요 / 설계 원칙 | 1 | 목표·원칙 |
-| context | 시스템 컨텍스트 | 1 | `@diagram` — zzon-doc C4 컨텍스트 (sample-context 패턴) |
-| landscape | 전체 아키텍처 원장 | 1 | `@diagram` — 풀뎁스 원장 (sample-full-landscape 패턴) |
-| container | 컨테이너 구성 | 2 | `@diagram` — C4 L2 |
-| cloud-diagram | 클라우드/인프라 구성도 | 1 | `@diagram` — 인프라 유형 |
+| context | 시스템 컨텍스트 | 1 | `@diagram` `context·T1` — C4 컨텍스트 |
+| landscape | 전체 아키텍처 원장 | 1 | `@diagram` `container 또는 deployment·T3` — 본문엔 링크로(위키 임베드 상한 T2), 개괄은 context 장 |
+| container | 컨테이너 구성 | 2 | `@diagram` `container·T2` — C4 L2 |
+| cloud-diagram | 클라우드/인프라 구성도 | 1 | `@diagram` `deployment·T2` — tf가 있으면 terra-form |
 | tech-stack | 기술 스택 / 선정 근거 | 1 | 스택과 이유 |
-| event-flow | 이벤트·메시지 흐름 | 2 | `@diagram` — 이벤트드리븐 (dynamic: 실제 기능별). 토폴로지+순번은 data-flow, 왕복·분기 시간축은 zzon-seq 시퀀스 — 병행 임베드 가능 |
-| seq-flows | 핵심 프로세스 시퀀스 | 1 | `@diagram` — **zzon-seq 필수 검토** (dynamic: 인증·결제·대표 유스케이스처럼 요청/응답 왕복·분기가 본질인 프로세스별 1장, slug `seq-` 접두). 구조도(data-flow)와 병행이 보완 관계 |
-| network | 네트워크 설계 | 2 | `@diagram` — 허브스포크/서브넷 |
+| event-flow | 이벤트·메시지 흐름 | 2 | `@diagram` `flow·T2` — 이벤트드리븐 (dynamic: 실제 기능별). 토폴로지+순번은 data-flow, 왕복·분기 시간축은 zzon-seq 시퀀스 — 병행 임베드 가능 |
+| seq-flows | 핵심 프로세스 시퀀스 | 1 | `@diagram` `sequence` — **zzon-seq 필수 검토** (dynamic: 인증·결제·대표 유스케이스처럼 요청/응답 왕복·분기가 본질인 프로세스별 1장, slug `seq-` 접두). 구조도(data-flow)와 병행이 보완 관계 |
+| network | 네트워크 설계 | 2 | `@diagram` `deployment·T2` — 허브스포크/서브넷 |
 | security | 보안 아키텍처 | 2 | 인증·인가/시크릿/암호화 (children tier 3) |
 | environments | 환경 분리 (dev/prd) | 2 | 환경 전략 |
-| scalability / availability | 확장성 / 가용성·DR | 3 | `@diagram` — 멀티리전 HA |
+| scalability / availability | 확장성 / 가용성·DR | 3 | `@diagram` `deployment·T2` — 멀티리전 HA |
 | adr | 의사결정 기록 (ADR) | 2 | 결정과 근거 (children: 결정별, dynamic) |
 
-**다이어그램은 반드시 zzon-doc 스킬 절차로**: 유형 판별(document-types.md) → 스펙 저작 → layout-lint → render → `specs/`에 두고 문서에 `@diagram(slug)`.
+**다이어그램은 반드시 zzon-doc 메인 절차로** 그린다: scan → 뷰·등급(selection-rubric) → `references/views/<뷰>.md` 저작 → `bun ia check` → build-docs. `specs/`에 두고 문서에는 `@diagram(slug)`만 쓴다. 슬롯 옆 `뷰·등급` 표기가 기본값이고, 위키 본문 임베드는 T2가 상한이다.
 단서(기존): `*.tf`/CDK·docker-compose·패키지 구조·큐/토픽 설정.
 질문 은행 — (기존) "코드에서 못 읽은 인프라(DNS·CDN·모니터링 외부 서비스)가 있나?" / "이 아키텍처에서 의도된 결정 vs 역사적 우연은?" / (신규) "예상 트래픽 규모와 가용성 목표는?" / "클라우드/온프렘 제약은?"
 
 ### 06 data — 데이터 설계 ★ zzon-doc 다이어그램 연동
 | slug | 제목 | tier | 목적 · 연동 |
 |---|---|---|---|
-| logical-erd | 논리 ERD | 1 | `@diagram` — ERD (카디널리티 포함). 테이블 많으면 도메인별 분할 |
+| logical-erd | 논리 ERD | 1 | `@diagram` `erd·T2` — 카디널리티 포함. 장당 ≤12 테이블, 넘으면 도메인별 분할 |
+| state-machine | 상태 전이 | 2 | `@diagram` `state·T2` — **dynamic: 상태 enum·상태 머신마다 1장**(scan의 상태 신호). 주문·결제·예약처럼 상태 컬럼이 있는 엔터티 |
+| domain-model | 도메인 모델 | 3 | `@diagram` `domain-model·T2` — 애그리거트·엔터티·값 객체 관계(클래스 표기). DDD 프로젝트에서 |
 | table-spec | 테이블 명세 | 2 | **dynamic** — children을 실제 도메인별로 |
-| dfd | 데이터 흐름 / 파이프라인 | 2 | `@diagram` — 스테이지 밴드 |
+| dfd | 데이터 흐름 / 파이프라인 | 2 | `@diagram` `flow·T2` — 단계 그룹 열 |
 | migration | 마이그레이션 전략 | 2 | 스키마 변경 관리 |
 | conceptual / physical-erd | 개념 / 물리 모델 | 3 | — |
 | indexing | 인덱스·쿼리 전략 | 3 | 성능 |
@@ -115,7 +117,7 @@ na 판별 우선: **"디자인 산출물을 별도 도구(Figma 등)로 관리�
 | api-spec | API 명세 | 1 | **dynamic** — children을 실제 도메인별 엔드포인트로 |
 | standard | API 설계 표준 / 컨벤션 | 2 | URI·메서드·버전 규칙 |
 | conventions | 공통 규약 (에러/페이징/필터) | 2 | 표준 응답 형식 |
-| authn | 인증·인가 설계 | 2 | 토큰·권한 흐름 (`@diagram` — zzon-seq: 로그인/갱신 왕복은 시퀀스가 정본) |
+| authn | 인증·인가 설계 | 2 | 토큰·권한 흐름 (`@diagram` `sequence` — 로그인/갱신 왕복은 시퀀스가 정본) |
 | external | 외부 연동 인터페이스 | 2 | 외부 API 규약 |
 | events | 이벤트·메시지 스키마 | 2 | 페이로드 정의 |
 
@@ -126,7 +128,7 @@ na 판별 우선: **"디자인 산출물을 별도 도구(Figma 등)로 관리�
 | slug | 제목 | tier | 목적 |
 |---|---|---|---|
 | environment | 개발 환경 / 퀵스타트 | 1 | **가장 많이 읽히는 문서** — 클론부터 첫 실행까지 |
-| structure | 모듈·디렉터리 구조 | 1 | 코드 구조 규칙 |
+| structure | 모듈·디렉터리 구조 | 1 | 코드 구조 규칙 + `@diagram` `dependency` — **`scan-deps.mjs`로 기계 생성**(모듈 수가 등급을 정한다, 순환 강조) |
 | conventions | 코딩 컨벤션 | 2 | 스타일·린트·타입 |
 | vcs | 형상 관리·브랜치 전략 | 2 | 브랜치·커밋·리뷰 |
 | shared | 공통 모듈 | 3 | 공유 타입·유틸 |
@@ -148,11 +150,11 @@ na 판별 우선: "테스트가 코드 저장소에 자체 문서화되어 있�
 ### 10 operations — 전개·운영
 | slug | 제목 | tier | 목적 |
 |---|---|---|---|
-| cicd | 배포 전략 (CI/CD) | 1 | 빌드·배포 자동화 (`@diagram` 가능 — 파이프라인 유형) |
-| runbook | 운영 가이드 / 런북 | 2 | 절차서 |
+| cicd | 배포 전략 (CI/CD) | 1 | 빌드·배포 자동화 (`@diagram` `flow·T2` 가능 — 파이프라인) |
+| runbook | 운영 가이드 / 런북 | 2 | 절차서 (`@diagram` `flowchart·T2` 가능 — 분기 있는 절차) |
 | environments | 환경 구성 | 2 | 환경별 차이 |
 | monitoring | 모니터링·알람 | 2 | 지표·알람 |
-| incident | 장애 대응 | 2 | 장애 절차 |
+| incident | 장애 대응 | 2 | 장애 절차 (`@diagram` `flowchart·T2` 권장 — 판단 분기·에스컬레이션) |
 | iac | 인프라 프로비저닝 (IaC) | 2 | 코드형 인프라 |
 | release / observability | 릴리스 관리 / 관측성 | 3 | — |
 
@@ -171,6 +173,6 @@ na 판별 우선: "발주처 제출용 관리 문서가 필요한가?" — 아�
 1. 승인된 티어의 노드만 트리에 넣는다 (tier 태그는 유지 — 나중 승격 대비).
 2. `dynamic` 노드는 코드 스캔 결과로 children을 만든다 (예: api-spec → 실제 도메인 Orders/Catalog…).
 3. 프로젝트에 없는 개념은 넣지 않거나 na 처리한다 — **카탈로그를 그대로 복사하지 마라.**
-4. 각 노드의 summary를 프로젝트 문맥으로 다시 쓴다 (카탈로그 문구 복붙 금지).
+4. 각 노드의 summary를 프로젝트 문맥으로 다시 쓴다 (카탈로그 문구 복붙 금지). 섹션 `purpose`, summary, 질문 문장은 `../../zzon-doc/references/writing-style.md`를 따른다. 위 카탈로그 표의 '목적' 칸은 메모라서, 거기 있는 "·" 나열과 약어(FR, NFR, C4)를 그대로 옮기지 말고 문장으로 푼다.
 5. 섹션 제외는 `interview.excludedSections`에 사유와 함께 기록한다.
 6. **섹션 `code`는 포함된 섹션에 카탈로그 순서대로 `"00"`부터 연속 재부여한다.** 카탈로그의 번호는 템플릿 식별용일 뿐 — 제외한 섹션의 번호를 비워둔 채 `00, 05, 06…`으로 만들지 마라(빌드가 경고한다). 나중에 섹션을 승격·추가하면 카탈로그 순서 자리에 끼우고 code를 전체 재부여한다 — 문서 참조는 `path` 기준이라 code 변경은 안전하다.

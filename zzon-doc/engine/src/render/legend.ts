@@ -62,6 +62,13 @@ const EDGE_DASH: Record<SceneEdge["style"]["preset"], string | undefined> = {
  * Resolved legend entries for one finished Scene: ONLY what the scene uses.
  * Returns [] when the scene has no categories, edge layers, or groups.
  */
+/** reader-facing names for the layers the notation helpers set (authors may name their own) */
+const LAYER_KO: Record<string, string> = {
+  transition: "전이", flow: "흐름", depends: "의존", cycle: "순환",
+  inherit: "상속", implement: "구현", compose: "합성", aggregate: "집약", assoc: "연관",
+  nav: "이동", auth: "로그인 필요",
+};
+
 export function legendEntries(scene: Scene): LegendEntry[] {
   const entries: LegendEntry[] = [];
 
@@ -88,7 +95,7 @@ export function legendEntries(scene: Scene): LegendEntry[] {
     const dash = EDGE_DASH[e.style.preset];
     entries.push({
       group: "edge",
-      label: layer,
+      label: LAYER_KO[layer] ?? layer,
       swatch: { type: "line", color: e.style.color, ...(dash ? { dash } : {}) },
     });
   }

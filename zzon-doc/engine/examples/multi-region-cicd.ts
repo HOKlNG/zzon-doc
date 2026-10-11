@@ -8,7 +8,7 @@
 import { diagram } from "../src/dsl/index.ts";
 
 // 리전 3개가 가로로 나열되는 본질적으로 넓은 다이어그램 — 종횡비 타깃을 명시
-export default diagram("multi-region-cicd", { title: "Multi-Region Web Service with CI/CD", aspectRatio: 2.0 }, (d) => {
+export default diagram("multi-region-cicd", { title: "멀티 리전 웹 서비스와 CI/CD", aspectRatio: 2.0 }, (d) => {
   const user = d.actor("user", { icon: "users", label: "사용자 (End Users)", side: "left" });
   const route53 = d.actor("route53", { icon: "r53", label: "Route 53", side: "top" });
 

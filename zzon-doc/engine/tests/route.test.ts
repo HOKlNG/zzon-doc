@@ -137,7 +137,7 @@ describe("routeEdges", () => {
 
   test("edge style resolution", () => {
     const normal = byId.get("e-normal")!;
-    expect(normal.style).toEqual({ preset: "default", color: "#545B64", arrowhead: "end" });
+    expect(normal.style).toEqual({ preset: "default", color: "#52525b", arrowhead: "end" });
     const dotted = byId.get("e-dotted")!;
     expect(dotted.style).toEqual({ preset: "dotted", color: "#7AA116", arrowhead: "end" });
     expect(dotted.layer).toBe("network");

@@ -1,0 +1,594 @@
+{
+ "id": "screen-flow-sample",
+ "title": "구매 동선 화면 흐름",
+ "docKind": "screen-flow",
+ "width": 972.18,
+ "height": 392.85,
+ "groups": [],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "home",
+   "to": "list",
+   "points": [
+    {
+     "x": 200.24,
+     "y": 69.1
+    },
+    {
+     "x": 240.86,
+     "y": 69.1
+    },
+    {
+     "x": 240.86,
+     "y": 99.33
+    },
+    {
+     "x": 281.48,
+     "y": 99.33
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "nav",
+   "label": {
+    "text": "카테고리",
+    "x": 220.55,
+    "y": 60.45,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "list",
+   "to": "detail",
+   "points": [
+    {
+     "x": 449.48,
+     "y": 99.33
+    },
+    {
+     "x": 528.58,
+     "y": 99.33
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "nav",
+   "label": {
+    "text": "상품 선택",
+    "x": 489.03,
+    "y": 90.68,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "detail",
+   "to": "cart",
+   "points": [
+    {
+     "x": 696.58,
+     "y": 99.33
+    },
+    {
+     "x": 772.18,
+     "y": 99.33
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "nav",
+   "label": {
+    "text": "담기",
+    "x": 734.38,
+    "y": 90.68,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "cart",
+   "to": "checkout",
+   "points": [
+    {
+     "x": 856.18,
+     "y": 136.42
+    },
+    {
+     "x": 856.18,
+     "y": 203.42
+    },
+    {
+     "x": 365.48,
+     "y": 203.42
+    },
+    {
+     "x": 365.48,
+     "y": 286.65
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "nav",
+   "label": {
+    "text": "주문하기",
+    "x": 610.83,
+    "y": 219.89,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "cart",
+   "to": "login",
+   "points": [
+    {
+     "x": 856.18,
+     "y": 136.42
+    },
+    {
+     "x": 856.18,
+     "y": 189.42
+    },
+    {
+     "x": 116.24,
+     "y": 189.42
+    },
+    {
+     "x": 116.24,
+     "y": 274.29
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "auth",
+   "label": {
+    "text": "비로그인",
+    "x": 486.21,
+    "y": 180.77,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e5",
+   "from": "login",
+   "to": "checkout",
+   "points": [
+    {
+     "x": 200.24,
+     "y": 311.38
+    },
+    {
+     "x": 240.86,
+     "y": 311.38
+    },
+    {
+     "x": 240.86,
+     "y": 323.75
+    },
+    {
+     "x": 281.48,
+     "y": 323.75
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "auth",
+   "label": {
+    "text": "로그인 성공",
+    "x": 228.04,
+    "y": 302.73,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e6",
+   "from": "checkout",
+   "to": "done",
+   "points": [
+    {
+     "x": 449.48,
+     "y": 323.75
+    },
+    {
+     "x": 489.03,
+     "y": 323.75
+    },
+    {
+     "x": 489.03,
+     "y": 293.52
+    },
+    {
+     "x": 528.58,
+     "y": 293.52
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "nav",
+   "label": {
+    "text": "결제 승인",
+    "x": 500.06,
+    "y": 284.87,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e7",
+   "from": "done",
+   "to": "home",
+   "points": [
+    {
+     "x": 696.58,
+     "y": 293.52
+    },
+    {
+     "x": 704.58,
+     "y": 293.52
+    },
+    {
+     "x": 704.58,
+     "y": 24
+    },
+    {
+     "x": 116.24,
+     "y": 24
+    },
+    {
+     "x": 116.24,
+     "y": 32
+    }
+   ],
+   "style": {
+    "preset": "dotted",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "nav",
+   "label": {
+    "text": "쇼핑 계속",
+    "x": 410.41,
+    "y": 15.35,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "cart",
+   "rect": {
+    "x": 772.18,
+    "y": 62.23,
+    "width": 168,
+    "height": 74.19
+   },
+   "role": "shape",
+   "shape": "screen",
+   "label": {
+    "text": "장바구니",
+    "x": 856.1844100560897,
+    "y": 99.32666015625,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   },
+   "sublabel": {
+    "text": "/cart",
+    "x": 856.1844100560897,
+    "y": 132.42265625000002,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "checkout",
+   "rect": {
+    "x": 281.48,
+    "y": 286.65,
+    "width": 168,
+    "height": 74.19
+   },
+   "role": "shape",
+   "shape": "screen",
+   "label": {
+    "text": "주문·결제",
+    "x": 365.48321314102566,
+    "y": 323.74931640625,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   },
+   "sublabel": {
+    "text": "/checkout",
+    "x": 365.48321314102566,
+    "y": 356.8453125,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "detail",
+   "rect": {
+    "x": 528.58,
+    "y": 62.23,
+    "width": 168,
+    "height": 74.19
+   },
+   "role": "shape",
+   "shape": "screen",
+   "label": {
+    "text": "상품 상세",
+    "x": 612.5754181690705,
+    "y": 99.32666015625,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   },
+   "sublabel": {
+    "text": "/products/[id]",
+    "x": 612.5754181690705,
+    "y": 132.42265625000002,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "done",
+   "rect": {
+    "x": 528.58,
+    "y": 256.42,
+    "width": 168,
+    "height": 74.19
+   },
+   "role": "shape",
+   "shape": "screen",
+   "label": {
+    "text": "주문 완료",
+    "x": 612.5754181690705,
+    "y": 293.51865234375003,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   },
+   "sublabel": {
+    "text": "/orders/[id]/complete",
+    "x": 612.5754181690705,
+    "y": 326.6146484375,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "home",
+   "rect": {
+    "x": 32.24,
+    "y": 32,
+    "width": 168,
+    "height": 74.19
+   },
+   "role": "shape",
+   "shape": "screen",
+   "description": "추천 상품과 기획전을 보여 주는 첫 화면이다.",
+   "label": {
+    "text": "홈",
+    "x": 116.24160657051283,
+    "y": 69.09599609375,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   },
+   "sublabel": {
+    "text": "/",
+    "x": 116.24160657051283,
+    "y": 102.1919921875,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "list",
+   "rect": {
+    "x": 281.48,
+    "y": 62.23,
+    "width": 168,
+    "height": 74.19
+   },
+   "role": "shape",
+   "shape": "screen",
+   "label": {
+    "text": "상품 목록",
+    "x": 365.48321314102566,
+    "y": 99.32666015625,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   },
+   "sublabel": {
+    "text": "/products?category=",
+    "x": 365.48321314102566,
+    "y": 132.42265625000002,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "node",
+   "path": "login",
+   "rect": {
+    "x": 32.24,
+    "y": 274.29,
+    "width": 168,
+    "height": 74.19
+   },
+   "role": "shape",
+   "shape": "screen",
+   "label": {
+    "text": "로그인",
+    "x": 116.24160657051283,
+    "y": 311.383984375,
+    "fontSize": 12,
+    "weight": "semibold",
+    "align": "middle"
+   },
+   "sublabel": {
+    "text": "/login",
+    "x": 116.24160657051283,
+    "y": 344.47998046875,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle"
+   }
+  }
+ ],
+ "markers": [],
+ "flows": [
+  {
+   "id": "buy",
+   "title": "첫 구매",
+   "steps": [
+    {
+     "edgeId": "e0",
+     "text": "홈에서 카테고리로 들어간다",
+     "badge": {
+      "x": 240.86,
+      "y": 84.22
+     },
+     "n": 1
+    },
+    {
+     "edgeId": "e1",
+     "text": "상품을 고른다",
+     "badge": {
+      "x": 489.03,
+      "y": 99.33
+     },
+     "n": 2
+    },
+    {
+     "edgeId": "e2",
+     "text": "장바구니에 담는다",
+     "badge": {
+      "x": 734.38,
+      "y": 99.33
+     },
+     "n": 3
+    },
+    {
+     "edgeId": "e3",
+     "text": "주문을 시작한다",
+     "badge": {
+      "x": 602.72,
+      "y": 203.42
+     },
+     "n": 4
+    },
+    {
+     "edgeId": "e6",
+     "text": "결제가 승인되면 완료 화면으로 간다",
+     "badge": {
+      "x": 489.03,
+      "y": 308.63
+     },
+     "n": 5
+    }
+   ]
+  }
+ ],
+ "icons": [],
+ "texts": [
+  "/",
+  "/cart",
+  "/checkout",
+  "/login",
+  "/orders/[id]/complete",
+  "/products/[id]",
+  "/products?category=",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "…«»+",
+  "결제 승인",
+  "결제가 승인되면 완료 화면으로 간다",
+  "담기",
+  "로그인",
+  "로그인 성공",
+  "비로그인",
+  "상품 목록",
+  "상품 상세",
+  "상품 선택",
+  "상품을 고른다",
+  "쇼핑 계속",
+  "장바구니",
+  "장바구니에 담는다",
+  "주문 완료",
+  "주문·결제",
+  "주문을 시작한다",
+  "주문하기",
+  "첫 구매",
+  "추천 상품과 기획전을 보여 주는 첫 화면이다.",
+  "카테고리",
+  "홈",
+  "홈에서 카테고리로 들어간다"
+ ]
+}

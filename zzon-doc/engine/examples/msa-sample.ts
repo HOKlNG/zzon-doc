@@ -6,7 +6,7 @@
  */
 import { diagram } from "../src/dsl/index.ts";
 
-export default diagram("msa-sample", { aspectRatio: 2.6, title: "MSA Sample — Category Cards" }, (d) => {
+export default diagram("msa-sample", { aspectRatio: 2.6, title: "MSA 서비스 구성" }, (d) => {
   const gateway = d.node("gateway", {
     category: "gateway",
     label: "API Gateway",
@@ -19,7 +19,7 @@ export default diagram("msa-sample", { aspectRatio: 2.6, title: "MSA Sample — 
     category: "service",
     label: "Order Service",
     tech: "NestJS 10",
-    description: "주문 생성/조회 도메인. 결제 승인 후 주문 상태를 확정한다.",
+    description: "주문을 만들고 조회하며, 결제가 승인되면 주문 상태를 확정한다.",
   });
   const payment = services.node("payment", {
     category: "service",
@@ -32,7 +32,7 @@ export default diagram("msa-sample", { aspectRatio: 2.6, title: "MSA Sample — 
   const pg = d.node("pg-api", {
     category: "external",
     label: "PG API",
-    description: "외부 결제 대행사 (Toss Payments). 장애 시 재시도 큐로 우회한다.",
+    description: "외부 결제대행사인 Toss Payments로, 장애가 나면 재시도 큐로 돌려 다시 시도한다.",
   });
 
   d.edge(gateway, order, { label: "REST", layer: "http" });

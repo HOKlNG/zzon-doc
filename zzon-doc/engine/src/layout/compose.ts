@@ -36,7 +36,8 @@ import { measureWidth } from "../text/metrics.ts";
 import { placeLayered, placePack, type ChildBox, type ChildEdge } from "./elk-adapter.ts";
 import { GROUP_STYLES } from "../render/group-styles.ts";
 import { sizeTable, makeSceneTable } from "../render/table.ts";
-import { sizeCard, CARD_CATEGORY_META } from "../render/card.ts";
+import { sizeCard, CARD_CATEGORY_META, CARD_SHAPES, notationCategory, activityText } from "../render/card.ts";
+import { sizeShape } from "../render/shapes.ts";
 
 const CANVAS_MARGIN = 32;
 const ACTOR_GAP = 48;
@@ -75,6 +76,7 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
   function layNode(el: NodeEl | RailItem | ActorEl, role: SceneNode["role"], iconSize: number): Laid {
     const asNode = el as NodeEl;
     if (asNode.table) return layTable(asNode);
+    if (asNode.shape) return layShape(asNode);
     if (asNode.category) return layCard(asNode);
     const visual: NodeVisual = sizeNode(
       { label: el.label, sublabel: asNode.sublabel, badges: asNode.badges },
@@ -148,12 +150,78 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
     };
   }
 
+  // terminals nothing points at are flowchart starts
+  const edgeTargets = new Set(model.edges.map((e) => e.to));
+
+  function layShape(el: NodeEl): Laid {
+    if (CARD_SHAPES.has(el.shape!)) return layNotationCard(el);
+    const sized = sizeShape({ shape: el.shape!, label: el.label, sublabel: el.sublabel, classSpec: el.classSpec });
+    return {
+      path: el.path,
+      width: sized.width,
+      height: sized.height,
+      place: (ox, oy) => {
+        const rect = { x: ox, y: oy, width: sized.width, height: sized.height };
+        rectByPath.set(el.path, rect);
+        scene.nodes.push({
+          kind: "node",
+          path: el.path,
+          rect,
+          role: "shape",
+          shape: el.shape,
+          ...(el.classSpec ? { classSpec: el.classSpec } : {}),
+          description: el.description,
+          href: el.href,
+          // the shape renderer lays text out itself; these anchors only carry the
+          // strings (payload label, font subset) and stay inside rect for routing
+          label: el.label ? makeLabel(el.label, ox + sized.width / 2, oy + sized.height / 2, 12, { weight: "semibold" }) : undefined,
+          sublabel: el.sublabel ? makeLabel(el.sublabel, ox + sized.width / 2, oy + sized.height - 4, 10) : undefined,
+          meta: el.meta,
+        });
+      },
+    };
+  }
+
+  /** state / process / decision / terminal / module: the architecture card, keeping
+   *  `shape` on the scene node for routing (decision exits) and semantics */
+  function layNotationCard(el: NodeEl): Laid {
+    const category = notationCategory(el.shape!, el.tone, !edgeTargets.has(el.path));
+    const tech = activityText(el.sublabel);
+    const sized = sizeCard({ label: el.label, category, tech });
+    return {
+      path: el.path,
+      width: sized.width,
+      height: sized.height,
+      place: (ox, oy) => {
+        const rect = { x: ox, y: oy, width: sized.width, height: sized.height };
+        rectByPath.set(el.path, rect);
+        scene.nodes.push({
+          kind: "node",
+          path: el.path,
+          rect,
+          role: "card",
+          shape: el.shape,
+          category,
+          tech,
+          description: el.description,
+          href: el.href,
+          label: el.label
+            ? makeLabel(el.label, ox + 52, oy + 24, 12, { weight: "semibold", align: "start" })
+            : undefined,
+          meta: el.meta,
+        });
+      },
+    };
+  }
+
   function layCard(el: NodeEl): Laid {
+    // 설명 문장은 기본적으로 사이드바 전용 — 캔버스 표기는 nodeDescriptions(C4 컨텍스트 관례)일 때만
+    const onCanvas = model.nodeDescriptions === true && !!el.description;
     const sized = sizeCard({
       label: el.label,
       category: el.category!,
       tech: el.tech,
-      description: el.description,
+      description: onCanvas ? el.description : undefined,
     });
     return {
       path: el.path,
@@ -170,6 +238,7 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
           category: el.category,
           tech: el.tech,
           description: el.description,
+          ...(onCanvas ? { descriptionOnCanvas: true as const } : {}),
           href: el.href,
           // 렌더러가 내부 배치하므로 좌표는 bbox 근사용 — 반드시 rect 안쪽이어야
           // 라우팅·불변식의 라벨 영역이 실제와 일치한다
@@ -253,12 +322,12 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
       for (const child of el.children) {
         laids.push(child.type === "node" ? layNode(child, "resource", NODE_ICON) : await layGroup(child));
       }
-      const boxes: ChildBox[] = laids.map((l, i) => ({ id: l.path, width: l.width, height: l.height, order: i }));
+      const boxes: ChildBox[] = laids.map((l, i) => ({ id: l.path, width: l.width, height: l.height, order: i, ...hintOf(el.children[i]!) }));
       const projected = projectEdges(el.children, model.edges);
-      const strategy = el.layout === "auto" ? autoStrategy(projected) : el.layout;
+      const strategy = el.layout === "auto" ? autoStrategy(projected, boxes) : el.layout;
       const placed =
         strategy === "layered"
-          ? await placeLayeredBestFit(boxes, projected, model.aspectRatio, corridorFor(el.children, model.edges))
+          ? await placeLayeredBestFit(boxes, projected, model, corridorFor(el.children, model.edges))
           : await placePack(boxes, model.aspectRatio);
       contentW = placed.width;
       contentH = placed.height;
@@ -364,11 +433,11 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
   for (const child of model.children) {
     coreLaids.push(child.type === "node" ? layNode(child, "resource", NODE_ICON) : await layGroup(child));
   }
-  const coreBoxes: ChildBox[] = coreLaids.map((l, i) => ({ id: l.path, width: l.width, height: l.height, order: i }));
+  const coreBoxes: ChildBox[] = coreLaids.map((l, i) => ({ id: l.path, width: l.width, height: l.height, order: i, ...hintOf(model.children[i]!) }));
   const coreEdges = projectEdges(model.children, model.edges);
   const corePlaced =
-    autoStrategy(coreEdges) === "layered"
-      ? await placeLayeredBestFit(coreBoxes, coreEdges, model.aspectRatio, corridorFor(model.children, model.edges))
+    autoStrategy(coreEdges, coreBoxes) === "layered"
+      ? await placeLayeredBestFit(coreBoxes, coreEdges, model, corridorFor(model.children, model.edges), true)
       : await placePack(coreBoxes, model.aspectRatio);
 
   // actors by side
@@ -509,6 +578,11 @@ export async function layoutDiagram(model: DiagramModel): Promise<Scene> {
       if (n.tech) texts.add(n.tech);
     }
     if (n.description) texts.add(n.description);
+    if (n.shape) {
+      texts.add("…«»+"); // truncation / stereotype / overflow glyphs
+      if (n.classSpec?.stereotype) texts.add(n.classSpec.stereotype);
+      for (const r of [...(n.classSpec?.attributes ?? []), ...(n.classSpec?.methods ?? [])]) texts.add(r);
+    }
     if (n.table) for (const c of n.table.columns) {
       texts.add(c.name);
       if (c.type) texts.add(c.type);
@@ -561,7 +635,10 @@ function railOverhang(el: GroupEl): { top: number; right: number; bottom: number
  * to a single ELK layer — elk.aspectRatio is a no-op for connected layered
  * graphs — so those pack instead and the global router draws the fan.
  */
-function autoStrategy(projected: ChildEdge[]): "pack" | "layered" {
+function autoStrategy(projected: ChildEdge[], boxes: ChildBox[] = []): "pack" | "layered" {
+  // an author who pinned layers/slots asked for that structure — honor it even
+  // without internal edges (a lane of 4 DBs is a column, not a 2x2 pack)
+  if (boxes.some((b) => b.layer !== undefined || b.slot !== undefined)) return "layered";
   if (projected.length === 0) return "pack";
   const degree = new Map<string, number>();
   const out = new Map<string, string[]>();
@@ -595,22 +672,37 @@ function autoStrategy(projected: ChildEdge[]): "pack" | "layered" {
   return depth <= 1 && maxDegree >= 4 ? "pack" : "layered";
 }
 
+/** 개괄 등급(T1) 상한 — 이하 규모는 방향을 종횡비 때문에 뒤집지 않는다 (selection-rubric §3.1) */
+const OVERVIEW_MAX_NODES = 9;
+
 /**
- * layered 배치가 목표 종횡비 대비 2배 이상 넓으면(ELK wrapping은 소프트라 과폭이
- * 남는다) DOWN 방향으로 한 번 더 배치해 목표에 가까운 쪽을 채택한다.
+ * 작성자가 방향을 선언했으면 그대로 따른다. 미선언이면 RIGHT로 배치하되, 목표 종횡비
+ * 대비 크게 넓고(ELK wrapping은 소프트라 과폭이 남는다) 개괄 규모를 넘는 컨테이너만
+ * DOWN으로 한 번 더 배치해 목표에 가까운 쪽을 채택한다. 작은 그림(사용자→시스템→외부
+ * 3열 같은 컨텍스트)을 세로로 뒤집으면 의미 방향이 깨진다 — 넓은 건 화면 맞춤이 해결한다.
  */
 async function placeLayeredBestFit(
   boxes: ChildBox[],
   edges: ChildEdge[],
-  aspectRatio: number,
+  model: DiagramModel,
   minCorridor = 0,
+  topLevel = false,
 ): Promise<Awaited<ReturnType<typeof placeLayered>>> {
-  const right = await placeLayered(boxes, edges, "RIGHT", aspectRatio, minCorridor);
+  const aspectRatio = model.aspectRatio;
+  const wrap = topLevel ? "rows" : "elk";
+  // declared direction = the author's reading order: only the text-like row wrap
+  // (RIGHT, top level) keeps it; ELK's MULTI_EDGE wrap would fold a DOWN
+  // dependency graph into side-by-side columns
+  if (model.direction) {
+    return placeLayered(boxes, edges, model.direction, aspectRatio, minCorridor, model.direction === "RIGHT" && topLevel ? "rows" : "none");
+  }
+  const right = await placeLayered(boxes, edges, "RIGHT", aspectRatio, minCorridor, wrap);
   const ratio = right.height > 0 ? right.width / right.height : aspectRatio;
   const bandHi = aspectRatio * 1.75; // 불변식 허용 상한과 일치
   const bandLo = aspectRatio * 0.25;
   if (ratio <= bandHi) return right;
-  const down = await placeLayered(boxes, edges, "DOWN", aspectRatio, minCorridor);
+  if (boxes.length <= OVERVIEW_MAX_NODES && !boxes.some((b) => b.layer !== undefined)) return right;
+  const down = await placeLayered(boxes, edges, "DOWN", aspectRatio, minCorridor, wrap);
   const dRatio = down.height > 0 ? down.width / down.height : aspectRatio;
   const inBand = (r: number) => r >= bandLo && r <= bandHi;
   if (inBand(dRatio)) return down; // 밴드 안이 최우선
@@ -625,13 +717,20 @@ function corridorFor(children: Element[], edges: Edge[]): number {
     return null;
   };
   let w = 0;
+  // the busiest pair of neighbours decides how many parallel runs share a
+  // corridor: each needs a nudging lane next to the widest label
+  const perPair = new Map<string, number>();
   for (const e of edges) {
-    if (!e.label) continue;
     const from = owner(e.from);
     const to = owner(e.to);
-    if (from && to && from !== to) w = Math.max(w, measureWidth(e.label, 11));
+    if (!from || !to || from === to) continue;
+    const key = [from, to].sort().join("|");
+    perPair.set(key, (perPair.get(key) ?? 0) + 1);
+    if (e.label) w = Math.max(w, measureWidth(e.label, 11));
   }
-  return w ? w + 28 : 0;
+  const busiest = Math.max(0, ...perPair.values());
+  const lanes = Math.min(Math.max(busiest - 1, 0), 6) * 14; // NUDGING_DISTANCE per extra run
+  return w ? w + 28 + lanes : lanes;
 }
 
 function projectEdges(children: Element[], edges: Edge[]): ChildEdge[] {
@@ -644,8 +743,10 @@ function projectEdges(children: Element[], edges: Edge[]): ChildEdge[] {
   const seen = new Set<string>();
   const out: ChildEdge[] = [];
   for (const e of edges) {
-    const from = owner(e.from);
-    const to = owner(e.to);
+    // UML inheritance/realization point child→parent, but parents sit first
+    const [a, b] = e.layoutReverse ? [e.to, e.from] : [e.from, e.to];
+    const from = owner(a);
+    const to = owner(b);
     if (!from || !to || from === to) continue;
     const key = `${from}->${to}`;
     if (seen.has(key)) continue;
@@ -653,4 +754,33 @@ function projectEdges(children: Element[], edges: Edge[]): ChildEdge[] {
     out.push({ from, to });
   }
   return out;
+}
+
+/**
+ * Author layout hints for one container child. Groups without their own hint
+ * inherit the minimum layer/order of their descendant nodes — the legacy
+ * DiagramSpec put lanes on nodes only, so a group spans its members' lanes.
+ */
+function hintOf(el: Element): { layer?: number; slot?: number } {
+  const own = el.hints ?? {};
+  let layer = own.layer;
+  let slot = own.order;
+  if (el.type === "group" && (layer === undefined || slot === undefined)) {
+    const layers: number[] = [];
+    const slots: number[] = [];
+    const walk = (e: Element) => {
+      if (e.type === "node") {
+        if (e.hints?.layer !== undefined) layers.push(e.hints.layer);
+        if (e.hints?.order !== undefined) slots.push(e.hints.order);
+      } else {
+        const kids = e.grid ? Object.values(e.grid.cells).flatMap((c) => c.children) : e.children;
+        kids.forEach(walk);
+      }
+    };
+    el.children.forEach(walk);
+    if (el.grid) Object.values(el.grid.cells).flatMap((c) => c.children).forEach(walk);
+    if (layer === undefined && layers.length) layer = Math.min(...layers);
+    if (slot === undefined && slots.length) slot = Math.min(...slots);
+  }
+  return { ...(layer !== undefined ? { layer } : {}), ...(slot !== undefined ? { slot } : {}) };
 }

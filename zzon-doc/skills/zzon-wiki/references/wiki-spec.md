@@ -42,7 +42,7 @@
     {
       "id": "q-001",                       // ^q-\d{3,}$ , 전역 유일
       "doc": "architecture/context",       // 트리 경로 (sectionId/slug[/slug])
-      "text": "외부 PG는 토스 단일인가, 복수 연동 예정인가?",
+      "text": "결제대행사는 토스페이먼츠 한 곳만 쓰는가, 여러 곳을 연동할 예정인가?",
       "status": "open",                    // "open" | "answered" | "dropped"
       "askedAt": "2026-07-05T13:10:00+09:00",
       "answer": null,                      // answered면 필수
@@ -51,11 +51,11 @@
   ],
   "history": [                             // append-only, 최신이 뒤. 200개 초과 시 앞에서 잘림
     { "ts": "2026-07-05T11:05:00+09:00", "actor": "skill", "action": "init",
-      "note": "tier=standard, 섹션 9개 승인" },
+      "note": "표준 구성과 섹션 목록을 승인받았다" },
     { "ts": "2026-07-05T13:10:00+09:00", "actor": "skill", "action": "draft",
-      "docs": ["architecture/context"], "note": "코드 스캔 초안 + 질문 1건" },
+      "docs": ["architecture/context"], "note": "코드를 읽고 초안을 쓴 뒤 질문을 하나 남겼다" },
     { "ts": "2026-07-05T14:20:00+09:00", "actor": "human", "action": "edited",
-      "docs": ["data/logical-erd"], "note": "빌드 시 해시 불일치 감지" }
+      "docs": ["data/logical-erd"], "note": "사람이 직접 고친 문서를 빌드에서 확인했다" }
   ]
 }
 ```
@@ -66,7 +66,7 @@
 {
   "slug": "context",                 // ^[a-z0-9][a-z0-9_-]*$ , 같은 부모 안에서 유일
   "title": "시스템 컨텍스트",
-  "summary": "시스템과 외부 행위자.", // 문서 목적 한 줄 (nav·카드에 노출)
+  "summary": "누가 시스템을 쓰고 어떤 외부 서비스와 연결되는지 정리한다.", // 문서 목적 한 줄 (nav·카드에 노출)
   "tier": 1,                         // 1(라이트) | 2(표준) | 3(풀) — 카탈로그에서 상속
   "status": "done",                  // "todo" | "draft" | "done" | "na"
   "naReason": null,                  // status="na"면 필수 (왜 해당 없음인지)
@@ -96,6 +96,7 @@
 - 지원 문법: `#`~`####` 제목, 문단, `-`/`1.` 목록, ``` 코드펜스, 인라인 코드, **굵게**, *기울임*, [링크](url), `>` 인용, `|` 표, `---` 구분선.
 - 링크 스킴 허용목록: `https?:`, `#`(사이트 내 해시 라우트), 상대경로. `javascript:`/`data:`는 텍스트로 강등된다.
 - **H1은 쓰지 않는다** — 페이지 제목은 wiki.json의 `title`이 렌더한다. 본문은 `##`부터.
+- **문체**: 본문과 wiki.json의 사람 글(`title`, `summary`, `purpose`, 질문 `text`, `note`)은 `../../zzon-doc/references/writing-style.md`의 여섯 규칙을 따른다. 화살표 사슬, 줄표 끼워 넣기, 필드 이름, 섹션·질문 번호를 문장에 쓰지 않는다.
 
 ### 다이어그램 임베드
 
@@ -112,7 +113,7 @@
 답을 못 받은 지점은 본문에 반드시 이 형태로 남긴다:
 
 ```
-> ❓ 미확인(q-001): 외부 PG는 토스 단일인가, 복수 연동 예정인가?
+> ❓ 미확인(q-001): 결제대행사는 토스페이먼츠 한 곳만 쓰는가, 여러 곳을 연동할 예정인가?
 ```
 
 - `q-NNN`은 wiki.json 질문 대장의 id와 일치해야 한다.
@@ -125,3 +126,4 @@
 3. todo 문서에 **빈 md 파일을 만들지 않았나?**
 4. 아키텍처류 문서라면 **다이어그램을 zzon-doc 절차로 그려 임베드했나?** (직접 HTML 금지)
 5. status·hash를 wiki.json에 반영했나? (빌드를 돌리면 자동)
+6. 문장을 writing-style.md 여섯 규칙으로 다시 읽었나? (기호 나열, 필드 이름, 내부 코드, 그림 제작 설명이 남지 않았나)

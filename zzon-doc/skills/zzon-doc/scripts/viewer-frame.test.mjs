@@ -274,8 +274,8 @@ test("FRAME_GLYPHS가 런타임 주입 STR 전체를 덮는다 (구성상 보장
  * 격리 (§8) / 안전성 / 안정성
  * ========================================================================= */
 
-test("엔진 임포트 금지: 모듈은 아무것도 import하지 않는다", () => {
-  const src = readFileSync(MODULE_URL, "utf8");
+test("엔진 임포트 금지: 모듈이 import하는 것은 공용 디자인 토큰 하나뿐이다", () => {
+  const src = readFileSync(MODULE_URL, "utf8").replace(/^import \{[^}]*\} from "\.\/design-tokens\.mjs";$/m, "");
   assert.ok(!/^\s*import[\s("']/m.test(src), "import 구문 발견");
   assert.ok(!/\brequire\s*\(/.test(src), "require 호출 발견");
   assert.ok(!/\bfrom\s+["']/.test(src), "from 절 발견");

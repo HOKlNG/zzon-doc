@@ -15,6 +15,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { FONT_STACK, MONO_STACK, themeCss, tokenNames } from "../../zzon-doc/scripts/design-tokens.mjs";
+import { fontFaceCss } from "../../zzon-doc/scripts/engine-cli.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ENGINE = readFileSync(join(HERE, "seq-engine.js"), "utf8");
@@ -123,14 +125,27 @@ function escapeHtml(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+/** 공용 디자인 토큰(--z-*) — seq-engine.js의 색·글꼴 변수가 이 값을 참조한다 */
+const TOKENS_CSS =
+  `:root{--z-font:${FONT_STACK};--z-mono:${MONO_STACK}}\n` +
+  themeCss(tokenNames("--z-"), { light: ":root", dark: ':root[data-theme="dark"]' });
+
 function buildHtml(spec, slug) {
   const payload = JSON.stringify({ ...spec, slug }).replace(/</g, "\\u003c");
+  const html = buildPage(spec, payload);
+  // 다른 zzon 화면과 같은 글꼴(Pretendard 서브셋) — bun이 없으면 OS 글꼴
+  return html.replace("/*__FONT__*/", () => fontFaceCss(html));
+}
+
+function buildPage(spec, payload) {
   return `<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>${escapeHtml(spec.title)}</title>
+<style>/*__FONT__*/
+${TOKENS_CSS}</style>
 </head>
 <body>
 <script id="zzon-seq-spec" type="application/json">${payload}</script>

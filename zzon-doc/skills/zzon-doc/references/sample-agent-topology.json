@@ -1,8 +1,8 @@
 {
   "specVersion": 1,
-  "title": "zzon-doc 플러그인 구조 (에이전트 토폴로지)",
+  "title": "zzon-doc 플러그인 구조",
   "kind": "agent-topology",
-  "description": "마켓플레이스 → 플러그인 → 스킬 → Claude 저작 → 렌더/빌드 스크립트로 이어지는 이 플러그인 자체의 구조.",
+  "description": "이 플러그인이 어떻게 짜여 있는지 보여 준다. 마켓플레이스가 플러그인을 싣고, 스킬이 Claude에게 절차를 안내하면 Claude가 스펙 규칙과 샘플을 읽고 렌더 스크립트로 그림을 만든다.",
   "layout": { "direction": "RIGHT" },
   "groups": [
     { "id": "skillpkg", "label": "zzon-doc 스킬 패키지", "kind": "boundary" }
@@ -10,12 +10,12 @@
   "nodes": [
     { "id": "marketplace", "label": "zzon 마켓플레이스", "category": "other", "tech": "marketplace.json" },
     { "id": "plugin", "label": "zzon-doc 플러그인", "category": "other", "tech": "plugin.json" },
-    { "id": "skill", "label": "zzon-doc 스킬", "category": "skill", "tech": "SKILL.md", "parentId": "skillpkg", "description": "코드 분석 → 스펙 저작 → 렌더 절차를 안내한다." },
-    { "id": "claude", "label": "Claude (저작자)", "category": "agent", "parentId": "skillpkg", "description": "소스를 읽고 DiagramSpec JSON을 만든다." },
+    { "id": "skill", "label": "zzon-doc 스킬", "category": "skill", "tech": "SKILL.md", "parentId": "skillpkg", "description": "코드를 분석하고 스펙을 써서 렌더하기까지의 절차를 안내한다." },
+    { "id": "claude", "label": "Claude (저작자)", "category": "agent", "parentId": "skillpkg", "description": "소스 코드를 읽고 다이어그램 스펙을 쓴다." },
     { "id": "specmd", "label": "diagram-spec.md", "category": "doc", "parentId": "skillpkg" },
     { "id": "samples", "label": "샘플 스펙들", "category": "doc", "parentId": "skillpkg" },
-    { "id": "render", "label": "render.mjs (엔진)", "category": "other", "tech": "Node", "parentId": "skillpkg", "description": "스펙 1개 → 단일 .html." },
-    { "id": "build", "label": "build-docs.mjs", "category": "other", "tech": "Node", "parentId": "skillpkg", "description": "여러 스펙 → 통합 문서 index.html." }
+    { "id": "render", "label": "render.mjs (엔진)", "category": "other", "tech": "Node", "parentId": "skillpkg", "description": "스펙 하나를 HTML 파일 하나로 렌더한다." },
+    { "id": "build", "label": "build-docs.mjs", "category": "other", "tech": "Node", "parentId": "skillpkg", "description": "여러 스펙을 묶어 통합 문서를 만든다." }
   ],
   "edges": [
     { "id": "e-mp-plugin", "source": "marketplace", "target": "plugin", "kind": "depends", "label": "수록" },
@@ -31,11 +31,11 @@
     {
       "id": "make-one",
       "label": "다이어그램 1장 만들기",
-      "description": "요청부터 .html 산출까지의 기본 경로",
+      "description": "요청을 받아 HTML 파일이 나오기까지의 기본 경로",
       "steps": [
         { "edge": "e-skill-claude", "text": "스킬이 Claude에게 절차를 안내한다." },
         { "edge": "e-claude-specmd", "text": "Claude가 스펙 규칙을 읽는다." },
-        { "edge": "e-claude-render", "text": "Claude가 render.mjs로 .html을 뽑는다." }
+        { "edge": "e-claude-render", "text": "Claude가 렌더 스크립트로 HTML 파일을 만든다." }
       ]
     }
   ]

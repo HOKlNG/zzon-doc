@@ -137,7 +137,7 @@ interface TableColors {
 /** interactive variant: CSS vars so the theme toggle restyles live */
 const VAR_COLORS: TableColors = {
   bg: "var(--ia-canvas)",
-  border: "var(--table-border, #D4D4D8)",
+  border: "var(--table-border, #d4d4d8)",
   head: "var(--table-head, #f4f4f5)",
   zebra: "var(--table-zebra, rgba(125,137,152,0.09))",
   text: "var(--ia-text)",
@@ -153,14 +153,14 @@ const VAR_COLORS: TableColors = {
 /** static variant: literals baked per theme (canvas/text/muted from theme.ts) */
 const STATIC_COLORS: Record<ThemeName, TableColors> = {
   light: {
-    bg: THEMES.light.canvas, border: "#D4D4D8", head: "#F4F4F5", zebra: "#F7F7F8",
+    bg: THEMES.light.canvas, border: "#d4d4d8", head: "#f4f4f5", zebra: "#f7f7f8",
     text: THEMES.light.text, muted: THEMES.light.edge, accent: "#10B981", key: "#F59E0B",
     chipStroke: "#D4D4D8", fkText: "#0284C7", fkFill: "#E0F2FE", fkStroke: "#7DD3FC",
   },
   dark: {
-    bg: THEMES.dark.canvas, border: "#2E3B50", head: "#1D2739", zebra: "#1A2334",
+    bg: THEMES.dark.canvas, border: "#3f3f46", head: "#1f1f23", zebra: "#141417",
     text: THEMES.dark.text, muted: THEMES.dark.edge, accent: "#34D399", key: "#FBBF24",
-    chipStroke: "#3A4961", fkText: "#38BDF8", fkFill: "#123B55", fkStroke: "#1E5B80",
+    chipStroke: "#3f3f46", fkText: "#38BDF8", fkFill: "#123B55", fkStroke: "#1E5B80",
   },
 };
 

@@ -2,7 +2,7 @@
   "specVersion": 1,
   "title": "데모숍 ERD",
   "kind": "erd",
-  "description": "주문 도메인의 핵심 테이블. FK 엣지는 컬럼 높이에 앵커된다.",
+  "description": "주문 도메인의 핵심 테이블과 그 관계를 보여 준다.",
   "layout": { "direction": "RIGHT" },
   "groups": [],
   "nodes": [
@@ -10,7 +10,7 @@
       "id": "order_items",
       "label": "order_items",
       "category": "table",
-      "description": "주문 상품 라인. 주문 시점 가격을 스냅샷으로 보관한다.",
+      "description": "주문에 담긴 상품 한 줄이다. 주문 당시의 가격을 그대로 저장한다.",
       "table": {
         "columns": [
           { "name": "id", "type": "bigint", "pk": true },
@@ -25,7 +25,7 @@
       "id": "orders",
       "label": "orders",
       "category": "table",
-      "description": "주문 헤더. 상태 머신: pending → paid → shipped → done",
+      "description": "주문 한 건의 기본 정보다. 상태는 pending, paid, shipped, done 순서로 바뀐다.",
       "table": {
         "columns": [
           { "name": "id", "type": "bigint", "pk": true },
@@ -40,7 +40,7 @@
       "id": "products",
       "label": "products",
       "category": "table",
-      "description": "판매 상품 카탈로그",
+      "description": "판매하는 상품 목록이다.",
       "table": {
         "columns": [
           { "name": "id", "type": "bigint", "pk": true },
@@ -54,7 +54,7 @@
       "id": "users",
       "label": "users",
       "category": "table",
-      "description": "회원. 소프트 삭제(deleted_at) 사용",
+      "description": "회원 정보다. 지울 때는 행을 없애지 않고 deleted_at에 시각을 남긴다.",
       "table": {
         "columns": [
           { "name": "id", "type": "bigint", "pk": true },

@@ -34,6 +34,8 @@ import { sidebarDataAttrs } from "./sidebar.ts";
 import { renderFlowBadgesSvg } from "./flows.ts";
 import { renderTableSvg, cardinalityMarkerDefs, edgeCardinalityAttrs } from "./table.ts";
 import { renderCardSvg } from "./card.ts";
+import { renderShapeSvg } from "./shapes.ts";
+import type { EdgeMarker } from "../model/types.ts";
 
 // ------------------------------------------------------------ shared primitives
 
@@ -87,7 +89,7 @@ export function lineHeightFor(fontSize: number, weight: FontWeight): number {
 export const colorId = (color: string): string => color.replace(/[^a-zA-Z0-9]/g, "");
 
 /** One <marker> per distinct arrowhead color, in first-use order. */
-export function arrowMarkerDefs(edges: readonly SceneEdge[]): string {
+export function arrowMarkerDefs(edges: readonly SceneEdge[], canvas = "var(--ia-canvas)"): string {
   const seen = new Set<string>();
   const parts: string[] = [];
   for (const e of edges) {
@@ -99,7 +101,44 @@ export function arrowMarkerDefs(edges: readonly SceneEdge[]): string {
         `<path d="M0 0L10 5L0 10z" fill="${e.style.color}"/></marker>`,
     );
   }
+  // UML end decorations (sourceMarker/targetMarker), one per (kind, color)
+  const umlSeen = new Set<string>();
+  for (const e of edges) {
+    for (const m of [e.style.sourceMarker, e.style.targetMarker]) {
+      if (!m || m === "none" || m === "arrow") continue;
+      const key = `${m}:${e.style.color}`;
+      if (umlSeen.has(key)) continue;
+      umlSeen.add(key);
+      parts.push(umlMarkerDef(m, e.style.color, canvas));
+    }
+  }
   return parts.join("\n");
+}
+
+const umlMarkerId = (m: EdgeMarker, color: string) => `mk-${m}-${colorId(color)}`;
+
+/** UML relation ends: hollow triangle (inheritance), filled/hollow diamond (composition/aggregation), open V (dependency) */
+function umlMarkerDef(m: EdgeMarker, color: string, canvas: string): string {
+  const head = `<marker id="${umlMarkerId(m, color)}" markerUnits="userSpaceOnUse" orient="auto-start-reverse" `;
+  switch (m) {
+    case "triangle":
+      return head + `viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13"><path d="M1 1L11 6L1 11z" fill="${canvas}" stroke="${color}" stroke-width="1.3"/></marker>`;
+    case "diamond":
+      return head + `viewBox="0 0 16 10" refX="15.5" refY="5" markerWidth="16" markerHeight="10"><path d="M0.5 5L8 0.5L15.5 5L8 9.5z" fill="${color}"/></marker>`;
+    case "diamond-open":
+      return head + `viewBox="0 0 16 10" refX="15.5" refY="5" markerWidth="16" markerHeight="10"><path d="M0.5 5L8 0.5L15.5 5L8 9.5z" fill="${canvas}" stroke="${color}" stroke-width="1.2"/></marker>`;
+    case "open-arrow":
+      return head + `viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10"><path d="M1 1L9 5L1 9" fill="none" stroke="${color}" stroke-width="1.4"/></marker>`;
+    default:
+      return "";
+  }
+}
+
+function endMarkerUrl(m: EdgeMarker | undefined, color: string, plain: boolean): string | undefined {
+  if (m === undefined) return plain ? `url(#arw-${colorId(color)})` : undefined;
+  if (m === "none") return undefined;
+  if (m === "arrow") return `url(#arw-${colorId(color)})`;
+  return `url(#${umlMarkerId(m, color)})`;
 }
 
 /**
@@ -146,12 +185,11 @@ export interface EdgeGeometry {
 /** Path data + dash + arrowhead refs for one routed edge (both variants). */
 export function edgeGeometry(e: SceneEdge): EdgeGeometry {
   const d = e.points.map((p, i) => `${i === 0 ? "M" : "L"}${fmt(p.x)} ${fmt(p.y)}`).join("");
-  const url = `url(#arw-${colorId(e.style.color)})`;
   return {
     d,
     dash: EDGE_DASH[e.style.preset],
-    markerStart: e.style.arrowhead === "both" ? url : undefined,
-    markerEnd: e.style.arrowhead !== "none" ? url : undefined,
+    markerStart: endMarkerUrl(e.style.sourceMarker, e.style.color, e.style.arrowhead === "both"),
+    markerEnd: endMarkerUrl(e.style.targetMarker, e.style.color, e.style.arrowhead !== "none"),
   };
 }
 
@@ -197,9 +235,11 @@ function textEl(label: SceneLabel, defaultFill: string, pill = false): string {
   if (pill) {
     const w = measure(label.text, label.fontSize, label.weight ?? "regular").width;
     const x = label.align === "middle" ? label.x - w / 2 : label.align === "end" ? label.x - w : label.x;
+    // line labels sit on a pill (card fill + border), the same chip every zzon page uses
+    const ph = label.fontSize + 9;
     bg =
-      `<rect x="${fmt(x - 5)}" y="${fmt(label.y - label.fontSize - 1)}" width="${fmt(w + 10)}"` +
-      ` height="${fmt(label.fontSize + 8)}" rx="4" fill="var(--ia-canvas, #fff)" fill-opacity="0.92"/>`;
+      `<rect x="${fmt(x - 7)}" y="${fmt(label.y - label.fontSize - 1.5)}" width="${fmt(w + 14)}"` +
+      ` height="${fmt(ph)}" rx="${fmt(ph / 2)}" fill="var(--card, #fff)" stroke="var(--border, #e4e4e7)" stroke-width="1"/>`;
   }
   const open = bg +
     `<text x="${fmt(label.x)}" y="${fmt(label.y)}" font-size="${fmt(label.fontSize)}"` +
@@ -293,6 +333,9 @@ function edgeLabelsLayer(edges: readonly SceneEdge[]): string {
 
 function nodeMarkup(n: SceneNode): string {
   if (n.table) return renderTableSvg(n, { interactive: true });
+  if (n.shape && !n.category) {
+    return renderShapeSvg(n, sidebarDataAttrs(n) + (n.meta ? ` data-meta="${escapeXml(JSON.stringify(n.meta))}"` : ""));
+  }
   if (n.category) return renderCardSvg(n, { interactive: true });
   const cls = `node${n.role && n.role !== "resource" ? ` node-${n.role}` : ""}`;
   let open = `<g class="${cls}" data-path="${escapeXml(n.path)}"`;
