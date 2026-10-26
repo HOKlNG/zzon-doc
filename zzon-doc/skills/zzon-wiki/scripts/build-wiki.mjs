@@ -302,9 +302,37 @@ function proseOf(md) {
   for (const line of lines) {
     if (/^##\s*(관련 자료|더 보기|참고 자료)\s*$/.test(line)) break;
     if (/❓/.test(line)) continue;
-    out.push(line.replace(/`[^`]*`/g, ""));
+    // 표 첫 열의 ID(결정 색인의 번호, 요구사항 ID)는 추적 키라 센다 대상이 아니다
+    const row = /^\s*\|/.test(line) ? line.replace(/^\s*\|[^|]*\|/, "|") : line;
+    out.push(row.replace(/`[^`]*`/g, ""));
   }
   return out.join("\n");
+}
+
+/** 글의 결 지표 — writing-style.md "글의 결" 표의 기준과 같은 잣대 */
+function proseMetrics(md) {
+  const body = md.replace(/\r\n/g, "\n").replace(/```[\s\S]*?```/g, "").split(/\n##\s*(?:관련 자료|더 보기|참고 자료)\s*\n/)[0];
+  const prose = [], list = [], table = [];
+  for (const l of body.split("\n")) {
+    if (/^\s*\|/.test(l)) table.push(l);
+    else if (/^\s*([-*]|\d+\.)\s/.test(l)) list.push(l);
+    else if (l.trim() && !/^#/.test(l) && !/❓/.test(l) && !/^@diagram/.test(l)) prose.push(l);
+  }
+  const text = prose.join("\n");
+  const sentences = text.split(/(?<=[.?!])\s+(?=\S)/).filter((x) => x.trim().length > 4);
+  const plain = body.replace(/`[^`]*`/g, "").replace(/\[[^\]]*\]\([^)]*\)/g, "L");
+  const per1k = (n) => Math.round((n / Math.max(1, plain.length)) * 10000) / 10;
+  const p = proseOf(md);
+  return {
+    codes: p.match(TRACKING_CODE) || [],
+    dashes: (p.match(/\s—\s/g) || []).length,
+    sentences: sentences.length,
+    avgLen: Math.round(sentences.reduce((a, x) => a + x.length, 0) / Math.max(1, sentences.length)),
+    listRatio: Math.round((list.length / Math.max(1, list.length + prose.length)) * 100),
+    tablePer10k: Math.round((table.length / Math.max(1, body.length)) * 10000),
+    tickPer1k: per1k((body.match(/`[^`]+`/g) || []).length),
+    dotPer1k: per1k((plain.match(/·/g) || []).length),
+  };
 }
 
 function statusReport(root, wiki) {
@@ -352,21 +380,25 @@ function statusReport(root, wiki) {
   walkDocs(wiki, (n, path) => { if (n.status === "todo") todo.push(path); });
   console.log(`  todo ${todo.length}건` + (todo.length ? `: ${todo.slice(0, 8).join(", ")}${todo.length > 8 ? " …" : ""}` : ""));
 
-  // 문체 검사(writing-style.md 규칙 7·12) — 본문 문장에 남은 추적 코드와 문장을 잇는 줄표
+  // 문체 검사(writing-style.md 규칙 4·7·12·13, "글의 결") — 추적 코드·줄표, 그리고 AWS 기술 블로그와 다른 글의 결
   const style = [];
   walkDocs(wiki, (n, path) => {
     if (!n.file || !existsSync(join(root, n.file))) return;
-    const s = proseOf(readFileSync(join(root, n.file), "utf8"));
-    const codes = s.match(TRACKING_CODE) || [];
-    const dashes = (s.match(/\s—\s/g) || []).length;
-    if (codes.length || dashes > 5) style.push({ path, codes: codes.length, dashes, sample: [...new Set(codes)].slice(0, 3) });
+    const m = proseMetrics(readFileSync(join(root, n.file), "utf8"));
+    const issues = [];
+    if (m.codes.length) issues.push(`추적 코드 ${m.codes.length} (${[...new Set(m.codes)].slice(0, 3).join(", ")})`);
+    if (m.dashes > 5) issues.push(`줄표 ${m.dashes}`);
+    if (m.sentences >= 8 && m.avgLen < 45) issues.push(`단문 나열(평균 ${m.avgLen}자)`);
+    if (m.listRatio > 40) issues.push(`목록 ${m.listRatio}%`);
+    if (m.tablePer10k > 80) issues.push(`표 행 1만 자당 ${m.tablePer10k}`);
+    if (m.tickPer1k > 5) issues.push(`백틱 1천 자당 ${m.tickPer1k}`);
+    if (m.dotPer1k > 3) issues.push(`가운뎃점 1천 자당 ${m.dotPer1k}`);
+    if (issues.length) style.push({ path, issues });
   });
   if (style.length) {
-    console.log(`  문체 검사 — 본문에 추적 코드나 줄표가 남은 문서 ${style.length}개 (관련 자료 절·질문 표식·코드 블록은 제외):`);
-    for (const d of style.slice(0, 12)) {
-      console.log(`    - ${d.path}: 추적 코드 ${d.codes}${d.sample.length ? ` (${d.sample.join(", ")})` : ""} · 줄표 ${d.dashes}`);
-    }
-    if (style.length > 12) console.log(`    … 외 ${style.length - 12}개`);
+    console.log(`  문체 검사 — writing-style.md 기준을 넘는 문서 ${style.length}개 (관련 자료 절·질문 표식·코드 블록 제외, 표·목록 기준은 찾아보는 문서면 무시해도 된다):`);
+    for (const d of style.slice(0, 15)) console.log(`    - ${d.path}: ${d.issues.join(" · ")}`);
+    if (style.length > 15) console.log(`    … 외 ${style.length - 15}개`);
   }
 
   // 임베드 다이어그램도 근거 코드와 대조한다 — 문서는 최신인데 그림만 낡는 경우를 잡는다

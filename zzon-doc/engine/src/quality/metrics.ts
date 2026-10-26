@@ -250,6 +250,24 @@ const f2 = (n: number) => Math.round(n * 100) / 100;
 export const TRACKING_CODE = /\b(?:ADR|FL|OPS|TKT|JIRA)-\d+\b|\bq-\d{2,}\b|§\s?\d|\b[DB]-\d{3}\b/g;
 const READER_KEYS = new Set(["title", "label", "sublabel", "name", "description", "text"]);
 
+/** "A·B·C" chains (three or more items) inside description sentences */
+export function dotChains(model: unknown): string[] {
+  const found: string[] = [];
+  const seen = new WeakSet<object>();
+  const walk = (v: unknown, key?: string) => {
+    if (typeof v === "string") {
+      if (key === "description" || key === "text") for (const m of v.matchAll(/[^\s·,()"]+(?:·[^\s·,()"]+){2,}/g)) found.push(m[0]);
+      return;
+    }
+    if (!v || typeof v !== "object" || seen.has(v)) return;
+    seen.add(v);
+    if (Array.isArray(v)) v.forEach((x) => walk(x, key));
+    else for (const [k, x] of Object.entries(v)) walk(x, k);
+  };
+  walk(model);
+  return found;
+}
+
 export function trackingCodes(model: unknown): string[] {
   const found: string[] = [];
   const seen = new WeakSet<object>();
@@ -402,6 +420,18 @@ export function gateScene(
       limit: "0",
       severity: "warn",
       hint: `제목·라벨·설명에서 결정 번호·티켓 코드를 빼고 내용을 써라: ${codes.slice(0, 4).map((c) => `「${c}」`).join(", ")}`,
+    });
+  }
+  // "구매·갱신·해지·환불" — three or more words chained by middle dots read as a symbol list
+  const chains = dotChains(model);
+  if (chains.length) {
+    push({
+      id: "dot-chains",
+      label: "가운뎃점 나열",
+      value: chains.length,
+      limit: "0",
+      severity: "warn",
+      hint: `설명 문장에서 셋 이상을 ·로 잇지 말고 쉼표나 "와/과"로 써라: ${chains.slice(0, 3).map((c) => `「${c}」`).join(", ")}`,
     });
   }
   if (tier === "reference" && model.flows.length === 0) {

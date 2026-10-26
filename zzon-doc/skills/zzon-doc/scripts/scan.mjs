@@ -48,6 +48,10 @@ export function walk(root) {
         if (e.isDirectory()) continue;
       }
       const p = join(dir, e.name);
+      // git 워크트리·중첩 리포(.git 파일이나 폴더를 가진 하위 폴더)는 다른 체크아웃이다 — 같은 파일이
+      // 몇 벌씩 들어와 파일 상한에 걸리면 진짜 근거 파일이 목록에서 빠져 "삭제"로 보인다
+      if (e.isDirectory() && dir !== root && existsSync(join(p, ".git"))) continue;
+      if (e.isDirectory() && e.name === "worktrees" && dir.endsWith(".claude")) continue;
       if (e.isDirectory()) {
         // zzon 산출 폴더(docs/zzon-doc·구 루트 zzon-doc)는 건너뛰되, 같은 이름의 소스 폴더는 스캔한다
         const isOutput = existsSync(join(p, "manifest.json")) || existsSync(join(p, "specs")) || existsSync(join(p, "wiki.json"));
