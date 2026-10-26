@@ -2,13 +2,13 @@
   "specVersion": 1,
   "title": "주문 이벤트 흐름",
   "kind": "data-flow",
-  "description": "주문이 저장되면 이벤트 버스가 주문 생성 이벤트를 결제, 재고, 배송, 알림 구독자에게 동시에 전달한다.",
+  "description": "주문이 저장되면 이벤트 버스가 주문 생성 이벤트를 모든 구독자에게 동시에 전달합니다. 결제와 재고, 배송, 알림 구독자는 서로 기다리지 않고 각자 처리합니다.",
   "layout": { "direction": "RIGHT" },
   "nodes": [
     { "id": "client", "label": "웹 클라이언트", "category": "frontend", "tech": "React", "lane": 0 },
-    { "id": "api", "label": "주문 API", "category": "backend", "tech": "NestJS", "description": "주문을 받아 저장하고 이벤트를 발행한다.", "lane": 1 },
+    { "id": "api", "label": "주문 API", "category": "backend", "tech": "NestJS", "description": "주문을 받아 저장하고 이벤트를 발행합니다.", "lane": 1 },
     { "id": "db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL", "lane": 2, "order": 0 },
-    { "id": "bus", "label": "이벤트 버스", "category": "queue", "tech": "EventBridge", "description": "OrderCreated 이벤트를 모든 구독자에게 나눠 보낸다.", "lane": 2, "order": 1 },
+    { "id": "bus", "label": "이벤트 버스", "category": "queue", "tech": "EventBridge", "description": "OrderCreated 이벤트를 모든 구독자에게 나눠 보냅니다.", "lane": 2, "order": 1 },
     { "id": "pay", "label": "결제 서비스", "category": "service", "lane": 3, "order": 0 },
     { "id": "inv", "label": "재고 서비스", "category": "service", "lane": 3, "order": 1 },
     { "id": "ship", "label": "배송 워커", "category": "worker", "lane": 3, "order": 2 },
@@ -27,22 +27,22 @@
     {
       "id": "publish",
       "label": "주문 생성과 발행",
-      "description": "주문이 저장되고 OrderCreated가 발행되는 경로",
+      "description": "주문이 저장되고 OrderCreated가 발행되는 경로입니다.",
       "steps": [
-        { "edge": "e-client-api", "text": "클라이언트가 주문을 요청한다." },
-        { "edge": "e-api-db", "text": "주문을 DB에 저장한다." },
-        { "edge": "e-api-bus", "text": "OrderCreated 이벤트를 발행한다." }
+        { "edge": "e-client-api", "text": "클라이언트가 주문을 요청합니다." },
+        { "edge": "e-api-db", "text": "주문을 DB에 저장합니다." },
+        { "edge": "e-api-bus", "text": "OrderCreated 이벤트를 발행합니다." }
       ]
     },
     {
       "id": "fanout",
       "label": "구독자 동시 전달",
-      "description": "OrderCreated 이벤트가 결제, 재고, 배송, 알림으로 동시에 퍼지는 경로",
+      "description": "OrderCreated 이벤트가 결제와 재고, 배송, 알림으로 동시에 퍼지는 경로입니다.",
       "steps": [
-        { "edge": "e-bus-pay", "text": "결제 서비스가 결제를 처리한다." },
-        { "edge": "e-bus-inv", "text": "재고 서비스가 재고를 차감한다." },
-        { "edge": "e-bus-ship", "text": "배송 워커가 배송을 준비한다." },
-        { "edge": "e-bus-notify", "text": "알림 함수가 사용자에게 통지한다." }
+        { "edge": "e-bus-pay", "text": "결제 서비스가 결제를 처리합니다." },
+        { "edge": "e-bus-inv", "text": "재고 서비스가 재고를 차감합니다." },
+        { "edge": "e-bus-ship", "text": "배송 워커가 배송을 준비합니다." },
+        { "edge": "e-bus-notify", "text": "알림 함수가 사용자에게 알립니다." }
       ]
     }
   ]

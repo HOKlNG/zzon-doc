@@ -10,7 +10,7 @@ import { diagram } from "../src/dsl/index.ts";
 export default diagram("erd-sample", { aspectRatio: 2.6, title: "북마크 서비스 핵심 테이블", docKind: "erd" }, (d) => {
   const users = d.node("users", {
     label: "users",
-    description: "가입 사용자 계정",
+    description: "가입한 사용자의 계정입니다.",
     table: {
       columns: [
         { name: "id", type: "uuid", pk: true },
@@ -23,7 +23,7 @@ export default diagram("erd-sample", { aspectRatio: 2.6, title: "북마크 서�
 
   const links = d.node("links", {
     label: "links",
-    description: "사용자가 수집한 링크",
+    description: "사용자가 수집한 링크입니다.",
     table: {
       columns: [
         { name: "id", type: "uuid", pk: true },
@@ -38,7 +38,7 @@ export default diagram("erd-sample", { aspectRatio: 2.6, title: "북마크 서�
 
   const tags = d.node("tags", {
     label: "tags",
-    description: "링크 분류 태그",
+    description: "링크를 분류하는 태그입니다.",
     table: {
       columns: [
         { name: "id", type: "uuid", pk: true },
@@ -49,7 +49,7 @@ export default diagram("erd-sample", { aspectRatio: 2.6, title: "북마크 서�
 
   const linkTags = d.node("link_tags", {
     label: "link_tags",
-    description: "링크와 태그를 다대다로 잇는 조인 테이블",
+    description: "링크와 태그를 다대다로 잇는 조인 테이블입니다.",
     table: {
       columns: [
         { name: "link_id", type: "uuid", pk: true, fk: { table: "links", column: "id" } },

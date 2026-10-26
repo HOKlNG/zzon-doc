@@ -3,56 +3,56 @@
   "kind": "sequence",
   "title": "예약 결제 흐름",
   "subtitle": "슬롯 잠금부터 결제 승인과 확정 알림까지",
-  "description": "피크닉 앱에서 예약을 결제하는 흐름으로, 예약 API가 슬롯을 먼저 잠근 뒤 결제를 요청한다. 승인되면 예약을 확정하고 확인 메일을 보내며, 거절되면 잠금을 풀고 사유를 돌려준다.",
+  "description": "피크닉 앱에서 예약을 결제하는 흐름입니다. 예약 API가 슬롯을 먼저 잠근 뒤 결제를 요청하고, 승인되면 예약을 확정해 확인 메일을 보냅니다. 거절되면 잠금을 풀고 사유를 돌려줍니다.",
   "order": 1,
   "actors": [
     {
       "id": "app",
       "name": "Picnic App",
       "type": "mobile",
-      "description": "결제를 요청하고 확정 결과를 보여 주는 React Native 앱이다."
+      "description": "결제를 요청하고 확정 결과를 보여 주는 React Native 앱입니다."
     },
     {
       "id": "api",
       "name": "Booking API",
       "type": "server",
-      "description": "슬롯을 잠그고 결제를 조율해 예약을 확정하는 Express 서비스다."
+      "description": "슬롯을 잠그고 결제를 조율해 예약을 확정하는 Express 서비스입니다."
     },
     {
       "id": "redis",
       "name": "Redis",
       "type": "cache",
-      "description": "슬롯을 먼저 잠가 두 사람이 같은 슬롯을 동시에 결제하지 못하게 한다."
+      "description": "슬롯을 먼저 잠가 두 사람이 같은 슬롯을 동시에 결제하지 못하게 합니다."
     },
     {
       "id": "pg",
       "name": "PayGate",
       "type": "external",
-      "description": "카드 승인이나 거절을 바로 응답하는 외부 결제 게이트웨이다."
+      "description": "카드 승인이나 거절을 바로 응답하는 외부 결제 게이트웨이입니다."
     },
     {
       "id": "db",
       "name": "PostgreSQL",
       "type": "database",
-      "description": "예약과 결제 기록을 저장하며, 확정은 한 트랜잭션으로 기록한다."
+      "description": "예약과 결제 기록을 저장하고, 확정은 한 트랜잭션으로 기록합니다."
     },
     {
       "id": "q",
       "name": "confirm 큐",
       "type": "queue",
-      "description": "확정 뒤의 알림 같은 후속 처리를 비동기로 떼어 내는 SQS 큐다."
+      "description": "확정 뒤의 알림 같은 후속 처리를 비동기로 떼어 내는 SQS 큐입니다."
     },
     {
       "id": "notifier",
       "name": "Notify Worker",
       "type": "worker",
-      "description": "큐에서 확정 이벤트를 꺼내 확인 메일을 보내는 워커다."
+      "description": "큐에서 확정 이벤트를 꺼내 확인 메일을 보내는 워커입니다."
     },
     {
       "id": "mail",
       "name": "SMTP",
       "type": "email",
-      "description": "메일 발송 서버로, 로컬에서는 Mailpit을, 운영에서는 SES를 쓴다."
+      "description": "메일 발송 서버이며, 로컬에서는 Mailpit을, 운영에서는 SES를 씁니다."
     }
   ],
   "steps": [
@@ -60,47 +60,47 @@
       "type": "message",
       "from": "app",
       "to": "api",
-      "label": "POST /v1/bookings/:id/pay { cardToken }",
+      "label": "결제 요청",
       "arrow": "sync",
       "essential": true,
-      "description": "결제 버튼을 누르면 예약 번호와 카드 토큰으로 결제를 요청하며, 카드 번호는 앱이 미리 토큰으로 바꿔 서버는 토큰만 다룬다.",
+      "description": "결제 버튼을 누르면 앱이 예약 번호와 카드 토큰을 보냅니다. 카드 번호는 앱이 미리 토큰으로 바꾸므로 서버는 토큰만 다룹니다.",
       "sourceRef": "services/api/src/routes/bookings.ts:41"
     },
     {
       "type": "message",
       "from": "api",
       "to": "api",
-      "label": "권한·상태 검증 (owner, status=pending)",
+      "label": "권한과 상태 확인",
       "arrow": "sync",
-      "description": "요청자가 예약 주인인지, 예약이 아직 결제 대기 상태인지 확인하고 아니면 403이나 409로 바로 끝낸다.",
+      "description": "요청자가 예약 주인인지, 예약이 아직 결제 대기 상태인지 확인합니다. 둘 중 하나라도 아니면 오류로 바로 끝냅니다.",
       "sourceRef": "services/api/src/services/booking.service.ts:88"
     },
     {
       "type": "message",
       "from": "api",
       "to": "redis",
-      "label": "SET lock:slot:{slotId} NX EX 120",
+      "label": "슬롯 잠금",
       "arrow": "sync",
       "essential": true,
-      "description": "같은 슬롯을 두 명이 동시에 결제하는 경합을 막기 위해 120초 선점 잠금을 건다.",
+      "description": "같은 슬롯을 두 사람이 동시에 결제하지 못하도록 슬롯을 120초 동안 잠급니다.",
       "sourceRef": "services/api/src/services/slot-lock.ts:17"
     },
     {
       "type": "message",
       "from": "redis",
       "to": "api",
-      "label": "OK / 이미 잠김",
+      "label": "잠금 결과",
       "arrow": "reply",
-      "description": "이미 잠겨 있으면 409 SLOT_BUSY로 응답하고 끝낸다."
+      "description": "이미 잠겨 있으면 슬롯이 사용 중이라고 응답하고 끝냅니다."
     },
     {
       "type": "message",
       "from": "api",
       "to": "pg",
-      "label": "POST /approve { amount, cardToken }",
+      "label": "결제 승인 요청",
       "arrow": "sync",
       "essential": true,
-      "description": "결제 게이트웨이에 승인을 요청하고, 10초 안에 응답이 없으면 확정되지 않은 거래를 취소 API로 되돌린다.",
+      "description": "결제 게이트웨이에 금액과 카드 토큰으로 승인을 요청합니다. 10초 안에 응답이 없으면 확정되지 않은 거래를 취소합니다.",
       "sourceRef": "services/api/src/clients/paygate.ts:29"
     },
     {
@@ -113,39 +113,39 @@
       "type": "message",
       "from": "pg",
       "to": "api",
-      "label": "200 { approvalNo }",
+      "label": "승인 번호",
       "arrow": "reply",
       "essential": true,
-      "description": "승인 번호를 받아 두고, 뒤에서 실패하면 이 번호로 결제를 취소한다."
+      "description": "승인 번호를 받아 둡니다. 뒤에서 실패하면 이 번호로 결제를 취소합니다."
     },
     {
       "type": "message",
       "from": "api",
       "to": "db",
-      "label": "TX: bookings.confirm + payments.insert",
+      "label": "예약 확정 저장",
       "arrow": "sync",
       "essential": true,
-      "description": "예약을 확정 상태로 바꾸고 결제 기록을 같은 트랜잭션에 남기며, 커밋에 실패하면 결제 승인을 취소한다.",
+      "description": "예약을 확정 상태로 바꾸고 결제 기록을 같은 트랜잭션에 남깁니다. 커밋에 실패하면 결제 승인을 취소합니다.",
       "sourceRef": "services/api/src/services/booking.service.ts:132"
     },
     {
       "type": "message",
       "from": "api",
       "to": "q",
-      "label": "SendMessage → booking-confirm",
+      "label": "확정 이벤트 발행",
       "arrow": "async",
       "essential": true,
-      "description": "알림과 정산 같은 후속 처리를 큐로 넘기며, 예약은 이미 확정됐으므로 발행에 실패해도 흐름을 막지 않는다.",
+      "description": "알림과 정산 같은 후속 처리를 큐로 넘깁니다. 예약은 이미 확정됐으므로 발행에 실패해도 흐름을 막지 않습니다.",
       "sourceRef": "services/api/src/services/booking.service.ts:151"
     },
     {
       "type": "message",
       "from": "api",
       "to": "app",
-      "label": "200 { status: 'confirmed' }",
+      "label": "확정 응답",
       "arrow": "reply",
       "essential": true,
-      "description": "앱이 확정 화면으로 넘어간다."
+      "description": "앱이 확정 화면으로 넘어갑니다."
     },
     {
       "type": "fragment_else",
@@ -155,25 +155,25 @@
       "type": "message",
       "from": "pg",
       "to": "api",
-      "label": "402 { reason }",
+      "label": "거절 사유",
       "arrow": "reply",
-      "description": "거절 사유 코드를 받는다."
+      "description": "거절 사유를 받습니다."
     },
     {
       "type": "message",
       "from": "api",
       "to": "redis",
-      "label": "DEL lock:slot:{slotId}",
+      "label": "잠금 해제",
       "arrow": "sync",
-      "description": "잠금을 바로 풀어 다른 사용자가 결제할 수 있게 한다."
+      "description": "잠금을 바로 풀어 다른 사용자가 결제할 수 있게 합니다."
     },
     {
       "type": "message",
       "from": "api",
       "to": "app",
-      "label": "402 { reason }",
+      "label": "거절 안내",
       "arrow": "reply",
-      "description": "앱이 거절 사유를 보여 주고 다른 카드를 고르도록 안내한다."
+      "description": "앱이 거절 사유를 보여 주고 다른 카드를 고르도록 안내합니다."
     },
     {
       "type": "fragment_end"
@@ -181,34 +181,34 @@
     {
       "type": "note",
       "actor": "q",
-      "text": "3회 재시도해도 실패하면 DLQ로 옮긴다. 예약 확정에는 영향이 없다."
+      "text": "세 번 다시 시도해도 실패하면 실패 메시지 큐(DLQ)로 옮깁니다. 예약 확정에는 영향이 없습니다."
     },
     {
       "type": "message",
       "from": "q",
       "to": "notifier",
-      "label": "ReceiveMessage (long polling)",
+      "label": "확정 이벤트 수신",
       "arrow": "async",
       "essential": true,
-      "description": "워커가 확정 이벤트를 소비한다.",
+      "description": "워커가 큐에서 확정 이벤트를 꺼냅니다.",
       "sourceRef": "services/notifier/src/consumer.ts:21"
     },
     {
       "type": "message",
       "from": "notifier",
       "to": "db",
-      "label": "SELECT booking + user email",
+      "label": "예약 정보 조회",
       "arrow": "sync",
-      "description": "메일에 넣을 예약 정보와 받는 사람 주소를 읽는다."
+      "description": "메일에 넣을 예약 정보와 받는 사람 주소를 읽습니다."
     },
     {
       "type": "message",
       "from": "notifier",
       "to": "mail",
-      "label": "SMTP send: 예약 확정 메일",
+      "label": "확정 메일 발송",
       "arrow": "sync",
       "essential": true,
-      "description": "확정 내역과 취소 규정을 담은 메일을 보낸다.",
+      "description": "확정 내역과 취소 규정을 담은 메일을 보냅니다.",
       "sourceRef": "services/notifier/src/mailer.ts:44"
     }
   ]

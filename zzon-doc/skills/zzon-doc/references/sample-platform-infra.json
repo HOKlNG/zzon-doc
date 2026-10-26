@@ -3,7 +3,7 @@
   "title": "커머스 플랫폼 인프라",
   "kind": "infra",
   "section": "인프라",
-  "description": "웹과 모바일 요청이 CDN과 게이트웨이를 지나 BFF에 모이고, BFF가 주문 서비스와 상품 서비스를 불러 응답을 만든다. 서비스는 각자의 DB와 공용 캐시를 쓰고, 결제는 PG사에 맡긴다.",
+  "description": "웹과 모바일 요청이 CDN과 게이트웨이를 지나 BFF에 모이고, BFF가 주문 서비스와 상품 서비스를 불러 응답을 만듭니다. 서비스는 각자의 DB와 공용 캐시를 쓰고, 결제는 PG사에 맡깁니다.",
   "layout": { "direction": "RIGHT" },
   "groups": [
     { "id": "clients", "label": "Clients", "kind": "zone" },
@@ -16,10 +16,10 @@
     { "id": "mobile", "label": "모바일", "category": "mobile", "tech": "RN", "parentId": "clients", "lane": 0, "order": 1 },
 
     { "id": "cdn", "label": "CDN", "category": "cdn", "tech": "CloudFront", "parentId": "edge", "lane": 1, "order": 0 },
-    { "id": "gw", "label": "게이트웨이", "category": "gateway", "tech": "ALB+APIGW", "parentId": "edge", "lane": 1, "order": 1, "description": "요청을 서비스로 보내고 호출량 제한과 TLS 종료를 맡는다." },
+    { "id": "gw", "label": "게이트웨이", "category": "gateway", "tech": "ALB+APIGW", "parentId": "edge", "lane": 1, "order": 1, "description": "요청을 서비스로 보내고 호출량 제한과 TLS 종료를 맡습니다." },
     { "id": "auth", "label": "인증", "category": "auth", "tech": "Cognito", "parentId": "edge", "lane": 1, "order": 2 },
 
-    { "id": "bff", "label": "BFF", "category": "backend", "tech": "NestJS", "parentId": "svc", "lane": 2, "order": 0, "description": "프런트엔드를 위해 여러 서비스의 응답을 모아 주는 API다." },
+    { "id": "bff", "label": "BFF", "category": "backend", "tech": "NestJS", "parentId": "svc", "lane": 2, "order": 0, "description": "프런트엔드를 위해 여러 서비스의 응답을 모아 주는 API입니다." },
     { "id": "order", "label": "주문 서비스", "category": "service", "tech": "NestJS", "parentId": "svc", "lane": 2, "order": 1 },
     { "id": "catalog", "label": "상품 서비스", "category": "service", "tech": "Go", "parentId": "svc", "lane": 2, "order": 2 },
     { "id": "payment", "label": "결제 서비스", "category": "service", "tech": "Go", "parentId": "svc", "lane": 2, "order": 3 },
@@ -51,25 +51,25 @@
     {
       "id": "browse",
       "label": "상품 탐색",
-      "description": "클라이언트가 상품을 조회하는 경로",
+      "description": "클라이언트가 상품을 조회하는 경로입니다.",
       "steps": [
-        { "edge": "e-web-cdn", "text": "웹이 CDN에 요청한다." },
-        { "edge": "e-cdn-gw", "text": "게이트웨이로 전달된다." },
-        { "edge": "e-gw-bff", "text": "BFF가 요청을 받는다." },
-        { "edge": "e-bff-catalog", "text": "BFF가 상품 서비스를 호출한다." },
-        { "edge": "e-catalog-cache", "text": "상품 서비스가 캐시를 조회한다." }
+        { "edge": "e-web-cdn", "text": "웹이 CDN에 요청합니다." },
+        { "edge": "e-cdn-gw", "text": "요청이 게이트웨이로 전달됩니다." },
+        { "edge": "e-gw-bff", "text": "BFF가 요청을 받습니다." },
+        { "edge": "e-bff-catalog", "text": "BFF가 상품 서비스를 호출합니다." },
+        { "edge": "e-catalog-cache", "text": "상품 서비스가 캐시를 조회합니다." }
       ]
     },
     {
       "id": "checkout",
       "label": "주문 결제",
-      "description": "주문 생성에서 PG 승인까지",
+      "description": "주문을 만들어 PG 승인을 받기까지의 경로입니다.",
       "steps": [
-        { "edge": "e-gw-bff", "text": "게이트웨이가 BFF로 라우팅한다." },
-        { "edge": "e-bff-order", "text": "BFF가 주문 서비스를 호출한다." },
-        { "edge": "e-order-db", "text": "주문을 DB에 저장한다." },
-        { "edge": "e-order-payment", "text": "결제 서비스에 결제를 요청한다." },
-        { "edge": "e-payment-pg", "text": "결제 서비스가 PG사에 승인을 요청한다." }
+        { "edge": "e-gw-bff", "text": "게이트웨이가 요청을 BFF로 보냅니다." },
+        { "edge": "e-bff-order", "text": "BFF가 주문 서비스를 호출합니다." },
+        { "edge": "e-order-db", "text": "주문을 DB에 저장합니다." },
+        { "edge": "e-order-payment", "text": "결제 서비스에 결제를 요청합니다." },
+        { "edge": "e-payment-pg", "text": "결제 서비스가 PG사에 승인을 요청합니다." }
       ]
     }
   ]

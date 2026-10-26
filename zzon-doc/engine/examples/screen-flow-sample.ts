@@ -9,7 +9,7 @@ export default diagram(
   "screen-flow-sample",
   { title: "구매 동선 화면 흐름", docKind: "screen-flow", view: "screen-flow", tier: "standard" },
   (d) => {
-    const home = d.screen("home", { label: "홈", route: "/", description: "추천 상품과 기획전을 보여 주는 첫 화면이다." });
+    const home = d.screen("home", { label: "홈", route: "/", description: "추천 상품과 기획전을 보여 주는 첫 화면입니다." });
     const list = d.screen("list", { label: "상품 목록", route: "/products?category=" });
     const detail = d.screen("detail", { label: "상품 상세", route: "/products/[id]" });
     const cart = d.screen("cart", { label: "장바구니", route: "/cart" });
@@ -31,11 +31,11 @@ export default diagram(
     d.flow("buy", {
       title: "첫 구매",
       steps: [
-        { edge: n1, text: "홈에서 카테고리로 들어간다" },
-        { edge: n2, text: "상품을 고른다" },
-        { edge: n3, text: "장바구니에 담는다" },
-        { edge: n4, text: "주문을 시작한다" },
-        { edge: n5, text: "결제가 승인되면 완료 화면으로 간다" },
+        { edge: n1, text: "홈에서 카테고리로 들어갑니다" },
+        { edge: n2, text: "상품을 고릅니다" },
+        { edge: n3, text: "장바구니에 담습니다" },
+        { edge: n4, text: "주문을 시작합니다" },
+        { edge: n5, text: "결제가 승인되면 완료 화면으로 갑니다" },
       ],
     });
   },

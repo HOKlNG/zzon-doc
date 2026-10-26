@@ -1830,11 +1830,11 @@
   {
    "id": "ingest",
    "title": "콘텐츠 수집",
-   "description": "모바일 요청부터 AI 요약까지의 비동기 파이프라인",
+   "description": "모바일 요청부터 AI 요약까지 이어지는 비동기 파이프라인입니다.",
    "steps": [
     {
      "edgeId": "e0",
-     "text": "모바일 앱이 API Gateway로 요청한다",
+     "text": "모바일 앱이 API Gateway로 요청합니다",
      "badge": {
       "x": 208.07,
       "y": 325.15
@@ -1843,7 +1843,7 @@
     },
     {
      "edgeId": "e1",
-     "text": "api Lambda가 요청을 처리한다",
+     "text": "API 함수가 요청을 처리합니다",
      "badge": {
       "x": 574.6,
       "y": 250.63
@@ -1852,7 +1852,7 @@
     },
     {
      "edgeId": "e8",
-     "text": "수집 요청을 scrape 큐에 넣는다",
+     "text": "수집 요청을 수집 큐에 넣습니다",
      "badge": {
       "x": 986.56,
       "y": 246.33
@@ -1861,7 +1861,7 @@
     },
     {
      "edgeId": "e10",
-     "text": "scraper Lambda가 큐 메시지로 트리거된다",
+     "text": "수집 함수가 큐 메시지를 받아 실행됩니다",
      "badge": {
       "x": 990.01,
       "y": 388.91
@@ -1870,7 +1870,7 @@
     },
     {
      "edgeId": "e11",
-     "text": "AI 처리 메시지를 발행한다",
+     "text": "AI 처리 메시지를 발행합니다",
      "badge": {
       "x": 913.88,
       "y": 389.52
@@ -1879,7 +1879,7 @@
     },
     {
      "edgeId": "e12",
-     "text": "scraper가 AI 처리 메시지로 다시 트리거된다",
+     "text": "수집 함수가 AI 처리 메시지를 받아 다시 실행됩니다",
      "badge": {
       "x": 1004.01,
       "y": 479.65
@@ -1888,7 +1888,7 @@
     },
     {
      "edgeId": "e13",
-     "text": "LLM API로 요약하고 태그를 붙인다",
+     "text": "LLM API로 요약하고 태그를 붙입니다",
      "badge": {
       "x": 1365.67,
       "y": 576.23
@@ -1934,9 +1934,10 @@
   "512MB · 30s",
   "6",
   "7",
-  "AI 처리 메시지를 발행한다",
+  "AI 처리 메시지를 발행합니다",
   "AI 처리 발행",
   "API Gateway",
+  "API 함수가 요청을 처리합니다",
   "AWS Cloud",
   "CloudWatch 알람 ×4",
   "Cognito User Pool",
@@ -1950,7 +1951,7 @@
   "IGW",
   "JWT 검증",
   "LLM API",
-  "LLM API로 요약하고 태그를 붙인다",
+  "LLM API로 요약하고 태그를 붙입니다",
   "Lambda (컨테이너 이미지)",
   "OAuth",
   "Observability",
@@ -1966,7 +1967,6 @@
   "ai-process queue",
   "ap-northeast-2 (Seoul)",
   "api",
-  "api Lambda가 요청을 처리한다",
   "api · scraper · digest",
   "digest",
   "digest·source-poll 매시간 / FOMO 일·주간",
@@ -1975,19 +1975,19 @@
   "public·private ×2 AZ, NAT는 prd만",
   "scrape queue",
   "scraper",
-  "scraper Lambda가 큐 메시지로 트리거된다",
-  "scraper가 AI 처리 메시지로 다시 트리거된다",
   "trigger",
   "개발자 (deployer)",
   "관리형 PostgreSQL",
   "관리형 Redis (SaaS)",
   "다이제스트 발송",
   "모바일 사용자",
-  "모바일 앱이 API Gateway로 요청한다",
-  "모바일 요청부터 AI 요약까지의 비동기 파이프라인",
+  "모바일 앱이 API Gateway로 요청합니다",
+  "모바일 요청부터 AI 요약까지 이어지는 비동기 파이프라인입니다.",
   "사용자 메일함",
   "수집 요청",
-  "수집 요청을 scrape 큐에 넣는다",
+  "수집 요청을 수집 큐에 넣습니다",
+  "수집 함수가 AI 처리 메시지를 받아 다시 실행됩니다",
+  "수집 함수가 큐 메시지를 받아 실행됩니다",
   "시크릿 로드",
   "알람",
   "외부 SaaS",

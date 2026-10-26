@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "코드를 근거로 아키텍처·상태도·플로우차트·의존성·시퀀스 다이어그램을 객관 기준으로 골라 그리고(Terraform 인프라는 AWS 공식 아이콘), 프로젝트 개발 문서 위키를 질문 기반으로 채우는 Claude Code 플러그인. 모두 의존성 0짜리 단일 .html로 출력.",
-    "version": "0.9.0"
+    "version": "0.9.1"
   },
   "plugins": [
     {

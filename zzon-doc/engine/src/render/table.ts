@@ -29,7 +29,6 @@ const PK_SLOT = 20;
 const NAME_SIZE = 11;
 const TYPE_SIZE = 10;
 const TITLE_SIZE = 12;
-const COUNT_SIZE = 9;
 const CHIP_SIZE = 8.5;
 const CHIP_PAD = 4;
 const CHIP_GAP = 3;
@@ -67,10 +66,9 @@ export interface SizedTable {
 /** Content-derived table size: min 240 wide, grows to fit header + rows. */
 export function sizeTable(node: { label?: string; table: TableSpec }): SizedTable {
   const cols = node.table.columns;
-  // header: [table icon] title ......... "N cols"
+  // header: [table icon] title — no column count (reader-facing text carries no counts)
   let need =
-    PAD_X + HEAD_ICON + 8 + measureWidth(node.label ?? "", TITLE_SIZE, "semibold") +
-    12 + measureWidth(`${cols.length} cols`, COUNT_SIZE) + PAD_X;
+    PAD_X + HEAD_ICON + 8 + measureWidth(node.label ?? "", TITLE_SIZE, "semibold") + PAD_X;
   // rows: [pk slot] name ......... type [FK][UQ][N]
   for (const c of cols) {
     const chipsW = chipTags(c).reduce((w, t) => w + chipWidth(t) + CHIP_GAP, 0);
@@ -223,7 +221,6 @@ function tableMarkup(n: SceneNode, c: TableColors, txt: EmitText, interactive: b
   const hc = r.y + t.headerHeight / 2;
   bits.push(inlineIcon("x.lucide-table2", r.x + PAD_X, hc - HEAD_ICON / 2, HEAD_ICON, c.accent));
   bits.push(txt(title, r.x + PAD_X + HEAD_ICON + 8, hc + 4, TITLE_SIZE, "semibold", c.text, "start"));
-  bits.push(txt(`${t.columns.length} cols`, r.x + r.width - PAD_X, hc + 3.5, COUNT_SIZE, "regular", c.muted, "end"));
 
   // column rows (col.y is the ABSOLUTE row center from makeSceneTable)
   t.columns.forEach((col, i) => {

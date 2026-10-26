@@ -14,14 +14,14 @@ export default diagram(
       tone: "wait",
       label: "결제 대기",
       sublabel: "entry / 재고 가예약",
-      description: "주문이 생성되고 결제를 기다린다. 30분 안에 결제가 없으면 만료된다.",
+      description: "주문이 생성되어 결제를 기다립니다. 30분 안에 결제가 없으면 만료됩니다.",
       hints: { layer: 1 },
     });
-    const paid = d.state("paid", { label: "결제 완료", description: "결제가 승인되어 출고 지시를 기다린다.", hints: { layer: 2 } });
+    const paid = d.state("paid", { label: "결제 완료", description: "결제가 승인되어 출고 지시를 기다립니다.", hints: { layer: 2 } });
     const shipping = d.state("shipping", { label: "배송 중", sublabel: "do / 배송 추적", hints: { layer: 3 } });
     const delivered = d.state("delivered", { label: "배송 완료", tone: "done", hints: { layer: 4 } });
     const end = d.final("end", { hints: { layer: 5 } });
-    const canceled = d.state("canceled", { label: "취소", tone: "fail", description: "결제 전에 취소했거나 결제 기한이 지났다.", hints: { layer: 2, order: 1 } });
+    const canceled = d.state("canceled", { label: "취소", tone: "fail", description: "결제 전에 취소했거나 결제 기한이 지났습니다.", hints: { layer: 2, order: 1 } });
     const refunding = d.state("refunding", { label: "환불 중", tone: "wait", hints: { layer: 3, order: 1 } });
     const refunded = d.state("refunded", { label: "환불 완료", tone: "done", hints: { layer: 4, order: 1 } });
 
@@ -40,11 +40,11 @@ export default diagram(
     d.flow("happy", {
       title: "정상 주문",
       steps: [
-        { edge: t1, text: "주문이 생성되며 재고를 가예약한다" },
-        { edge: t2, text: "결제대행사가 결제를 승인한다" },
-        { edge: t3, text: "물류에 출고를 지시한다" },
-        { edge: t4, text: "고객이 수령을 확인한다" },
-        { edge: t5, text: "주문이 종결된다" },
+        { edge: t1, text: "주문이 생성되며 재고를 미리 잡아 둡니다" },
+        { edge: t2, text: "결제대행사가 결제를 승인합니다" },
+        { edge: t3, text: "물류에 출고를 지시합니다" },
+        { edge: t4, text: "고객이 수령을 확인합니다" },
+        { edge: t5, text: "주문이 종결됩니다" },
       ],
     });
   },

@@ -2,7 +2,7 @@
   "specVersion": 1,
   "title": "행동 로그 데이터 파이프라인",
   "kind": "data-flow",
-  "description": "앱 행동 로그와 운영 DB 변경분이 수집, 처리, 적재, 서빙 단계를 거쳐 대시보드와 추천 모델에 쓰이기까지를 보여 준다. 검증에 실패한 이벤트는 실패 큐에 모았다가 다시 적재한다.",
+  "description": "앱 행동 로그와 운영 DB 변경분이 수집부터 서빙까지 거쳐 대시보드와 추천 모델에 쓰이는 경로를 보여 줍니다. 검증에 실패한 이벤트는 실패 큐에 모았다가 다시 적재합니다.",
   "layout": {
     "direction": "RIGHT",
     "align": "start"
@@ -39,7 +39,7 @@
       "id": "app-events",
       "label": "앱 이벤트",
       "category": "external",
-      "description": "웹과 모바일 앱이 남기는 사용자 행동 로그다.",
+      "description": "웹과 모바일 앱이 남기는 사용자 행동 로그입니다.",
       "lane": 0,
       "order": 0
     },
@@ -48,7 +48,7 @@
       "label": "운영 DB CDC",
       "category": "external",
       "order": 1,
-      "description": "운영 DB의 변경 내역을 실시간으로 흘려보낸다.",
+      "description": "운영 DB의 변경 내역을 실시간으로 흘려보냅니다.",
       "lane": 0
     },
     {
@@ -57,7 +57,7 @@
       "category": "topic",
       "tech": "Kafka",
       "parentId": "g-ingest",
-      "description": "원천 이벤트를 토픽별로 잠시 쌓아 둔다.",
+      "description": "원천 이벤트를 토픽별로 잠시 쌓아 둡니다.",
       "lane": 1,
       "order": 0
     },
@@ -67,7 +67,7 @@
       "category": "pipeline",
       "tech": "Flink",
       "parentId": "g-process",
-      "description": "이벤트를 정제하고 중복을 없애고 스키마를 검증한다.",
+      "description": "이벤트를 정제해 중복을 없애고 스키마를 검증합니다.",
       "lane": 2,
       "order": 0
     },
@@ -78,7 +78,7 @@
       "tech": "DLQ",
       "parentId": "g-process",
       "order": 1,
-      "description": "검증 실패 이벤트를 격리해 재처리 대상으로 보관한다",
+      "description": "검증에 실패한 이벤트를 격리해 재처리 대상으로 보관합니다.",
       "lane": 2
     },
     {
@@ -87,7 +87,7 @@
       "category": "storage",
       "tech": "S3 Parquet",
       "parentId": "g-store",
-      "description": "가공하지 않은 원본을 쌓는 층이다.",
+      "description": "가공하지 않은 원본을 쌓는 층입니다.",
       "lane": 3,
       "order": 0
     },
@@ -98,7 +98,7 @@
       "tech": "Delta Lake",
       "parentId": "g-store",
       "order": 0,
-      "description": "정제와 조인을 마친 믿을 수 있는 데이터 층이다.",
+      "description": "정제와 조인을 마쳐 그대로 믿고 쓸 수 있는 데이터 층입니다.",
       "lane": 4
     },
     {
@@ -108,7 +108,7 @@
       "tech": "BigQuery",
       "parentId": "g-store",
       "order": 0,
-      "description": "지표와 마트처럼 바로 쓰기 좋게 집계한 층이다.",
+      "description": "지표와 마트처럼 바로 쓰기 좋게 집계한 층입니다.",
       "lane": 5
     },
     {
@@ -117,7 +117,7 @@
       "category": "analytics",
       "tech": "Looker",
       "parentId": "g-serve",
-      "description": "경영 지표와 운영 지표를 보여 준다.",
+      "description": "경영 지표와 운영 지표를 보여 줍니다.",
       "lane": 6,
       "order": 0
     },
@@ -128,7 +128,7 @@
       "tech": "Vertex AI",
       "parentId": "g-serve",
       "order": 1,
-      "description": "Gold 층의 피처로 학습하고 추천 결과를 내놓는다.",
+      "description": "Gold 층의 피처로 학습해 추천 결과를 내놓습니다.",
       "lane": 6
     },
     {
@@ -139,7 +139,7 @@
       "parentId": "g-gov",
       "lane": 3,
       "order": 8,
-      "description": "배치 변환과 재처리 작업을 일정에 맞춰 돌린다."
+      "description": "배치 변환과 재처리 작업을 일정에 맞춰 돌립니다."
     },
     {
       "id": "catalog",
@@ -149,7 +149,7 @@
       "parentId": "g-gov",
       "lane": 3,
       "order": 9,
-      "description": "스키마, 데이터 계보, 품질 정보를 관리한다."
+      "description": "스키마와 데이터 계보, 품질 정보를 관리합니다."
     }
   ],
   "edges": [
@@ -239,50 +239,50 @@
     {
       "id": "hot-path",
       "label": "실시간 적재 경로",
-      "description": "이벤트가 생겨 대시보드에 반영되기까지의 기본 경로",
+      "description": "이벤트가 생겨 대시보드에 반영되기까지의 기본 경로입니다.",
       "steps": [
         {
           "edge": "e-app-stream",
-          "text": "클라이언트 이벤트가 스트림에 발행된다"
+          "text": "클라이언트가 이벤트를 스트림에 발행합니다"
         },
         {
           "edge": "e-stream-etl",
-          "text": "스트림 처리기가 토픽을 구독해 정제한다"
+          "text": "스트림 처리기가 토픽을 구독해 정제합니다"
         },
         {
           "edge": "e-etl-bronze",
-          "text": "원본을 Bronze 층에 적재한다"
+          "text": "원본을 Bronze 층에 적재합니다"
         },
         {
           "edge": "e-bronze-silver",
-          "text": "정제 변환으로 Silver 층을 만든다"
+          "text": "정제 변환으로 Silver 층을 만듭니다"
         },
         {
           "edge": "e-silver-gold",
-          "text": "지표 집계로 Gold 층을 만든다"
+          "text": "지표를 집계해 Gold 층을 만듭니다"
         },
         {
           "edge": "e-gold-bi",
-          "text": "대시보드가 Gold 지표를 조회한다"
+          "text": "대시보드가 Gold 지표를 조회합니다"
         }
       ]
     },
     {
       "id": "replay",
       "label": "실패 재처리 경로",
-      "description": "검증에 실패한 이벤트를 따로 모았다가 다시 넣는 경로",
+      "description": "검증에 실패한 이벤트를 따로 모았다가 다시 넣는 경로입니다.",
       "steps": [
         {
           "edge": "e-etl-dlq",
-          "text": "스키마 검증에 실패한 이벤트를 실패 큐로 격리한다"
+          "text": "스키마 검증에 실패한 이벤트를 실패 큐로 격리합니다"
         },
         {
           "edge": "e-airflow-etl",
-          "text": "오케스트레이터가 재처리 잡을 스케줄한다"
+          "text": "오케스트레이터가 재처리 잡을 예약합니다"
         },
         {
           "edge": "e-dlq-bronze",
-          "text": "실패분을 재처리해 Bronze 층에 적재한다"
+          "text": "실패분을 재처리해 Bronze 층에 적재합니다"
         }
       ]
     }

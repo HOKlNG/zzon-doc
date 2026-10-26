@@ -2,7 +2,7 @@
   "specVersion": 1,
   "title": "데모숍 시스템 컨텍스트",
   "kind": "infra",
-  "description": "데모숍을 누가 쓰고 어떤 외부 서비스에 기대는지 보여 준다. 데모숍을 더블클릭하면 내부 구성 그림으로 넘어간다.",
+  "description": "데모숍을 누가 쓰고 어떤 외부 서비스에 기대는지 보여 줍니다. 데모숍을 더블클릭하면 내부 구성 그림으로 넘어갑니다.",
   "section": "개요",
   "order": 1,
   "layout": { "direction": "RIGHT", "nodeDescriptions": true },
@@ -12,14 +12,14 @@
       "id": "shopper",
       "label": "구매자",
       "category": "user",
-      "description": "상품을 찾아보고 주문하고 결제하는 일반 사용자"
+      "description": "상품을 찾아보고 주문하고 결제하는 일반 사용자입니다."
     },
     {
       "id": "admin",
       "label": "운영자",
       "category": "user",
       "order": 1,
-      "description": "상품과 재고, 주문을 관리하는 내부 직원"
+      "description": "상품과 재고, 주문을 관리하는 내부 직원입니다."
     },
     {
       "id": "demoshop",
@@ -27,13 +27,13 @@
       "category": "service",
       "tech": "커머스 플랫폼",
       "href": "sample-container",
-      "description": "상품 전시부터 주문, 결제, 알림까지 맡는 중심 시스템"
+      "description": "상품 전시부터 알림까지 커머스 전 과정을 맡는 중심 시스템입니다."
     },
     {
       "id": "pg",
       "label": "토스페이먼츠",
       "category": "external",
-      "description": "결제 승인과 취소를 처리하는 결제대행사"
+      "description": "결제 승인과 취소를 처리하는 결제대행사입니다."
     },
     {
       "id": "mailer",
@@ -41,14 +41,14 @@
       "category": "external",
       "tech": "SES",
       "order": 1,
-      "description": "주문 확인 메일과 알림 메일을 보낸다"
+      "description": "주문 확인 메일과 알림 메일을 보냅니다."
     },
     {
       "id": "logistics",
       "label": "물류 시스템",
       "category": "external",
       "order": 2,
-      "description": "출고와 배송 추적을 맡는 외부 시스템"
+      "description": "출고와 배송 추적을 맡는 외부 시스템입니다."
     }
   ],
   "edges": [

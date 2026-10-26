@@ -31,19 +31,71 @@ export const CANVAS_JS: string = `(function () {
   var vb = vb0.slice();
   var MIN_ZOOM = 0.2, MAX_ZOOM = 8, LABEL_ZOOM = 0.75;
   var labelMode = "auto";
-  function zoomLevel() { return vb0[2] / vb[2]; }
+  var base = vb0[2]; /* viewBox width of the last fit — zoom 1 */
+  function zoomLevel() { return base / vb[2]; }
   function applyVB() {
     svg.setAttribute("viewBox", vb.join(" "));
     svg.classList.toggle("labels-off", labelMode === "auto" && zoomLevel() < LABEL_ZOOM);
   }
-  function fitView() { vb = vb0.slice(); applyVB(); }
+  /* The frame floats its title bar + flow buttons (top-left), toolbar (right)
+     and legend (bottom-left) over the canvas. A plain fit lets them cover the
+     drawing's edges, so the fit leaves those strips free: measure the
+     overlays and fit the drawing into the rectangle that remains. */
+  function overlayInsets(r) {
+    var ins = { t: 0, r: 0, b: 0, l: 0 };
+    function box(sel) {
+      var el = document.querySelector(sel);
+      if (!el || !el.offsetParent) return null;
+      var b = el.getBoundingClientRect();
+      return b.width && b.height ? b : null;
+    }
+    var tops = [".frame-titlebar", ".frame-flowcol"];
+    for (var i = 0; i < tops.length; i++) {
+      var b = box(tops[i]);
+      if (b && b.top < r.top + r.height / 2) ins.t = Math.max(ins.t, b.bottom - r.top + 8);
+    }
+    var lg = box(".frame-legend");
+    if (lg && lg.top > r.top + r.height / 2) ins.b = Math.max(ins.b, r.bottom - lg.top + 8);
+    var tb = box(".frame-toolbar");
+    if (tb && tb.left > r.left + r.width / 2) ins.r = Math.max(ins.r, r.right - tb.left + 8);
+    return ins;
+  }
+  function fitView() {
+    vb = vb0.slice();
+    var r = svg.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) {
+      var ins = overlayInsets(r);
+      var iw = r.width - ins.l - ins.r, ih = r.height - ins.t - ins.b;
+      /* only when enough room is left — on tiny canvases the overlays win */
+      if ((ins.t || ins.b || ins.r) && iw > r.width * 0.5 && ih > r.height * 0.5) {
+        var s = Math.min(iw / vb0[2], ih / vb0[3]);
+        var w = r.width / s, h = r.height / s;
+        vb = [vb0[0] - (ins.l + (iw - vb0[2] * s) / 2) / s, vb0[1] - (ins.t + (ih - vb0[3] * s) / 2) / s, w, h];
+      }
+    }
+    base = vb[2];
+    applyVB();
+  }
   /* On a phone-width canvas a whole-diagram fit shrinks text past reading
      size, so the FIRST fit (frame boot) opens at a readable zoom from the
      top-left instead; the fit button and dblclick still show everything. */
-  var READABLE_ZOOM = 0.6, NARROW_PX = 640, booted = false;
+  var READABLE_ZOOM = 0.6, TALL_READABLE = 0.55, NARROW_PX = 640, booted = false;
   function bootView() {
     var r = svg.getBoundingClientRect();
-    if (!r.width || !r.height || r.width > NARROW_PX) return fitView();
+    if (!r.width || !r.height) return fitView();
+    if (r.width > NARROW_PX) {
+      /* A long top-to-bottom drawing (a 20-step flowchart) fitted whole is
+         too small to read on a wide screen. Open it at its width — never
+         above 1:1 — from the top; the fit button still shows all of it. */
+      fitView();
+      var whole = Math.min(r.width / vb0[2], r.height / vb0[3]);
+      var ins = overlayInsets(r);
+      var across = Math.min(1, (r.width - ins.l - ins.r) / vb0[2]);
+      if (whole >= TALL_READABLE || across < whole * 1.6) return;
+      vb = [vb0[0] - (r.width - vb0[2] * across) / 2 / across, vb0[1] - ins.t / across, r.width / across, r.height / across];
+      applyVB();
+      return;
+    }
     if (Math.min(r.width / vb0[2], r.height / vb0[3]) >= READABLE_ZOOM) return fitView();
     var w = r.width / READABLE_ZOOM, h = r.height / READABLE_ZOOM;
     vb = [vb0[0] + Math.min(0, (vb0[2] - w) / 2), vb0[1] + Math.min(0, (vb0[3] - h) / 2), w, h];
@@ -84,8 +136,8 @@ export const CANVAS_JS: string = `(function () {
     if (touches[ev.pointerId]) touches[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
     if (pinch && touchList().length === 2) {
       var p = pinchState();
-      var zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, (vb0[2] / pinch.vb[2]) * (p.d / pinch.d)));
-      vb[2] = vb0[2] / zoom;
+      var zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, (base / pinch.vb[2]) * (p.d / pinch.d)));
+      vb[2] = base / zoom;
       vb[3] = pinch.vb[3] * (vb[2] / pinch.vb[2]);
       vb[0] = pinch.px - ((p.cx - p.r.left) / p.r.width) * vb[2];
       vb[1] = pinch.py - ((p.cy - p.r.top) / p.r.height) * vb[3];
@@ -118,8 +170,8 @@ export const CANVAS_JS: string = `(function () {
     var px = vb[0] + ((ev.clientX - r.left) / r.width) * vb[2];
     var py = vb[1] + ((ev.clientY - r.top) / r.height) * vb[3];
     var factor = Math.pow(1.0015, ev.deltaY);
-    var zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, vb0[2] / (vb[2] * factor)));
-    factor = vb0[2] / zoom / vb[2];
+    var zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, base / (vb[2] * factor)));
+    factor = base / zoom / vb[2];
     vb[0] = px - (px - vb[0]) * factor;
     vb[1] = py - (py - vb[1]) * factor;
     vb[2] = vb[2] * factor;

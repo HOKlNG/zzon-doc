@@ -105,7 +105,10 @@ export function textToPathD(
   fontSize: number,
   weight: FontWeight = "regular",
 ): string {
-  return getFont(weight).getPath(text, x, y, fontSize, { kerning: true }).toPathData(2);
+  // opentype.js writes NaN into the path data when the origin carries float noise
+  // (231.00000000000003) — round the origin first; the output keeps 2 decimals anyway
+  const r2 = (v: number) => Math.round(v * 100) / 100;
+  return getFont(weight).getPath(text, r2(x), r2(y), fontSize, { kerning: true }).toPathData(2);
 }
 
 /** Collect every distinct character used (for font subsetting at package time). */

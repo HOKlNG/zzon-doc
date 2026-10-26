@@ -19,7 +19,7 @@ export default diagram(
       stereotype: "aggregate root",
       attributes: ["id: OrderId", "status: OrderStatus", "total: Money"],
       methods: ["place()", "pay(payment)", "cancel(reason)"],
-      description: "주문 애그리거트의 루트다. 더블클릭하면 주문 상태가 어떻게 바뀌는지 볼 수 있다.",
+      description: "주문 애그리거트의 루트입니다. 더블클릭하면 주문 상태가 어떻게 바뀌는지 볼 수 있습니다.",
       href: "state-sample",
     });
     const line = d.classNode("line", {

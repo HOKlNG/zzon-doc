@@ -2,7 +2,7 @@
   "specVersion": 1,
   "title": "멀티리전 HA 구성",
   "kind": "infra",
-  "description": "두 리전에 같은 구성을 두고, 평소에는 리전 A가 모든 트래픽을 받는다. 리전 A에 장애가 나면 글로벌 DNS가 트래픽을 리전 B로 돌리고, 복제 DB가 주 DB로 승격되어 서비스를 이어 간다.",
+  "description": "두 리전에 같은 구성을 두고, 평소에는 리전 A가 모든 트래픽을 받습니다. 리전 A에 장애가 나면 글로벌 DNS가 트래픽을 리전 B로 돌리고, 복제 DB가 주 DB로 승격되어 서비스를 이어 갑니다.",
   "layout": { "direction": "DOWN" },
   "groups": [
     { "id": "region-a", "label": "리전 A (ap-northeast-2)", "kind": "region" },
@@ -13,14 +13,14 @@
       "id": "enduser",
       "label": "사용자",
       "category": "user",
-      "description": "지연 시간 기반 라우팅으로 가까운 리전에 접속한다"
+      "description": "지연 시간 기반 라우팅으로 가까운 리전에 접속합니다."
     },
     {
       "id": "dns",
       "label": "글로벌 DNS",
       "category": "dns",
       "tech": "Route 53",
-      "description": "헬스체크 결과를 보고, 리전에 장애가 나면 트래픽을 다른 리전으로 돌린다."
+      "description": "헬스체크 결과를 보고, 리전에 장애가 나면 트래픽을 다른 리전으로 돌립니다."
     },
     {
       "id": "lb-a",
@@ -30,7 +30,7 @@
       "parentId": "region-a",
       "lane": 2,
       "order": 0,
-      "description": "리전 A의 진입점으로, 두 가용 영역에 요청을 나눈다."
+      "description": "리전 A의 진입점이며, 두 가용 영역에 요청을 나눕니다."
     },
     {
       "id": "lb-b",
@@ -40,7 +40,7 @@
       "parentId": "region-b",
       "lane": 2,
       "order": 1,
-      "description": "리전 B의 진입점이다."
+      "description": "리전 B의 진입점입니다."
     },
     {
       "id": "app-a",
@@ -51,7 +51,7 @@
       "lane": 3,
       "order": 0,
       "badge": "AZ ×2",
-      "description": "평소 트래픽을 처리하는 앱 서버로, 두 가용 영역에 복제되어 있다."
+      "description": "평소 트래픽을 처리하는 앱 서버이며, 두 가용 영역에 복제되어 있습니다."
     },
     {
       "id": "app-b",
@@ -62,7 +62,7 @@
       "lane": 3,
       "order": 1,
       "badge": "AZ ×2",
-      "description": "대기 중인 앱 서버로, 평소에는 최소 용량만 띄워 둔다."
+      "description": "대기 중인 앱 서버이며, 평소에는 최소 용량만 띄워 둡니다."
     },
     {
       "id": "db-a",
@@ -73,7 +73,7 @@
       "lane": 4,
       "order": 0,
       "badge": "Primary",
-      "description": "쓰기를 받는 주 DB로, 리전 B에 비동기로 복제한다."
+      "description": "쓰기를 받는 주 DB이며, 리전 B에 비동기로 복제합니다."
     },
     {
       "id": "db-b",
@@ -84,7 +84,7 @@
       "lane": 4,
       "order": 1,
       "badge": "Replica",
-      "description": "읽기 전용 복제본으로, 장애 전환 때 주 DB로 승격된다."
+      "description": "읽기 전용 복제본이며, 장애 전환 때 주 DB로 승격됩니다."
     }
   ],
   "edges": [
@@ -101,24 +101,24 @@
     {
       "id": "normal",
       "label": "평시 경로",
-      "description": "평소에는 리전 A가 모든 트래픽을 처리한다",
+      "description": "평소에는 리전 A가 모든 트래픽을 처리합니다.",
       "steps": [
-        { "edge": "e-enduser-dns", "text": "사용자가 도메인으로 접속한다" },
-        { "edge": "e-dns-lb-a", "text": "DNS가 액티브 리전 A로 라우팅한다" },
-        { "edge": "e-lb-a-app-a", "text": "로드밸런서가 두 가용 영역의 앱 서버로 요청을 나눈다" },
-        { "edge": "e-app-a-db-a", "text": "주 DB에서 읽고 쓴다" },
-        { "edge": "e-db-a-db-b", "text": "변경분이 리전 B로 비동기 복제된다" }
+        { "edge": "e-enduser-dns", "text": "사용자가 도메인으로 접속합니다" },
+        { "edge": "e-dns-lb-a", "text": "DNS가 요청을 활성 리전 A로 보냅니다" },
+        { "edge": "e-lb-a-app-a", "text": "로드밸런서가 두 가용 영역의 앱 서버로 요청을 나눕니다" },
+        { "edge": "e-app-a-db-a", "text": "앱이 주 DB에서 읽고 씁니다" },
+        { "edge": "e-db-a-db-b", "text": "변경분이 리전 B로 비동기 복제됩니다" }
       ]
     },
     {
       "id": "failover",
       "label": "페일오버 경로",
-      "description": "리전 A에 장애가 나면 DNS가 헬스체크 결과를 보고 리전 B로 전환한다",
+      "description": "리전 A에 장애가 나면 DNS가 헬스체크 결과를 보고 리전 B로 전환합니다.",
       "steps": [
-        { "edge": "e-enduser-dns", "text": "사용자 요청이 DNS에 도착한다" },
-        { "edge": "e-dns-lb-b", "text": "헬스체크 실패로 리전 B에 라우팅한다" },
-        { "edge": "e-lb-b-app-b", "text": "스탠바이 앱이 트래픽을 받는다" },
-        { "edge": "e-app-b-db-b", "text": "승격된 복제 DB에서 서비스를 지속한다" }
+        { "edge": "e-enduser-dns", "text": "사용자 요청이 DNS에 도착합니다" },
+        { "edge": "e-dns-lb-b", "text": "헬스체크가 실패해 DNS가 요청을 리전 B로 보냅니다" },
+        { "edge": "e-lb-b-app-b", "text": "대기하던 앱이 트래픽을 받습니다" },
+        { "edge": "e-app-b-db-b", "text": "승격된 복제 DB로 서비스를 이어 갑니다" }
       ]
     }
   ]

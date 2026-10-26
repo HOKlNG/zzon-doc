@@ -142,7 +142,7 @@
     "weight": "semibold",
     "align": "start"
    },
-   "description": "링크와 태그를 다대다로 잇는 조인 테이블"
+   "description": "링크와 태그를 다대다로 잇는 조인 테이블입니다."
   },
   {
    "kind": "node",
@@ -200,7 +200,7 @@
     "weight": "semibold",
     "align": "start"
    },
-   "description": "사용자가 수집한 링크"
+   "description": "사용자가 수집한 링크입니다."
   },
   {
    "kind": "node",
@@ -238,7 +238,7 @@
     "weight": "semibold",
     "align": "start"
    },
-   "description": "링크 분류 태그"
+   "description": "링크를 분류하는 태그입니다."
   },
   {
    "kind": "node",
@@ -287,7 +287,7 @@
     "weight": "semibold",
     "align": "start"
    },
-   "description": "가입 사용자 계정"
+   "description": "가입한 사용자의 계정입니다."
   }
  ],
  "markers": [],
@@ -311,9 +311,9 @@
   "user_id",
   "users",
   "uuid",
-  "가입 사용자 계정",
-  "링크 분류 태그",
-  "링크와 태그를 다대다로 잇는 조인 테이블",
-  "사용자가 수집한 링크"
+  "가입한 사용자의 계정입니다.",
+  "링크를 분류하는 태그입니다.",
+  "링크와 태그를 다대다로 잇는 조인 테이블입니다.",
+  "사용자가 수집한 링크입니다."
  ]
 }

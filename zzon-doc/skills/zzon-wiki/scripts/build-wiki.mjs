@@ -292,6 +292,21 @@ function listMdFiles(dir, base) {
  * 4. --status 리포트 (쓰기 없음)
  * ========================================================================= */
 
+/** 결정 번호·티켓·질문 번호·절 기호 — 독자 문장에 남기지 않는다 (엔진 metrics.ts TRACKING_CODE와 같은 식) */
+const TRACKING_CODE = /\b(?:ADR|FL|OPS|TKT|JIRA)-\d+\b|\bq-\d{2,}\b|§\s?\d|\b[DB]-\d{3}\b/g;
+
+/** 문체 검사 대상 본문 — 코드 블록, 질문 표식 줄, 끝의 관련 자료·더 보기 절을 뺀다 */
+function proseOf(md) {
+  const lines = md.replace(/\r\n/g, "\n").replace(/```[\s\S]*?```/g, "").split("\n");
+  const out = [];
+  for (const line of lines) {
+    if (/^##\s*(관련 자료|더 보기|참고 자료)\s*$/.test(line)) break;
+    if (/❓/.test(line)) continue;
+    out.push(line.replace(/`[^`]*`/g, ""));
+  }
+  return out.join("\n");
+}
+
 function statusReport(root, wiki) {
   const unchanged = [], edited = [], missing = [], noHash = [];
   const referenced = new Set();
@@ -336,6 +351,23 @@ function statusReport(root, wiki) {
   const todo = [];
   walkDocs(wiki, (n, path) => { if (n.status === "todo") todo.push(path); });
   console.log(`  todo ${todo.length}건` + (todo.length ? `: ${todo.slice(0, 8).join(", ")}${todo.length > 8 ? " …" : ""}` : ""));
+
+  // 문체 검사(writing-style.md 규칙 7·12) — 본문 문장에 남은 추적 코드와 문장을 잇는 줄표
+  const style = [];
+  walkDocs(wiki, (n, path) => {
+    if (!n.file || !existsSync(join(root, n.file))) return;
+    const s = proseOf(readFileSync(join(root, n.file), "utf8"));
+    const codes = s.match(TRACKING_CODE) || [];
+    const dashes = (s.match(/\s—\s/g) || []).length;
+    if (codes.length || dashes > 5) style.push({ path, codes: codes.length, dashes, sample: [...new Set(codes)].slice(0, 3) });
+  });
+  if (style.length) {
+    console.log(`  문체 검사 — 본문에 추적 코드나 줄표가 남은 문서 ${style.length}개 (관련 자료 절·질문 표식·코드 블록은 제외):`);
+    for (const d of style.slice(0, 12)) {
+      console.log(`    - ${d.path}: 추적 코드 ${d.codes}${d.sample.length ? ` (${d.sample.join(", ")})` : ""} · 줄표 ${d.dashes}`);
+    }
+    if (style.length > 12) console.log(`    … 외 ${style.length - 12}개`);
+  }
 
   // 임베드 다이어그램도 근거 코드와 대조한다 — 문서는 최신인데 그림만 낡는 경우를 잡는다
   if (existsSync(join(root, "specs"))) {
@@ -426,7 +458,10 @@ function build(root, wiki) {
         docErrors.push(`${path}: @diagram(${slug}) — manifest에 없다. 사용 가능: ${manifestSlugs ? [...manifestSlugs].join(", ") : "(manifest 없음)"}`);
         continue;
       }
-      rendered = rendered.split(`${DGM}${slug}\u0000`).join(diagramIframe(slug, manifest));
+      // 큰 그림이 있는 세부 그림은 큰 그림을 먼저 보여 준다 (문서가 큰 그림을 따로 넣었으면 그대로)
+      const ov = `${slug}-overview`;
+      const withOverview = manifestSlugs.has(ov) && !diagrams.includes(ov);
+      rendered = rendered.split(`${DGM}${slug}\u0000`).join((withOverview ? diagramIframe(ov, manifest) : "") + diagramIframe(slug, manifest));
     }
     // 본문에 남은 q 마커가 대장에 없는 경우 경고 (역방향 — 마커 소멸은 --status가 담당)
     const ledger = new Set(wiki.questions.map((q) => q.id));

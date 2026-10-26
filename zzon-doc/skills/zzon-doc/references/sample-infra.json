@@ -2,24 +2,24 @@
   "specVersion": 1,
   "title": "데모숍 인프라 구성도",
   "kind": "infra",
-  "description": "구매자 요청이 CloudFront와 웹 스토어를 거쳐 VPC 안의 주문 API와 저장소에 닿는 AWS 구성을 보여 준다. 플로우 버튼을 누르면 주문 결제와 로그인 경로가 차례로 강조된다.",
+  "description": "구매자 요청이 CloudFront와 웹 스토어를 거쳐 VPC 안의 주문 API와 저장소에 닿는 AWS 구성을 보여 줍니다. 플로우 버튼을 누르면 주문 결제와 로그인 경로를 차례로 강조합니다.",
   "layout": { "direction": "RIGHT" },
   "groups": [
     { "id": "aws", "label": "AWS (ap-northeast-2)", "kind": "boundary" },
     { "id": "vpc", "label": "VPC", "kind": "vpc", "parentId": "aws" }
   ],
   "nodes": [
-    { "id": "shopper", "label": "구매자", "category": "user", "description": "웹 브라우저로 접속하는 일반 사용자" },
-    { "id": "cdn", "label": "CloudFront", "category": "cdn", "tech": "CloudFront", "parentId": "aws", "description": "정적 파일을 캐시해 사용자 가까이에서 내보낸다." },
-    { "id": "web", "label": "웹 스토어", "category": "frontend", "tech": "Next.js 15", "parentId": "aws", "href": "architecture/overview", "description": "상품 탐색, 장바구니, 주문 화면을 제공한다." },
-    { "id": "auth", "label": "인증 서비스", "category": "auth", "tech": "Cognito", "parentId": "vpc", "description": "로그인을 처리하고 토큰을 발급한다." },
-    { "id": "api", "label": "주문 API", "category": "backend", "tech": "NestJS", "parentId": "vpc", "description": "주문을 만들고 조회하는 핵심 서비스다." },
-    { "id": "redis", "label": "세션 캐시", "category": "cache", "tech": "Redis 7", "parentId": "vpc", "description": "세션과 상품 정보를 캐시한다." },
-    { "id": "mq", "label": "주문 이벤트 큐", "category": "queue", "tech": "SQS", "parentId": "vpc", "description": "주문 완료 이벤트를 잠시 쌓아 두는 큐다." },
-    { "id": "db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL 16", "parentId": "vpc", "lane": 4, "description": "주문, 상품, 회원 데이터를 저장한다." },
-    { "id": "worker", "label": "알림 워커", "category": "worker", "tech": "Node.js", "parentId": "vpc", "description": "주문 이벤트를 꺼내 알림과 정산 같은 후처리를 한다." },
-    { "id": "toss", "label": "토스페이먼츠", "category": "external", "description": "결제 승인과 취소 API를 제공하는 외부 결제대행사다." },
-    { "id": "ses", "label": "메일 발송", "category": "external", "tech": "SES", "description": "주문 확인 메일을 보낸다." }
+    { "id": "shopper", "label": "구매자", "category": "user", "description": "웹 브라우저로 접속하는 일반 사용자입니다." },
+    { "id": "cdn", "label": "CloudFront", "category": "cdn", "tech": "CloudFront", "parentId": "aws", "description": "정적 파일을 캐시해 사용자 가까이에서 내보냅니다." },
+    { "id": "web", "label": "웹 스토어", "category": "frontend", "tech": "Next.js 15", "parentId": "aws", "href": "architecture/overview", "description": "상품 탐색과 장바구니, 주문 화면을 제공합니다." },
+    { "id": "auth", "label": "인증 서비스", "category": "auth", "tech": "Cognito", "parentId": "vpc", "description": "로그인을 처리하고 토큰을 발급합니다." },
+    { "id": "api", "label": "주문 API", "category": "backend", "tech": "NestJS", "parentId": "vpc", "description": "주문을 만들고 조회하는 핵심 서비스입니다." },
+    { "id": "redis", "label": "세션 캐시", "category": "cache", "tech": "Redis 7", "parentId": "vpc", "description": "세션과 상품 정보를 캐시합니다." },
+    { "id": "mq", "label": "주문 이벤트 큐", "category": "queue", "tech": "SQS", "parentId": "vpc", "description": "주문 완료 이벤트를 잠시 쌓아 두는 큐입니다." },
+    { "id": "db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL 16", "parentId": "vpc", "lane": 4, "description": "주문과 상품, 회원 데이터를 저장합니다." },
+    { "id": "worker", "label": "알림 워커", "category": "worker", "tech": "Node.js", "parentId": "vpc", "description": "주문 이벤트를 꺼내 알림과 정산 같은 후처리를 합니다." },
+    { "id": "toss", "label": "토스페이먼츠", "category": "external", "description": "결제 승인과 취소 API를 제공하는 외부 결제대행사입니다." },
+    { "id": "ses", "label": "메일 발송", "category": "external", "tech": "SES", "description": "주문 확인 메일을 보냅니다." }
   ],
   "edges": [
     { "id": "e-shopper-cdn", "source": "shopper", "target": "cdn", "kind": "http" },
@@ -39,25 +39,25 @@
     {
       "id": "order",
       "label": "주문 결제 흐름",
-      "description": "구매자가 결제를 완료하고 확인 메일을 받기까지의 전체 경로",
+      "description": "구매자가 결제를 완료하고 확인 메일을 받기까지의 전체 경로입니다.",
       "steps": [
-        { "edge": "e-web-api", "text": "장바구니에서 주문 요청을 전송한다" },
-        { "edge": "e-api-toss", "text": "주문 API가 토스페이먼츠에 결제 승인을 요청한다" },
-        { "edge": "e-api-db", "text": "승인 결과와 함께 주문을 저장한다" },
-        { "edge": "e-api-mq", "text": "주문 완료 이벤트를 큐에 발행한다" },
-        { "edge": "e-mq-worker", "text": "알림 워커가 이벤트를 소비한다" },
-        { "edge": "e-worker-ses", "text": "주문 확인 메일을 발송한다" }
+        { "edge": "e-web-api", "text": "장바구니에서 주문 요청을 보냅니다" },
+        { "edge": "e-api-toss", "text": "주문 API가 토스페이먼츠에 결제 승인을 요청합니다" },
+        { "edge": "e-api-db", "text": "승인 결과와 함께 주문을 저장합니다" },
+        { "edge": "e-api-mq", "text": "주문 완료 이벤트를 큐에 발행합니다" },
+        { "edge": "e-mq-worker", "text": "알림 워커가 이벤트를 꺼내 처리합니다" },
+        { "edge": "e-worker-ses", "text": "주문 확인 메일을 보냅니다" }
       ]
     },
     {
       "id": "login",
       "label": "로그인 흐름",
-      "description": "세션 캐시를 활용한 로그인 경로",
+      "description": "세션 캐시로 토큰을 검증하는 로그인 경로입니다.",
       "steps": [
-        { "edge": "e-web-auth", "text": "이메일과 비밀번호로 로그인을 요청한다" },
-        { "edge": "e-auth-db", "text": "인증 서비스가 회원 정보를 조회한다" },
-        { "edge": "e-web-api", "text": "발급된 토큰으로 API를 호출한다" },
-        { "edge": "e-api-redis", "text": "세션 캐시에서 토큰을 검증한다" }
+        { "edge": "e-web-auth", "text": "이메일과 비밀번호로 로그인을 요청합니다" },
+        { "edge": "e-auth-db", "text": "인증 서비스가 회원 정보를 조회합니다" },
+        { "edge": "e-web-api", "text": "발급된 토큰으로 API를 호출합니다" },
+        { "edge": "e-api-redis", "text": "세션 캐시에서 토큰을 검증합니다" }
       ]
     }
   ]

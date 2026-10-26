@@ -22,14 +22,14 @@ export default diagram(
   "context",
   { title: "데모숍 시스템 컨텍스트", view: "context", tier: "overview", direction: "RIGHT", nodeDescriptions: true },
   (d) => {
-    const buyer = d.node("buyer", { category: "user", label: "구매자", description: "상품을 탐색하고 주문한다", hints: { layer: 0, order: 0 } });
-    const admin = d.node("admin", { category: "user", label: "운영자", description: "상품과 주문을 관리한다", hints: { layer: 0, order: 1 } });
+    const buyer = d.node("buyer", { category: "user", label: "구매자", description: "상품을 탐색하고 주문합니다.", hints: { layer: 0, order: 0 } });
+    const admin = d.node("admin", { category: "user", label: "운영자", description: "상품과 주문을 관리합니다.", hints: { layer: 0, order: 1 } });
     const shop = d.node("shop", {
       category: "service", label: "데모숍", tech: "커머스 플랫폼",
-      description: "상품 전시부터 결제와 알림까지 맡는 중심 시스템", href: "container", hints: { layer: 1 },
+      description: "상품 전시부터 결제와 알림까지 맡는 중심 시스템입니다.", href: "container", hints: { layer: 1 },
     });
-    const pg = d.node("pg", { category: "external", label: "토스페이먼츠", description: "결제 승인을 맡는 외부 결제대행사", hints: { layer: 2, order: 0 } });
-    const mail = d.node("mail", { category: "external", label: "메일 서비스", tech: "SES", description: "주문 알림 메일을 보낸다", hints: { layer: 2, order: 1 } });
+    const pg = d.node("pg", { category: "external", label: "토스페이먼츠", description: "결제 승인을 맡는 외부 결제대행사입니다.", hints: { layer: 2, order: 0 } });
+    const mail = d.node("mail", { category: "external", label: "메일 서비스", tech: "SES", description: "주문 알림 메일을 보냅니다.", hints: { layer: 2, order: 1 } });
 
     d.edge(buyer, shop, { label: "주문", layer: "http" });
     d.edge(admin, shop, { label: "관리", layer: "http" });

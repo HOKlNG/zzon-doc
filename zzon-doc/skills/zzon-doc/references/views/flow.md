@@ -26,10 +26,10 @@ const submit = d.edge(client, api, { label: "주문 제출", layer: "sync" });
 const publish = d.edge(api, queue, { label: "이벤트 발행", layer: "async", style: { preset: "dashed" } });
 d.flow("order", {
   title: "주문 접수",
-  description: "주문을 제출해 저장되기까지의 정상 경로",
+  description: "주문을 제출해 저장되기까지의 정상 경로입니다.",
   steps: [
-    { edge: submit, text: "클라이언트가 주문을 제출한다" },
-    { edge: publish, text: "API가 주문 이벤트를 발행한다" },
+    { edge: submit, text: "클라이언트가 주문을 제출합니다" },
+    { edge: publish, text: "API가 주문 이벤트를 발행합니다" },
   ],
 });
 ```

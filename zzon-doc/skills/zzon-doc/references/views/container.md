@@ -36,7 +36,7 @@ export default diagram("container", { title: "데모숍 컨테이너", view: "co
   const e3 = d.edge(gw, order, { layer: "http" });
   d.edge(order, orderDb, { layer: "data" });
   d.edge(order, pg, { label: "결제 승인", layer: "http" });
-  d.flow("checkout", { title: "주문 접수", steps: [{ edge: e1, text: "구매자가 주문한다" }, { edge: e2, text: "웹이 API를 호출한다" }, { edge: e3, text: "주문 서비스로 라우팅된다" }] });
+  d.flow("checkout", { title: "주문 접수", steps: [{ edge: e1, text: "구매자가 주문합니다" }, { edge: e2, text: "웹이 API를 호출합니다" }, { edge: e3, text: "요청이 주문 서비스로 갑니다" }] });
 });
 ```
 

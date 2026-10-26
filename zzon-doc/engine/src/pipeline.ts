@@ -38,7 +38,11 @@ export async function buildScene(model: DiagramModel): Promise<Scene> {
     const s = await layoutDiagram(model);
     await routeEdges(s, model.edges);
     const m = measureScene(s);
-    const bad = m.crowded.length + 2 * m.occludedLabels.length;
+    // a pass far off the target aspect fits a page at a fraction of the size —
+    // count it as worse than a few crowded lines (aspect invariant band: ±40%)
+    const target = model.aspectRatio || 1.6;
+    const offAspect = m.aspect > target * 1.4 || (m.aspect > 0 && m.aspect < target / 1.4);
+    const bad = m.crowded.length + 2 * m.occludedLabels.length + (offAspect ? 4 : 0);
     if (bad < best) {
       scene = s;
       best = bad;

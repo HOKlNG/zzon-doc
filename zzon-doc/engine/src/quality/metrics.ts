@@ -242,6 +242,31 @@ export interface GateReport {
 
 const f2 = (n: number) => Math.round(n * 100) / 100;
 
+/**
+ * Decision records, ticket and question ids, section signs in text a reader sees
+ * (title, labels, flow names, descriptions). Ids belong in the source document's
+ * links, not on the canvas or in the sidebar.
+ */
+export const TRACKING_CODE = /\b(?:ADR|FL|OPS|TKT|JIRA)-\d+\b|\bq-\d{2,}\b|§\s?\d|\b[DB]-\d{3}\b/g;
+const READER_KEYS = new Set(["title", "label", "sublabel", "name", "description", "text"]);
+
+export function trackingCodes(model: unknown): string[] {
+  const found: string[] = [];
+  const seen = new WeakSet<object>();
+  const walk = (v: unknown, key?: string) => {
+    if (typeof v === "string") {
+      if (key && READER_KEYS.has(key)) for (const m of v.matchAll(TRACKING_CODE)) found.push(m[0]);
+      return;
+    }
+    if (!v || typeof v !== "object" || seen.has(v)) return;
+    seen.add(v);
+    if (Array.isArray(v)) v.forEach((x) => walk(x, key));
+    else for (const [k, x] of Object.entries(v)) walk(x, k);
+  };
+  walk(model);
+  return found;
+}
+
 export function gateScene(
   scene: Scene,
   model: DiagramModel,
@@ -365,6 +390,18 @@ export function gateScene(
       limit: "0",
       severity: semErr.length ? "fail" : "warn",
       hint: [...semErr, ...semWarn].slice(0, 3).map((i) => i.message).join(" / "),
+    });
+  }
+  // reader-facing text carries no tracking codes (writing-style.md 규칙 7)
+  const codes = trackingCodes(model);
+  if (codes.length) {
+    push({
+      id: "tracking-codes",
+      label: "추적 코드",
+      value: codes.length,
+      limit: "0",
+      severity: "warn",
+      hint: `제목·라벨·설명에서 결정 번호·티켓 코드를 빼고 내용을 써라: ${codes.slice(0, 4).map((c) => `「${c}」`).join(", ")}`,
     });
   }
   if (tier === "reference" && model.flows.length === 0) {

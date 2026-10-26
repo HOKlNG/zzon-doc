@@ -107,6 +107,7 @@
 ```
 
 빌드 타임에 iframe 블록(+ 캡션 + "크게 보기" 링크)으로 치환된다. slug가 manifest.json에 없으면 **빌드 에러 + 사용 가능한 slug 목록** 출력.
+그 그림에 큰 그림(`<slug>-overview`, 스펙 stub `"overview": true`)이 있으면 큰 그림을 바로 앞에 함께 넣는다. 문서가 `@diagram(<slug>-overview)`를 따로 썼으면 그 자리를 따른다.
 
 ### 미확인 지점 콜아웃 (질문 앵커)
 

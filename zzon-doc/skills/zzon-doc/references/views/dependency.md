@@ -29,7 +29,7 @@ node $Z/skills/zzon-doc/scripts/scan-deps.mjs <프로젝트 루트> --out <docsD
 
 ```json
 { "renderer": "engine", "kind": "dependency", "view": "dependency", "title": "모듈 의존성",
-  "description": "소스 모듈이 서로 무엇을 가져다 쓰는지 보여 준다. 여러 모듈이 함께 쓰는 render와 text는 맨 아래에 따로 모았다.",
+  "description": "소스 모듈이 서로 무엇을 가져다 쓰는지 보여 줍니다. 여러 모듈이 함께 쓰는 공용 모듈은 맨 아래에 따로 모았습니다.",
   "source": "terra/deps.ts", "sources": ["src/**"] }
 ```
 

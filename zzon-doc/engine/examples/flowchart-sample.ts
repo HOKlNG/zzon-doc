@@ -10,7 +10,7 @@ export default diagram(
   { title: "환불 판단 절차", docKind: "flowchart", view: "flowchart", tier: "standard" },
   (d) => {
     const start = d.terminal("start", { label: "환불 요청" });
-    const receive = d.process("receive", { label: "요청 접수", sublabel: "주문·결제 조회", description: "주문 상태와 결제 일시를 읽는다." });
+    const receive = d.process("receive", { label: "요청 접수", sublabel: "주문·결제 조회", description: "주문 상태와 결제 일시를 읽습니다." });
     const within = d.decision("within", { label: "결제 후 7일 이내?" });
     const shipped = d.decision("shipped", { label: "이미 출고?" });
     const pickup = d.process("pickup", { label: "회수 접수", sublabel: "물류 API", hints: { order: 1 } });
@@ -32,11 +32,11 @@ export default diagram(
     d.flow("fast", {
       title: "출고 전 환불",
       steps: [
-        { edge: e1, text: "고객이 환불을 요청한다" },
-        { edge: e2, text: "주문과 결제 정보를 조회한다" },
-        { edge: e3, text: "결제 후 7일 이내다" },
-        { edge: e4, text: "아직 출고 전이다" },
-        { edge: e5, text: "PG 취소로 환불을 마친다" },
+        { edge: e1, text: "고객이 환불을 요청합니다" },
+        { edge: e2, text: "주문과 결제 정보를 조회합니다" },
+        { edge: e3, text: "결제 후 7일 이내입니다" },
+        { edge: e4, text: "아직 출고 전입니다" },
+        { edge: e5, text: "결제를 취소해 환불을 마칩니다" },
       ],
     });
   },

@@ -19,13 +19,13 @@ export default diagram(
       category: "gateway",
       label: "주문 API",
       tech: "NestJS 10",
-      description: "주문 접수와 상태 조회를 처리하는 단일 진입점.",
+      description: "주문 접수와 상태 조회를 처리하는 단 하나의 진입점입니다.",
     });
     const queue = d.node("queue", { category: "queue", label: "주문 큐", tech: "SQS" });
     const worker = d.node("worker", {
       category: "worker",
       label: "정산 워커",
-      description: "큐 이벤트를 소비해 주문 레코드를 확정한다.",
+      description: "큐에서 이벤트를 꺼내 주문 레코드를 확정합니다.",
     });
     const db = d.node("orders-db", { category: "db", label: "주문 DB", tech: "PostgreSQL 16" });
 
@@ -41,22 +41,22 @@ export default diagram(
 
     d.flow("order", {
       title: "주문 접수",
-      description: "클라이언트가 주문을 제출해 워커가 저장하기까지의 정상 경로",
+      description: "클라이언트가 주문을 제출해 워커가 저장하기까지의 정상 경로입니다.",
       steps: [
-        { edge: submit, text: "클라이언트가 주문을 제출한다" },
-        { edge: publish, text: "API가 주문 이벤트를 큐에 발행한다" },
-        { edge: consume, text: "워커가 이벤트를 소비한다" },
-        { edge: persist, text: "주문 레코드를 저장한다" },
+        { edge: submit, text: "클라이언트가 주문을 제출합니다" },
+        { edge: publish, text: "API가 주문 이벤트를 큐에 발행합니다" },
+        { edge: consume, text: "워커가 이벤트를 꺼내 처리합니다" },
+        { edge: persist, text: "주문을 저장합니다" },
       ],
     });
 
     // shares the client→api edge with "order" — badge offset + frame step UI
     d.flow("status", {
       title: "상태 조회",
-      description: "클라이언트가 주문 상태를 주기적으로 묻는 경로",
+      description: "클라이언트가 주문 상태를 주기적으로 묻는 경로입니다.",
       steps: [
-        { edge: submit, text: "클라이언트가 주문 상태를 폴링한다" },
-        { edge: read, text: "API가 DB에서 주문 상태를 읽는다" },
+        { edge: submit, text: "클라이언트가 주문 상태를 주기적으로 조회합니다" },
+        { edge: read, text: "API가 DB에서 주문 상태를 읽습니다" },
       ],
     });
   },

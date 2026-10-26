@@ -17,7 +17,7 @@
 ```ts
 export default diagram("agents", { title: "에이전트 구성", view: "agent-topology", tier: "overview", docKind: "agent-topology", direction: "RIGHT" }, (d) => {
   const main = d.node("main", { category: "agent", label: "메인 세션", hints: { layer: 0 } });
-  const rev = d.node("reviewer", { category: "agent", label: "code-reviewer", description: "바뀐 코드를 읽고 버그와 개선점을 짚는다", hints: { layer: 1 } });
+  const rev = d.node("reviewer", { category: "agent", label: "code-reviewer", description: "바뀐 코드를 읽고 버그와 개선점을 짚습니다.", hints: { layer: 1 } });
   const lint = d.node("lint", { category: "hook", label: "lint 훅", sublabel: "PostToolUse", hints: { layer: 1, order: 1 } });
   d.edge(main, rev, { label: "위임", layer: "agent" });
   d.edge(main, lint, { label: "트리거", layer: "hook", style: { preset: "dashed" } });

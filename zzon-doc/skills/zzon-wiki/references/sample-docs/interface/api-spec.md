@@ -1,15 +1,31 @@
+## 개요
+
+데모숍의 API는 모두 같은 공통 규약을 따릅니다. 이 문서는 인증과 목록 조회, 에러 응답의 규약을 정리하고, 도메인별 상세는 하위 문서로 넘깁니다.
+
 ## 공통 규약
 
-- 모든 API는 `/api/v1` 아래에 있다.
-- 인증은 Cognito가 발급한 토큰을 `Authorization: Bearer <token>` 헤더에 담아 보낸다.
-- 에러는 `{ "error": { "code": "ORDER_NOT_FOUND", "message": "..." } }` 형태로 돌려준다.
-- 목록은 커서 방식으로 나눠 받는다. 예를 들어 `?cursor=…&limit=20`처럼 요청한다.
+모든 API는 `/api/v1` 아래에 있습니다. 요청에는 Cognito가 발급한 토큰을 인증 헤더에 담아 보냅니다.
+
+목록은 커서 방식으로 나눠 받습니다. 요청할 때 이어서 받을 위치와 한 번에 받을 개수를 함께 보냅니다.
+
+에러가 나면 에러 코드와 메시지를 담은 객체를 돌려줍니다. 클라이언트는 메시지가 아니라 코드로 분기해야 합니다.
 
 ## 도메인별 명세
 
-도메인별 상세는 하위 문서에서 다룬다. 코드에서 확인한 도메인은 주문(Orders)과 상품(Catalog)이다.
+코드에서 확인한 도메인은 주문과 상품입니다. 도메인마다 하위 문서를 따로 둡니다.
 
 | 도메인 | 경로 | 상태 |
 |---|---|---|
-| Orders | `/api/v1/orders` | 하위 문서 작성 예정 |
-| Catalog | `/api/v1/products` | 하위 문서 작성 예정 |
+| 주문 (Orders) | `/api/v1/orders` | 하위 문서 작성 예정 |
+| 상품 (Catalog) | `/api/v1/products` | 하위 문서 작성 예정 |
+
+## 설정 참고
+
+```http
+Authorization: Bearer <token>
+GET /api/v1/orders?cursor=…&limit=20
+```
+
+```json
+{ "error": { "code": "ORDER_NOT_FOUND", "message": "..." } }
+```

@@ -63,6 +63,17 @@ function countNodes(els: Element[]): number {
   return n;
 }
 
+/** nodes held in grid cells (anywhere in the tree) */
+function countGridNodes(els: Element[]): number {
+  let n = 0;
+  for (const e of els) {
+    if (!isGroup(e)) continue;
+    if (e.grid) for (const cell of Object.values(e.grid.cells)) n += countNodes(cell.children) + countGridNodes(cell.children);
+    n += countGridNodes(e.children);
+  }
+  return n;
+}
+
 function allNodes(els: Element[], out: NodeEl[] = []): NodeEl[] {
   for (const e of els) {
     if (isGroup(e)) allNodes(e.children, out);
@@ -97,10 +108,12 @@ function foldEdges(edges: Edge[], absorbed: Absorbed): { edges: Edge[]; remap: M
     const from = resolvePath(e.from, absorbed);
     const to = resolvePath(e.to, absorbed);
     if (!from || !to || from === to) continue;
-    const key = `${from}\u0000${to}`;
+    // one line per pair in the big picture — A→B and B→A become one two-way line
+    const key = from < to ? `${from}\u0000${to}` : `${to}\u0000${from}`;
     const kept = byPair.get(key);
     if (kept) {
       if (kept.label !== e.label) kept.label = undefined; // different words on one line: keep the line only
+      if (kept.from !== from) kept.style = { ...kept.style, arrowhead: "both" };
       remap.set(e.id, kept.id);
       continue;
     }
@@ -111,6 +124,43 @@ function foldEdges(edges: Edge[], absorbed: Absorbed): { edges: Edge[]; remap: M
     out.push(copy);
   }
   return { edges: out, remap };
+}
+
+/**
+ * A big picture over its line budget (overview: 1.5 per node, at most 12) drops
+ * shortcut lines first: A→C when A already reaches C through other lines. The
+ * detail sheet keeps every line; lines that carry a flow step are never dropped.
+ */
+function trimShortcuts(edges: Edge[], nodes: number, inFlow: Set<string>): Edge[] {
+  const budget = nodes <= OVERVIEW_MAX ? Math.min(12, Math.floor(nodes * 1.5)) : Math.floor(nodes * 1.5);
+  let out = edges.slice();
+  const reaches = (from: string, to: string, skip: Edge): boolean => {
+    const next = new Map<string, string[]>();
+    const add = (a: string, b: string) => next.set(a, [...(next.get(a) ?? []), b]);
+    for (const e of out) {
+      if (e === skip) continue;
+      add(e.from, e.to);
+      if (e.style?.arrowhead === "both") add(e.to, e.from);
+    }
+    const seen = new Set([from]);
+    const queue = [from];
+    while (queue.length) {
+      const cur = queue.shift()!;
+      for (const n of next.get(cur) ?? []) {
+        if (n === to) return true;
+        if (!seen.has(n)) { seen.add(n); queue.push(n); }
+      }
+    }
+    return false;
+  };
+  while (out.length > budget) {
+    const candidates = out.filter((e) => !inFlow.has(e.id) && reaches(e.from, e.to, e));
+    if (!candidates.length) break;
+    // unlabeled shortcuts go first — a labelled line usually says something the path does not
+    const pick = candidates.find((e) => !e.label) ?? candidates[0]!;
+    out = out.filter((e) => e !== pick);
+  }
+  return out;
 }
 
 function foldFlows(flows: FlowDef[], remap: Map<string, string>): FlowDef[] {
@@ -132,7 +182,9 @@ function foldFlows(flows: FlowDef[], remap: Map<string, string>): FlowDef[] {
  * kind's icon (Lambda ×3). A mixed cluster is shown as what it is: an account,
  * an OU, a VPC or a subnet, with the official icon for that container.
  */
-function clusterVisual(g: GroupEl, members: NodeEl[]): Pick<NodeEl, "icon" | "category"> | undefined {
+function clusterVisual(g: GroupEl, members: NodeEl[], cards = false): Pick<NodeEl, "icon" | "category"> | undefined {
+  // a card diagram stays a card diagram: an icon here would mix vocabularies
+  if (cards) return { category: members.find((m) => m.category)?.category ?? "service" };
   // containers first: an account or OU is shown as that, whatever it holds
   const label = g.label ?? "";
   if (g.kind === "account") {
@@ -207,6 +259,7 @@ export function foldModel(model: DiagramModel, opts: { href?: string } = {}): Fo
   const ledger: FoldEntry[] = [];
   const count = () => countNodes(work.children) + model.actors.length + work.bands.reduce((s, b) => s + countNodes(b.children), 0);
   const detailNodes = count();
+  const cardDiagram = ![...allNodes(model.children), ...model.bands.flatMap((b) => allNodes(b.children))].some((n) => n.icon);
   const fits = () => count() <= OVERVIEW_MAX;
   const eachList = (fn: (els: Element[]) => Element[]) => {
     work.children = fn(work.children);
@@ -271,7 +324,7 @@ export function foldModel(model: DiagramModel, opts: { href?: string } = {}): Fo
         return {
           ...e,
           label: `${lbl(e)} 외 ${same.length - 1}개`,
-          description: `${same.map(lbl).join(", ")}를 하나로 묶었다. 더블클릭하면 세부 그림으로 넘어간다.`,
+          description: `${same.map(lbl).join(", ")}를 하나로 묶었습니다. 더블클릭하면 세부 그림으로 넘어갑니다.`,
           ...(href ? { href } : {}),
         };
       });
@@ -317,7 +370,7 @@ export function foldModel(model: DiagramModel, opts: { href?: string } = {}): Fo
         ledger.push({ step: "fold", into: e.path, members: members.map(lbl) });
         folded++;
         foldedPaths.add(e.path);
-        const rep = clusterVisual(e, members);
+        const rep = clusterVisual(e, members, cardDiagram);
         const node: NodeEl = {
           type: "node",
           id: e.id,
@@ -326,7 +379,7 @@ export function foldModel(model: DiagramModel, opts: { href?: string } = {}): Fo
           label: e.label ?? e.id,
           sublabel: members.length === 0 ? undefined : members.length === 1 ? lbl(members[0]!) : `${members.length}개`,
           description: members.length
-            ? `${members.map(lbl).join(", ")}${members.length === 1 ? "를 담고 있다" : "를 하나로 묶었다"}. 더블클릭하면 세부 그림으로 넘어간다.`
+            ? `${members.map(lbl).join(", ")}${members.length === 1 ? "를 담고 있습니다" : "를 하나로 묶었습니다"}. 더블클릭하면 세부 그림으로 넘어갑니다.`
             : undefined,
           ...(href ? { href } : {}),
           meta: e.meta,
@@ -375,7 +428,10 @@ export function foldModel(model: DiagramModel, opts: { href?: string } = {}): Fo
     /* one level up per pass */
   }
 
-  const { edges, remap } = foldEdges(model.edges, absorbed);
+  const folded = foldEdges(model.edges, absorbed);
+  const { remap } = folded;
+  const edges = trimShortcuts(folded.edges, count(), new Set(model.flows.flatMap((f) => f.steps.map((s) => remap.get(s.edge) ?? ""))));
+  for (const [k, v] of remap) if (!edges.some((e) => e.id === v)) remap.delete(k);
   layerHints(work.children, edges);
   const gone = (p: string) => absorbed.has(p);
   const overview: DiagramModel = {
@@ -429,6 +485,15 @@ export interface ZoomPlan {
  *   - more than 20 nodes: overview required, and the detail links from it.
  */
 export function zoomPlan(model: DiagramModel): ZoomPlan {
+  // grid groups keep their nodes in cells, not children — the fold ladder does not
+  // walk them, so count them here and judge grids by size alone
+  const gridNodes = countGridNodes([...model.children, ...model.bands.flatMap((b) => b.children)]);
+  if (gridNodes > 0) {
+    const n = countNodes(model.children) + model.actors.length + model.bands.reduce((s, b) => s + countNodes(b.children), 0) + gridNodes;
+    if (n <= OVERVIEW_MAX) return { decision: "single", detailNodes: n, overviewNodes: n, reason: `노드 ${n}개라 이 한 장이 곧 큰 그림이다.` };
+    const reason = `노드 ${n}개. 격자 배치라 자동으로 접지 못한다. 큰 그림이 필요하면 칸(열·줄)을 노드로 삼아 따로 그린다.`;
+    return { decision: n > STANDARD_MAX ? "overview-required" : "overview-optional", detailNodes: n, overviewNodes: n, reason };
+  }
   const r = foldModel(structuredClone(model));
   const n = r.detailNodes;
   const o = r.overviewNodes;

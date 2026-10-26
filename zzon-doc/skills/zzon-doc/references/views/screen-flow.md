@@ -14,7 +14,7 @@
 
 | 요소 | DSL |
 |---|---|
-| 화면 | `d.screen(id, { label, route: "/products/[id]", description: "상품 정보와 구매 버튼을 보여 준다" })` |
+| 화면 | `d.screen(id, { label, route: "/products/[id]", description: "상품 정보와 구매 버튼을 보여 줍니다." })` |
 | 이동 | `d.edge(a, b, { label: "<사용자 행동>", layer: "nav" })` |
 | 조건부 이동(인증·권한) | `{ layer: "auth", style: { preset: "dashed" } }` |
 | 되돌아가는 동선 | `{ back: true, hints: { sourceSide: "E", targetSide: "N" } }` — 본선 순서를 지키고 캔버스 위로 돌아온다 |

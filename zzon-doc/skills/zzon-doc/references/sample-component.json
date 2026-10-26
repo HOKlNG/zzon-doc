@@ -2,7 +2,7 @@
   "specVersion": 1,
   "title": "주문 서비스 내부 구성",
   "kind": "infra",
-  "description": "주문 서비스 안의 부품들이 주문 한 건을 어떻게 확정하는지 보여 준다. 게이트웨이가 요청을 넘기면 오케스트레이터가 재고 확인, 결제, 저장, 이벤트 발행을 차례로 조율한다.",
+  "description": "주문 서비스 안의 부품들이 주문 한 건을 어떻게 확정하는지 보여 줍니다. 게이트웨이가 요청을 넘기면 오케스트레이터가 재고 확인부터 이벤트 발행까지 차례로 조율합니다.",
   "section": "구조",
   "order": 2,
   "layout": { "direction": "RIGHT" },
@@ -10,19 +10,19 @@
     { "id": "order-svc", "label": "주문 서비스 (NestJS)", "kind": "boundary" }
   ],
   "nodes": [
-    { "id": "gateway", "label": "API 게이트웨이", "category": "gateway", "tech": "Kong", "lane": 0, "description": "주문 API를 호출하는 앞단 게이트웨이다." },
+    { "id": "gateway", "label": "API 게이트웨이", "category": "gateway", "tech": "Kong", "lane": 0, "description": "주문 API를 호출하는 앞단 게이트웨이입니다." },
 
-    { "id": "order-api", "label": "주문 API", "category": "backend", "tech": "REST Controller", "parentId": "order-svc", "lane": 1, "description": "요청을 검증하고 로그인 정보를 확인한 뒤 주문 처리에 넘긴다." },
+    { "id": "order-api", "label": "주문 API", "category": "backend", "tech": "REST Controller", "parentId": "order-svc", "lane": 1, "description": "요청을 검증하고 로그인 정보를 확인한 뒤 주문 처리에 넘깁니다." },
 
-    { "id": "orchestrator", "label": "주문 오케스트레이터", "category": "service", "tech": "Use Case", "parentId": "order-svc", "lane": 2, "description": "재고 확인, 결제, 주문 저장, 이벤트 발행을 차례로 조율한다." },
+    { "id": "orchestrator", "label": "주문 오케스트레이터", "category": "service", "tech": "Use Case", "parentId": "order-svc", "lane": 2, "description": "재고 확인과 결제, 주문 저장, 이벤트 발행을 차례로 조율합니다." },
 
-    { "id": "inventory", "label": "재고 검사기", "category": "service", "parentId": "order-svc", "lane": 3, "order": 0, "description": "상품 재고를 조회해 주문할 수 있는지 판단한다." },
-    { "id": "pay-adapter", "label": "결제 어댑터", "category": "service", "parentId": "order-svc", "lane": 3, "order": 1, "description": "결제대행사 API 호출을 한곳에 감싼다." },
-    { "id": "publisher", "label": "이벤트 퍼블리셔", "category": "service", "parentId": "order-svc", "lane": 3, "order": 2, "description": "주문 완료 이벤트를 큐 메시지 형식으로 바꿔 발행한다." },
+    { "id": "inventory", "label": "재고 검사기", "category": "service", "parentId": "order-svc", "lane": 3, "order": 0, "description": "상품 재고를 조회해 주문할 수 있는지 판단합니다." },
+    { "id": "pay-adapter", "label": "결제 어댑터", "category": "service", "parentId": "order-svc", "lane": 3, "order": 1, "description": "결제대행사 API 호출을 한곳에 감쌉니다." },
+    { "id": "publisher", "label": "이벤트 퍼블리셔", "category": "service", "parentId": "order-svc", "lane": 3, "order": 2, "description": "주문 완료 이벤트를 큐 메시지 형식으로 바꿔 발행합니다." },
 
-    { "id": "order-db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL", "lane": 4, "order": 0, "href": "sample-erd", "description": "주문과 결제 데이터를 저장한다." },
-    { "id": "pg", "label": "토스페이먼츠", "category": "external", "lane": 4, "order": 1, "description": "결제 승인과 취소를 처리하는 외부 결제대행사다." },
-    { "id": "mq", "label": "주문 이벤트 큐", "category": "queue", "tech": "SQS", "lane": 4, "order": 2, "href": "sample-event-flow", "description": "주문 완료 이벤트가 쌓이는 큐다." }
+    { "id": "order-db", "label": "주문 DB", "category": "db", "tech": "PostgreSQL", "lane": 4, "order": 0, "href": "sample-erd", "description": "주문과 결제 데이터를 저장합니다." },
+    { "id": "pg", "label": "토스페이먼츠", "category": "external", "lane": 4, "order": 1, "description": "결제 승인과 취소를 처리하는 외부 결제대행사입니다." },
+    { "id": "mq", "label": "주문 이벤트 큐", "category": "queue", "tech": "SQS", "lane": 4, "order": 2, "href": "sample-event-flow", "description": "주문 완료 이벤트가 쌓이는 큐입니다." }
   ],
   "edges": [
     { "id": "e-gw-api", "source": "gateway", "target": "order-api", "kind": "http", "label": "REST" },
@@ -39,17 +39,17 @@
     {
       "id": "confirm",
       "label": "주문 확정",
-      "description": "주문 서비스 안에서 주문 한 건이 확정되기까지",
+      "description": "주문 서비스 안에서 주문 한 건이 확정되기까지의 경로입니다.",
       "steps": [
-        { "edge": "e-gw-api", "text": "게이트웨이가 주문 API를 호출한다" },
-        { "edge": "e-api-orch", "text": "API가 주문 처리를 시작한다" },
-        { "edge": "e-orch-inv", "text": "재고 검사기에 주문 가능 여부를 묻는다" },
-        { "edge": "e-inv-db", "text": "재고를 조회한다" },
-        { "edge": "e-orch-pay", "text": "결제 어댑터에 결제를 위임한다" },
-        { "edge": "e-pay-pg", "text": "토스페이먼츠가 결제를 승인한다" },
-        { "edge": "e-orch-db", "text": "주문을 확정 상태로 저장한다" },
-        { "edge": "e-orch-pub", "text": "완료 사실을 퍼블리셔에 넘긴다" },
-        { "edge": "e-pub-mq", "text": "주문 완료 이벤트를 발행한다" }
+        { "edge": "e-gw-api", "text": "게이트웨이가 주문 API를 호출합니다" },
+        { "edge": "e-api-orch", "text": "API가 주문 처리를 시작합니다" },
+        { "edge": "e-orch-inv", "text": "재고 검사기에 주문할 수 있는지 묻습니다" },
+        { "edge": "e-inv-db", "text": "재고를 조회합니다" },
+        { "edge": "e-orch-pay", "text": "결제 어댑터에 결제를 맡깁니다" },
+        { "edge": "e-pay-pg", "text": "토스페이먼츠가 결제를 승인합니다" },
+        { "edge": "e-orch-db", "text": "주문을 확정 상태로 저장합니다" },
+        { "edge": "e-orch-pub", "text": "완료 사실을 퍼블리셔에 넘깁니다" },
+        { "edge": "e-pub-mq", "text": "주문 완료 이벤트를 발행합니다" }
       ]
     }
   ]

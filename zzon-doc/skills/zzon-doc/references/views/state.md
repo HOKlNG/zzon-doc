@@ -47,7 +47,7 @@ export default diagram("state-order", { title: "주문 상태 전이", docKind: 
   const t3 = d.transition(paid, end);
   d.transition(canceled, end);
   d.flow("happy", { title: "정상 주문", steps: [
-    { edge: t1, text: "주문이 생성된다" }, { edge: t2, text: "PG가 승인한다" }, { edge: t3, text: "종결된다" },
+    { edge: t1, text: "주문이 생성됩니다" }, { edge: t2, text: "PG가 결제를 승인합니다" }, { edge: t3, text: "주문이 종결됩니다" },
   ] });
 });
 ```
@@ -61,6 +61,6 @@ export default diagram("state-order", { title: "주문 상태 전이", docKind: 
 
 ## 점검
 
-- [ ] 상태 이름은 코드의 enum 값과 대응한다. `description`에 원래 값(`PAID`)을 적었다.
+- [ ] 상태 이름은 코드의 enum 값과 대응한다. 원래 값은 상태 라벨의 보조 줄(sublabel)에 두고, `description`에는 그 상태가 무엇을 뜻하는지 문장으로 쓴다.
 - [ ] 전이를 읽은 파일을 `sources`에 남겼다. 사이드바 설명에는 파일 위치 대신 전이의 뜻을 썼다.
 - [ ] ERD의 status 컬럼, 시퀀스 장과 서로 `href`로 이었다.

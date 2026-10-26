@@ -2,7 +2,7 @@
   "specVersion": 1,
   "title": "링크 서비스 ERD",
   "kind": "erd",
-  "description": "사용자, 링크, 태그, 컬렉션, 댓글 테이블이 서로 어떻게 이어지는지 보여 준다.",
+  "description": "사용자와 링크를 중심으로 태그와 컬렉션, 댓글 테이블이 서로 어떻게 이어지는지 보여 줍니다.",
   "layout": {
     "direction": "RIGHT"
   },

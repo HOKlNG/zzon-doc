@@ -334,7 +334,7 @@ svg.ia-svg.labels-off .edge text{opacity:0}
 </div>
 <div id="dg-tip"></div>
 <script>
-window.__zzonFramePayload = {"id":"azure-aks-sample","title":"Azure 쇼핑몰 서비스 (AKS)","kind":"infra","counts":{"nodes":11,"edges":10,"flows":0,"groups":4},"warnings":[],"nodes":[{"path":"user","label":"사용자"},{"path":"sub/fd","label":"Front Door"},{"path":"sub/vnet/agw","label":"Application Gateway"},{"path":"sub/vnet/aks/ing","label":"ingress"},{"path":"sub/vnet/aks/svc","label":"shop-api"},{"path":"sub/vnet/aks/dep","label":"shop-api"},{"path":"sub/vnet/data/sql","label":"Azure SQL"},{"path":"sub/vnet/data/redis","label":"Azure Cache for Redis"},{"path":"sub/kv","label":"Key Vault"},{"path":"sub/acr","label":"Container Registry"},{"path":"sub/ai","label":"Application Insights"}],"edges":[{"id":"e0","from":"user","to":"sub/fd","label":"HTTPS","layer":"요청"},{"id":"e1","from":"sub/fd","to":"sub/vnet/agw","layer":"요청"},{"id":"e2","from":"sub/vnet/agw","to":"sub/vnet/aks/ing","layer":"요청"},{"id":"e3","from":"sub/vnet/aks/ing","to":"sub/vnet/aks/svc","layer":"요청"},{"id":"e4","from":"sub/vnet/aks/svc","to":"sub/vnet/aks/dep","layer":"요청"},{"id":"e5","from":"sub/vnet/aks/dep","to":"sub/vnet/data/sql","label":"주문 저장","layer":"요청"},{"id":"e6","from":"sub/vnet/aks/dep","to":"sub/vnet/data/redis","label":"세션","layer":"요청"},{"id":"e7","from":"sub/vnet/aks/dep","to":"sub/kv","label":"비밀 읽기","layer":"설정"},{"id":"e8","from":"sub/acr","to":"sub/vnet/aks/dep","label":"이미지","layer":"배포"},{"id":"e9","from":"sub/vnet/aks/dep","to":"sub/ai","label":"추적","layer":"관측"}],"flows":[],"legend":[{"group":"edge","label":"요청","swatch":{"type":"line","color":"#52525b"}},{"group":"edge","label":"설정","swatch":{"type":"line","color":"#52525b","dash":"6 4"}},{"group":"edge","label":"배포","swatch":{"type":"line","color":"#52525b","dash":"2 3"}},{"group":"edge","label":"관측","swatch":{"type":"line","color":"#52525b","dash":"2 3"}},{"group":"groupKind","label":"그룹","swatch":{"type":"border","color":"#7D8998","dash":"4 3"}}],"assets":{"svgFile":"azure-aks-sample.svg","pngFile":"azure-aks-sample.png"}};
+window.__zzonFramePayload = {"id":"azure-aks-sample","title":"Azure 쇼핑몰 서비스 (AKS)","kind":"infra","counts":{"nodes":11,"edges":10,"flows":0,"groups":4},"warnings":[],"nodes":[{"path":"user","label":"사용자"},{"path":"sub/fd","label":"Front Door"},{"path":"sub/vnet/agw","label":"Application Gateway"},{"path":"sub/vnet/aks/ing","label":"ingress"},{"path":"sub/vnet/aks/svc","label":"shop-api"},{"path":"sub/vnet/aks/dep","label":"shop-api"},{"path":"sub/vnet/data/sql","label":"Azure SQL"},{"path":"sub/vnet/data/redis","label":"Azure Cache for Redis"},{"path":"sub/kv","label":"Key Vault"},{"path":"sub/acr","label":"Container Registry"},{"path":"sub/ai","label":"Application Insights"}],"edges":[{"id":"e0","from":"user","to":"sub/fd","label":"HTTPS","layer":"요청"},{"id":"e1","from":"sub/fd","to":"sub/vnet/agw","layer":"요청"},{"id":"e2","from":"sub/vnet/agw","to":"sub/vnet/aks/ing","layer":"요청"},{"id":"e3","from":"sub/vnet/aks/ing","to":"sub/vnet/aks/svc","layer":"요청"},{"id":"e4","from":"sub/vnet/aks/svc","to":"sub/vnet/aks/dep","layer":"요청"},{"id":"e5","from":"sub/vnet/aks/dep","to":"sub/vnet/data/sql","label":"주문 저장","layer":"요청"},{"id":"e6","from":"sub/vnet/aks/dep","to":"sub/vnet/data/redis","label":"세션","layer":"요청"},{"id":"e7","from":"sub/vnet/aks/dep","to":"sub/kv","label":"비밀 읽기","layer":"설정"},{"id":"e8","from":"sub/acr","to":"sub/vnet/aks/dep","label":"이미지","layer":"배포"},{"id":"e9","from":"sub/vnet/aks/dep","to":"sub/ai","label":"추적","layer":"관측"}],"flows":[],"legend":[{"group":"edge","label":"요청","swatch":{"type":"line","color":"#52525b"}},{"group":"edge","label":"설정","swatch":{"type":"line","color":"#52525b","dash":"6 4"}},{"group":"edge","label":"배포","swatch":{"type":"line","color":"#52525b","dash":"2 3"}},{"group":"edge","label":"관측","swatch":{"type":"line","color":"#52525b","dash":"2 3"}},{"group":"groupKind","label":"그룹","swatch":{"type":"border","color":"#7D8998","dash":"4 3"}}],"assets":{"svgFile":"azure-aks-sample.svg"}};
 window.__zzonFrameStr = {"kindInfra":"인프라","kindDataFlow":"데이터 흐름","kindErd":"ERD","kindAgentTopology":"에이전트 구조","kindState":"상태 전이","kindFlowchart":"플로우차트","kindDependency":"모듈 의존성","kindScreenFlow":"화면 흐름","kindClass":"도메인 모델","fit":"화면 맞춤","reset":"보기 초기화","labelAlways":"라벨 항상 표시 (줌아웃해도 유지)","exportSvg":"SVG로 내보내기 (벡터 — 문서·Figma에 그대로)","exportPng":"PNG로 내보내기 (2배 해상도)","themeToggle":"테마 전환","svg":"SVG","png":"PNG","legend":"범례","close":"닫기","columns":"컬럼","connections":"연결","steps":"단계","detailPrefix":"상세 보기: ","tagFk":"FK","tagUq":"UQ","tagNullable":"N","dirOut":"→","dirIn":"←","nodesLabel":"노드","edgesLabel":"엣지","groupsLabel":"그룹","flowsLabel":"플로우","countUnit":"개","warnMorePrefix":" 외 ","warnMoreSuffix":"건","fkArrow":"FK → ","badHref":"지원하지 않는 href 형식:","noExportAsset":"내보낼 자산이 없습니다:","adapterFail":"어댑터 호출 실패:","needAdapter":"register()에는 어댑터 객체가 필요합니다"};
 window.__zzonFrameIcons = {"Server":"\u003crect width=\"20\" height=\"8\" x=\"2\" y=\"2\" rx=\"2\" ry=\"2\"/>\u003crect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" ry=\"2\"/>\u003cline x1=\"6\" x2=\"6.01\" y1=\"6\" y2=\"6\"/>\u003cline x1=\"6\" x2=\"6.01\" y1=\"18\" y2=\"18\"/>","Webhook":"\u003cpath d=\"M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2\"/>\u003cpath d=\"m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06\"/>\u003cpath d=\"m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8\"/>","Database":"\u003cellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\"/>\u003cpath d=\"M3 5V19A9 3 0 0 0 21 19V5\"/>\u003cpath d=\"M3 12A9 3 0 0 0 21 12\"/>","Bot":"\u003cpath d=\"M12 8V4H8\"/>\u003crect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\"/>\u003cpath d=\"M2 14h2\"/>\u003cpath d=\"M20 14h2\"/>\u003cpath d=\"M15 13v2\"/>\u003cpath d=\"M9 13v2\"/>","Route":"\u003ccircle cx=\"6\" cy=\"19\" r=\"3\"/>\u003cpath d=\"M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15\"/>\u003ccircle cx=\"18\" cy=\"5\" r=\"3\"/>","Workflow":"\u003crect width=\"8\" height=\"8\" x=\"3\" y=\"3\" rx=\"2\"/>\u003cpath d=\"M7 11v4a2 2 0 0 0 2 2h4\"/>\u003crect width=\"8\" height=\"8\" x=\"13\" y=\"13\" rx=\"2\"/>","Network":"\u003crect x=\"16\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\"/>\u003crect x=\"2\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\"/>\u003crect x=\"9\" y=\"2\" width=\"6\" height=\"6\" rx=\"1\"/>\u003cpath d=\"M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3\"/>\u003cpath d=\"M12 12V8\"/>","Monitor":"\u003crect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/>\u003cline x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\"/>\u003cline x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\"/>","Boxes":"\u003cpath d=\"M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z\"/>\u003cpath d=\"m7 16.5-4.74-2.85\"/>\u003cpath d=\"m7 16.5 5-3\"/>\u003cpath d=\"M7 16.5v5.17\"/>\u003cpath d=\"M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z\"/>\u003cpath d=\"m17 16.5-5-3\"/>\u003cpath d=\"m17 16.5 4.74-2.85\"/>\u003cpath d=\"M17 16.5v5.17\"/>\u003cpath d=\"M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z\"/>\u003cpath d=\"M12 8 7.26 5.15\"/>\u003cpath d=\"m12 8 4.74-2.85\"/>\u003cpath d=\"M12 13.5V8\"/>","Maximize":"\u003cpath d=\"M8 3H5a2 2 0 0 0-2 2v3\"/>\u003cpath d=\"M21 8V5a2 2 0 0 0-2-2h-3\"/>\u003cpath d=\"M3 16v3a2 2 0 0 0 2 2h3\"/>\u003cpath d=\"M16 21h3a2 2 0 0 0 2-2v-3\"/>","RotateCcw":"\u003cpath d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/>\u003cpath d=\"M3 3v5h5\"/>","Tag":"\u003cpath d=\"M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z\"/>\u003ccircle cx=\"7.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\"/>","Sun":"\u003ccircle cx=\"12\" cy=\"12\" r=\"4\"/>\u003cpath d=\"M12 2v2\"/>\u003cpath d=\"M12 20v2\"/>\u003cpath d=\"m4.93 4.93 1.41 1.41\"/>\u003cpath d=\"m17.66 17.66 1.41 1.41\"/>\u003cpath d=\"M2 12h2\"/>\u003cpath d=\"M20 12h2\"/>\u003cpath d=\"m6.34 17.66-1.41 1.41\"/>\u003cpath d=\"m19.07 4.93-1.41 1.41\"/>","Moon":"\u003cpath d=\"M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401\"/>","X":"\u003cpath d=\"M18 6 6 18\"/>\u003cpath d=\"m6 6 12 12\"/>","ZoomIn":"\u003ccircle cx=\"11\" cy=\"11\" r=\"8\"/>\u003cline x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"/>\u003cline x1=\"11\" x2=\"11\" y1=\"8\" y2=\"14\"/>\u003cline x1=\"8\" x2=\"14\" y1=\"11\" y2=\"11\"/>","KeyRound":"\u003cpath d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\"/>\u003ccircle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\"/>"};
 window.__zzonFrameNarrow = 640;
@@ -833,12 +833,76 @@ window.__zzonFrameNarrow = 640;
   var vb = vb0.slice();
   var MIN_ZOOM = 0.2, MAX_ZOOM = 8, LABEL_ZOOM = 0.75;
   var labelMode = "auto";
-  function zoomLevel() { return vb0[2] / vb[2]; }
+  var base = vb0[2]; /* viewBox width of the last fit — zoom 1 */
+  function zoomLevel() { return base / vb[2]; }
   function applyVB() {
     svg.setAttribute("viewBox", vb.join(" "));
     svg.classList.toggle("labels-off", labelMode === "auto" && zoomLevel() < LABEL_ZOOM);
   }
-  function fitView() { vb = vb0.slice(); applyVB(); }
+  /* The frame floats its title bar + flow buttons (top-left), toolbar (right)
+     and legend (bottom-left) over the canvas. A plain fit lets them cover the
+     drawing's edges, so the fit leaves those strips free: measure the
+     overlays and fit the drawing into the rectangle that remains. */
+  function overlayInsets(r) {
+    var ins = { t: 0, r: 0, b: 0, l: 0 };
+    function box(sel) {
+      var el = document.querySelector(sel);
+      if (!el || !el.offsetParent) return null;
+      var b = el.getBoundingClientRect();
+      return b.width && b.height ? b : null;
+    }
+    var tops = [".frame-titlebar", ".frame-flowcol"];
+    for (var i = 0; i < tops.length; i++) {
+      var b = box(tops[i]);
+      if (b && b.top < r.top + r.height / 2) ins.t = Math.max(ins.t, b.bottom - r.top + 8);
+    }
+    var lg = box(".frame-legend");
+    if (lg && lg.top > r.top + r.height / 2) ins.b = Math.max(ins.b, r.bottom - lg.top + 8);
+    var tb = box(".frame-toolbar");
+    if (tb && tb.left > r.left + r.width / 2) ins.r = Math.max(ins.r, r.right - tb.left + 8);
+    return ins;
+  }
+  function fitView() {
+    vb = vb0.slice();
+    var r = svg.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) {
+      var ins = overlayInsets(r);
+      var iw = r.width - ins.l - ins.r, ih = r.height - ins.t - ins.b;
+      /* only when enough room is left — on tiny canvases the overlays win */
+      if ((ins.t || ins.b || ins.r) && iw > r.width * 0.5 && ih > r.height * 0.5) {
+        var s = Math.min(iw / vb0[2], ih / vb0[3]);
+        var w = r.width / s, h = r.height / s;
+        vb = [vb0[0] - (ins.l + (iw - vb0[2] * s) / 2) / s, vb0[1] - (ins.t + (ih - vb0[3] * s) / 2) / s, w, h];
+      }
+    }
+    base = vb[2];
+    applyVB();
+  }
+  /* On a phone-width canvas a whole-diagram fit shrinks text past reading
+     size, so the FIRST fit (frame boot) opens at a readable zoom from the
+     top-left instead; the fit button and dblclick still show everything. */
+  var READABLE_ZOOM = 0.6, TALL_READABLE = 0.55, NARROW_PX = 640, booted = false;
+  function bootView() {
+    var r = svg.getBoundingClientRect();
+    if (!r.width || !r.height) return fitView();
+    if (r.width > NARROW_PX) {
+      /* A long top-to-bottom drawing (a 20-step flowchart) fitted whole is
+         too small to read on a wide screen. Open it at its width — never
+         above 1:1 — from the top; the fit button still shows all of it. */
+      fitView();
+      var whole = Math.min(r.width / vb0[2], r.height / vb0[3]);
+      var ins = overlayInsets(r);
+      var across = Math.min(1, (r.width - ins.l - ins.r) / vb0[2]);
+      if (whole >= TALL_READABLE || across < whole * 1.6) return;
+      vb = [vb0[0] - (r.width - vb0[2] * across) / 2 / across, vb0[1] - ins.t / across, r.width / across, r.height / across];
+      applyVB();
+      return;
+    }
+    if (Math.min(r.width / vb0[2], r.height / vb0[3]) >= READABLE_ZOOM) return fitView();
+    var w = r.width / READABLE_ZOOM, h = r.height / READABLE_ZOOM;
+    vb = [vb0[0] + Math.min(0, (vb0[2] - w) / 2), vb0[1] + Math.min(0, (vb0[3] - h) / 2), w, h];
+    applyVB();
+  }
 
   /* Pointer capture retargets the subsequent click to the svg root, which
      breaks closest(".node") hit-testing — so capture is deferred until the
@@ -874,8 +938,8 @@ window.__zzonFrameNarrow = 640;
     if (touches[ev.pointerId]) touches[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
     if (pinch && touchList().length === 2) {
       var p = pinchState();
-      var zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, (vb0[2] / pinch.vb[2]) * (p.d / pinch.d)));
-      vb[2] = vb0[2] / zoom;
+      var zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, (base / pinch.vb[2]) * (p.d / pinch.d)));
+      vb[2] = base / zoom;
       vb[3] = pinch.vb[3] * (vb[2] / pinch.vb[2]);
       vb[0] = pinch.px - ((p.cx - p.r.left) / p.r.width) * vb[2];
       vb[1] = pinch.py - ((p.cy - p.r.top) / p.r.height) * vb[3];
@@ -908,8 +972,8 @@ window.__zzonFrameNarrow = 640;
     var px = vb[0] + ((ev.clientX - r.left) / r.width) * vb[2];
     var py = vb[1] + ((ev.clientY - r.top) / r.height) * vb[3];
     var factor = Math.pow(1.0015, ev.deltaY);
-    var zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, vb0[2] / (vb[2] * factor)));
-    factor = vb0[2] / zoom / vb[2];
+    var zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, base / (vb[2] * factor)));
+    factor = base / zoom / vb[2];
     vb[0] = px - (px - vb[0]) * factor;
     vb[1] = py - (py - vb[1]) * factor;
     vb[2] = vb[2] * factor;
@@ -1031,7 +1095,11 @@ window.__zzonFrameNarrow = 640;
       labelMode = mode === "always" ? "always" : "auto";
       applyVB();
     },
-    fit: function () { fitView(); },
+    fit: function () {
+      if (booted) return fitView();
+      booted = true;
+      bootView();
+    },
     reset: function () { fitView(); },
     canvasShift: function (px) {
       svg.style.transform = px ? "translateX(" + px + "px)" : "";

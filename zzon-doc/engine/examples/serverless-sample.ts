@@ -113,15 +113,15 @@ export default diagram(
   // ── representative path (T3 원장은 flow로 경로를 강조해야 읽힌다) ──
   d.flow("ingest", {
     title: "콘텐츠 수집",
-    description: "모바일 요청부터 AI 요약까지의 비동기 파이프라인",
+    description: "모바일 요청부터 AI 요약까지 이어지는 비동기 파이프라인입니다.",
     steps: [
-      { edge: r1, text: "모바일 앱이 API Gateway로 요청한다" },
-      { edge: r2, text: "api Lambda가 요청을 처리한다" },
-      { edge: p1, text: "수집 요청을 scrape 큐에 넣는다" },
-      { edge: p2, text: "scraper Lambda가 큐 메시지로 트리거된다" },
-      { edge: p3, text: "AI 처리 메시지를 발행한다" },
-      { edge: p4, text: "scraper가 AI 처리 메시지로 다시 트리거된다" },
-      { edge: p5, text: "LLM API로 요약하고 태그를 붙인다" },
+      { edge: r1, text: "모바일 앱이 API Gateway로 요청합니다" },
+      { edge: r2, text: "API 함수가 요청을 처리합니다" },
+      { edge: p1, text: "수집 요청을 수집 큐에 넣습니다" },
+      { edge: p2, text: "수집 함수가 큐 메시지를 받아 실행됩니다" },
+      { edge: p3, text: "AI 처리 메시지를 발행합니다" },
+      { edge: p4, text: "수집 함수가 AI 처리 메시지를 받아 다시 실행됩니다" },
+      { edge: p5, text: "LLM API로 요약하고 태그를 붙입니다" },
     ],
   });
 

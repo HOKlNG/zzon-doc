@@ -60,7 +60,7 @@ argument-hint: '[그릴 대상 — 예: 이 레포 아키텍처 / 주문 상태 
 틀리기 쉬운 계약(상세는 views/README.md):
 - DSL은 `<docsDir>/terra/<slug>.ts`에 둔다. 머리는 `diagram(slug, { title, view, tier, direction? }, d => …)`이다. **view·tier는 게이트 기준**이니 빠뜨리지 마라.
 - **캔버스 텍스트를 절제한다.** 설명 문장은 `description:`(사이드바)에 넣는다. 라벨은 짧게, 엣지 라벨은 2어절 이내로 쓴다.
-- **독자가 읽는 글**(제목, 요약, `description`, 플로우 단계)은 `references/writing-style.md`의 여섯 규칙을 따른다. 필드 이름, 등급 코드, 화살표 사슬, 그림 제작 설명을 넣지 마라.
+- **독자가 읽는 글**(제목, 요약, `description`, 플로우 단계)은 `references/writing-style.md`(AWS 기술 블로그 기준, 본문 합니다체)를 따른다. 필드 이름, 등급 코드, 화살표 사슬, 그림 제작 설명을 넣지 마라. `bun ia check`의 "추적 코드" 경고(결정 번호·티켓·질문 번호·§)는 0으로 만든다. 선 종류(레이어) 이름은 범례에 그대로 보이므로 한국어로 짓는다.
 - **배치 의도는 힌트로 밝힌다.** 열은 `hints.layer`, 열 안 순서는 `hints.order`, 방향은 `direction`이다.
 - 엣지에는 `layer:`가 필수다. 대표 경로는 `d.flow()`로 넣는다(T3에서는 필수).
 - **축소는 rubric §3.3 사다리 순서로만** 한다. 줄인 내용은 충실도 장부로 보고한다.

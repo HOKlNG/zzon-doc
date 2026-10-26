@@ -1,0 +1,2410 @@
+{
+ "id": "multi-account-lz",
+ "title": "AWS 멀티 계정 랜딩 존",
+ "width": 1823.05,
+ "height": 913.28,
+ "groups": [
+  {
+   "kind": "group",
+   "path": "aws-cloud",
+   "rect": {
+    "x": 32,
+    "y": 32,
+    "width": 1588.33,
+    "height": 849.28
+   },
+   "groupKind": "aws-cloud",
+   "badgeIcon": "group.aws-cloud",
+   "badgeRect": {
+    "x": 32,
+    "y": 32,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "AWS Cloud",
+    "x": 64,
+    "y": 48,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#242F3E"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/end-users",
+   "rect": {
+    "x": 225.12,
+    "y": 74,
+    "width": 211.3,
+    "height": 126.47
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 225.123046875,
+    "y": 74,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "End Users / Desktops",
+    "x": 257.123046875,
+    "y": 90,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/infrastructure-ou",
+   "rect": {
+    "x": 821,
+    "y": 351.41,
+    "width": 785.33,
+    "height": 515.87
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "Infrastructure OU",
+    "x": 828.99609375,
+    "y": 367.40507812500005,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/infrastructure-ou/devops",
+   "rect": {
+    "x": 835,
+    "y": 393.41,
+    "width": 214.07,
+    "height": 126.47
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 834.99609375,
+    "y": 393.40507812500005,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "DevOps",
+    "x": 866.99609375,
+    "y": 409.40507812500005,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/infrastructure-ou/operations",
+   "rect": {
+    "x": 1069.07,
+    "y": 393.41,
+    "width": 218.49,
+    "height": 126.47
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 1069.06640625,
+    "y": 393.40507812500005,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Operations",
+    "x": 1101.06640625,
+    "y": 409.40507812500005,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/infrastructure-ou/perimeter",
+   "rect": {
+    "x": 1296.81,
+    "y": 539.87,
+    "width": 295.52,
+    "height": 313.41
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 1296.80859375,
+    "y": 539.8734375,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Perimeter Security",
+    "x": 1328.80859375,
+    "y": 555.8734375,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/infrastructure-ou/perimeter/inspection-vpc",
+   "rect": {
+    "x": 1310.81,
+    "y": 581.87,
+    "width": 267.52,
+    "height": 257.41
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 1310.80859375,
+    "y": 581.8734375,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Inspection VPC",
+    "x": 1342.80859375,
+    "y": 597.8734375,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/infrastructure-ou/shared-network",
+   "rect": {
+    "x": 835,
+    "y": 548.11,
+    "width": 397.81,
+    "height": 296.94
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 834.99609375,
+    "y": 548.1076171875001,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Shared Network",
+    "x": 866.99609375,
+    "y": 564.1076171875001,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/infrastructure-ou/shared-network/central-vpc",
+   "rect": {
+    "x": 849,
+    "y": 590.11,
+    "width": 149.56,
+    "height": 56
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 848.99609375,
+    "y": 590.1076171875001,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Central VPC",
+    "x": 880.99609375,
+    "y": 606.1076171875001,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/infrastructure-ou/shared-network/endpoint-vpc",
+   "rect": {
+    "x": 1042.55,
+    "y": 590.11,
+    "width": 159.22,
+    "height": 126.47
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 1042.552734375,
+    "y": 590.1076171875001,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Endpoint VPC",
+    "x": 1074.552734375,
+    "y": 606.1076171875001,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/management",
+   "rect": {
+    "x": 870.95,
+    "y": 74,
+    "width": 657.54,
+    "height": 257.41
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 870.9541015625,
+    "y": 74,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Management Account",
+    "x": 902.9541015625,
+    "y": 90,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/sandbox-n",
+   "rect": {
+    "x": 46,
+    "y": 74,
+    "width": 144.12,
+    "height": 126.47
+   },
+   "groupKind": "account",
+   "stack": 3,
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 46,
+    "y": 74,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Sandbox-N",
+    "x": 78,
+    "y": 90,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/security-ou",
+   "rect": {
+    "x": 456.43,
+    "y": 74,
+    "width": 394.53,
+    "height": 196.19
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "Security OU",
+    "x": 464.427734375,
+    "y": 90,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/security-ou/log-archive",
+   "rect": {
+    "x": 470.43,
+    "y": 116,
+    "width": 148.23,
+    "height": 140.19
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 470.427734375,
+    "y": 116,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Log Archive",
+    "x": 502.427734375,
+    "y": 132,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/security-ou/security-tooling",
+   "rect": {
+    "x": 662.65,
+    "y": 116,
+    "width": 174.3,
+    "height": 126.47
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 662.654296875,
+    "y": 116,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Security Tooling",
+    "x": 694.654296875,
+    "y": 132,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou",
+   "rect": {
+    "x": 46,
+    "y": 437.34,
+    "width": 620,
+    "height": 344
+   },
+   "groupKind": "generic",
+   "label": {
+    "text": "Workloads OU",
+    "x": 54,
+    "y": 453.34179687500006,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#7D8998"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/dev-team-1",
+   "rect": {
+    "x": 60,
+    "y": 479.34,
+    "width": 156.99,
+    "height": 112
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 60,
+    "y": 479.34179687500006,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Dev-Team-1",
+    "x": 92,
+    "y": 495.34179687500006,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/dev-team-1/vpc",
+   "rect": {
+    "x": 74,
+    "y": 521.34,
+    "width": 128.99,
+    "height": 56
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 74,
+    "y": 521.341796875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Dev VPC",
+    "x": 106,
+    "y": 537.341796875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/dev-team-n",
+   "rect": {
+    "x": 260.99,
+    "y": 479.34,
+    "width": 156.99,
+    "height": 112
+   },
+   "groupKind": "account",
+   "stack": 2,
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 260.990234375,
+    "y": 479.34179687500006,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Dev-Team-N",
+    "x": 292.990234375,
+    "y": 495.34179687500006,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/dev-team-n/vpc",
+   "rect": {
+    "x": 274.99,
+    "y": 521.34,
+    "width": 128.99,
+    "height": 56
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 274.990234375,
+    "y": 521.341796875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Dev VPC",
+    "x": 306.990234375,
+    "y": 537.341796875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/prod-team-1",
+   "rect": {
+    "x": 274.49,
+    "y": 645.34,
+    "width": 161.75,
+    "height": 112
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 274.494140625,
+    "y": 645.341796875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Prod-Team-1",
+    "x": 306.494140625,
+    "y": 661.341796875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/prod-team-1/vpc",
+   "rect": {
+    "x": 288.49,
+    "y": 687.34,
+    "width": 133.75,
+    "height": 56
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 288.494140625,
+    "y": 687.341796875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Prod VPC",
+    "x": 320.494140625,
+    "y": 703.341796875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/prod-team-n",
+   "rect": {
+    "x": 480.25,
+    "y": 645.34,
+    "width": 161.75,
+    "height": 112
+   },
+   "groupKind": "account",
+   "stack": 2,
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 480.2451171875,
+    "y": 645.341796875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Prod-Team-N",
+    "x": 512.2451171875,
+    "y": 661.341796875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/prod-team-n/vpc",
+   "rect": {
+    "x": 494.25,
+    "y": 687.34,
+    "width": 133.75,
+    "height": 56
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 494.2451171875,
+    "y": 687.341796875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Prod VPC",
+    "x": 526.2451171875,
+    "y": 703.341796875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/test-team-1",
+   "rect": {
+    "x": 471.98,
+    "y": 479.34,
+    "width": 160.49,
+    "height": 112
+   },
+   "groupKind": "account",
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 471.98046875,
+    "y": 479.34179687500006,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Test-Team-1",
+    "x": 503.98046875,
+    "y": 495.34179687500006,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/test-team-1/vpc",
+   "rect": {
+    "x": 485.98,
+    "y": 521.34,
+    "width": 132.49,
+    "height": 56
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 485.98046875,
+    "y": 521.341796875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Test VPC",
+    "x": 517.98046875,
+    "y": 537.341796875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/test-team-n",
+   "rect": {
+    "x": 60,
+    "y": 645.34,
+    "width": 160.49,
+    "height": 112
+   },
+   "groupKind": "account",
+   "stack": 2,
+   "badgeIcon": "group.account",
+   "badgeRect": {
+    "x": 60,
+    "y": 645.341796875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Test-Team-N",
+    "x": 92,
+    "y": 661.341796875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#E7157B"
+   }
+  },
+  {
+   "kind": "group",
+   "path": "aws-cloud/workloads-ou/test-team-n/vpc",
+   "rect": {
+    "x": 74,
+    "y": 687.34,
+    "width": 132.49,
+    "height": 56
+   },
+   "groupKind": "vpc",
+   "badgeIcon": "group.vpc",
+   "badgeRect": {
+    "x": 74,
+    "y": 687.341796875,
+    "width": 24,
+    "height": 24
+   },
+   "label": {
+    "text": "Test VPC",
+    "x": 106,
+    "y": 703.341796875,
+    "fontSize": 13,
+    "weight": "semibold",
+    "align": "start",
+    "color": "#8C4FFF"
+   }
+  }
+ ],
+ "overlays": [],
+ "edges": [
+  {
+   "kind": "edge",
+   "id": "e0",
+   "from": "aws-cloud/management/scp",
+   "to": "aws-cloud/management/ou-security",
+   "points": [
+    {
+     "x": 1019.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 194.47
+    },
+    {
+     "x": 1199.23,
+     "y": 194.47
+    },
+    {
+     "x": 1199.23,
+     "y": 151.23
+    },
+    {
+     "x": 1221.23,
+     "y": 151.23
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "governance",
+   "bundle": "bundle:out:aws-cloud/management/scp:E"
+  },
+  {
+   "kind": "edge",
+   "id": "e1",
+   "from": "aws-cloud/management/scp",
+   "to": "aws-cloud/management/ou-infrastructure",
+   "points": [
+    {
+     "x": 1019.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 202.87
+    },
+    {
+     "x": 1315.59,
+     "y": 202.87
+    },
+    {
+     "x": 1315.59,
+     "y": 151.23
+    },
+    {
+     "x": 1337.59,
+     "y": 151.23
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "governance",
+   "bundle": "bundle:out:aws-cloud/management/scp:E"
+  },
+  {
+   "kind": "edge",
+   "id": "e10",
+   "from": "aws-cloud/workloads-ou/test-team-n/vpc",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 206.49,
+     "y": 731.34
+    },
+    {
+     "x": 825,
+     "y": 731.34
+    },
+    {
+     "x": 825,
+     "y": 795.81
+    },
+    {
+     "x": 849,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "bundle": "tgw-attach"
+  },
+  {
+   "kind": "edge",
+   "id": "e11",
+   "from": "aws-cloud/workloads-ou/prod-team-1/vpc",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 422.25,
+     "y": 731.34
+    },
+    {
+     "x": 825,
+     "y": 731.34
+    },
+    {
+     "x": 825,
+     "y": 795.81
+    },
+    {
+     "x": 849,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "bundle": "tgw-attach"
+  },
+  {
+   "kind": "edge",
+   "id": "e12",
+   "from": "aws-cloud/workloads-ou/prod-team-n/vpc",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 628,
+     "y": 731.34
+    },
+    {
+     "x": 825,
+     "y": 731.34
+    },
+    {
+     "x": 825,
+     "y": 795.81
+    },
+    {
+     "x": 849,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "bundle": "tgw-attach"
+  },
+  {
+   "kind": "edge",
+   "id": "e13",
+   "from": "aws-cloud/infrastructure-ou/shared-network/central-vpc",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 897.01,
+     "y": 646.11
+    },
+    {
+     "x": 897.01,
+     "y": 760.58
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "label": {
+    "text": "VPC Attach",
+    "x": 903.01,
+    "y": 707.26,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e14",
+   "from": "aws-cloud/infrastructure-ou/shared-network/endpoint-vpc",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 1042.55,
+     "y": 704.58
+    },
+    {
+     "x": 969.03,
+     "y": 704.58
+    },
+    {
+     "x": 969.03,
+     "y": 795.81
+    },
+    {
+     "x": 945.03,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "bundle": "tgw-attach",
+   "label": {
+    "text": "VPC Attach",
+    "x": 1014.24,
+    "y": 695.93,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e15",
+   "from": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "to": "aws-cloud/infrastructure-ou/perimeter/inspection-vpc",
+   "points": [
+    {
+     "x": 945.03,
+     "y": 795.81
+    },
+    {
+     "x": 955.03,
+     "y": 795.81
+    },
+    {
+     "x": 955.03,
+     "y": 738.58
+    },
+    {
+     "x": 1310.81,
+     "y": 738.58
+    },
+    {
+     "x": 1310.81,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "label": {
+    "text": "Egress",
+    "x": 1132.92,
+    "y": 755.05,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e16",
+   "from": "internet",
+   "to": "aws-cloud/infrastructure-ou/perimeter/inspection-vpc/igw",
+   "points": [
+    {
+     "x": 1733.69,
+     "y": 432.64
+    },
+    {
+     "x": 1733.69,
+     "y": 456.64
+    },
+    {
+     "x": 1453.93,
+     "y": 456.64
+    },
+    {
+     "x": 1453.93,
+     "y": 724.58
+    },
+    {
+     "x": 1375.14,
+     "y": 724.58
+    },
+    {
+     "x": 1375.14,
+     "y": 754.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network"
+  },
+  {
+   "kind": "edge",
+   "id": "e17",
+   "from": "on-premises",
+   "to": "aws-cloud/infrastructure-ou/shared-network/dx",
+   "points": [
+    {
+     "x": 1676.33,
+     "y": 513.87
+    },
+    {
+     "x": 1282.81,
+     "y": 513.87
+    },
+    {
+     "x": 1282.81,
+     "y": 724.58
+    },
+    {
+     "x": 1092.69,
+     "y": 724.58
+    },
+    {
+     "x": 1092.69,
+     "y": 795.81
+    },
+    {
+     "x": 1077.69,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "hybrid",
+   "label": {
+    "text": "Direct Connect",
+    "x": 1550.02,
+    "y": 505.22,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e18",
+   "from": "aws-cloud/infrastructure-ou/shared-network/dx",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 989.03,
+     "y": 795.81
+    },
+    {
+     "x": 969.03,
+     "y": 795.81
+    },
+    {
+     "x": 945.03,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "hybrid",
+   "bundle": "tgw-attach"
+  },
+  {
+   "kind": "edge",
+   "id": "e19",
+   "from": "on-premises",
+   "to": "aws-cloud/infrastructure-ou/shared-network/vpn",
+   "points": [
+    {
+     "x": 1676.33,
+     "y": 513.87
+    },
+    {
+     "x": 1296.81,
+     "y": 513.87
+    },
+    {
+     "x": 1296.81,
+     "y": 795.81
+    },
+    {
+     "x": 1218.81,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "hybrid",
+   "label": {
+    "text": "IPSec VPN",
+    "x": 1486.57,
+    "y": 530.34,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "middle"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e2",
+   "from": "aws-cloud/management/scp",
+   "to": "aws-cloud/management/ou-workloads",
+   "points": [
+    {
+     "x": 952.17,
+     "y": 202.94
+    },
+    {
+     "x": 952.17,
+     "y": 224.94
+    },
+    {
+     "x": 927.6,
+     "y": 224.94
+    },
+    {
+     "x": 927.6,
+     "y": 246.94
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "governance"
+  },
+  {
+   "kind": "edge",
+   "id": "e20",
+   "from": "aws-cloud/infrastructure-ou/shared-network/vpn",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 1121.69,
+     "y": 795.81
+    },
+    {
+     "x": 1106.69,
+     "y": 795.81
+    },
+    {
+     "x": 1106.69,
+     "y": 752.58
+    },
+    {
+     "x": 969.03,
+     "y": 752.58
+    },
+    {
+     "x": 969.03,
+     "y": 795.81
+    },
+    {
+     "x": 945.03,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "hybrid",
+   "bundle": "tgw-attach"
+  },
+  {
+   "kind": "edge",
+   "id": "e3",
+   "from": "aws-cloud/management/scp",
+   "to": "aws-cloud/management/ou-sandbox",
+   "points": [
+    {
+     "x": 952.17,
+     "y": 202.94
+    },
+    {
+     "x": 952.17,
+     "y": 236.47
+    },
+    {
+     "x": 1052.11,
+     "y": 236.47
+    },
+    {
+     "x": 1052.11,
+     "y": 246.94
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "governance"
+  },
+  {
+   "kind": "edge",
+   "id": "e4",
+   "from": "aws-cloud/management/scp",
+   "to": "aws-cloud/management/ou-deployments",
+   "points": [
+    {
+     "x": 1019.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 228.07
+    },
+    {
+     "x": 1111.99,
+     "y": 228.07
+    },
+    {
+     "x": 1111.99,
+     "y": 282.17
+    },
+    {
+     "x": 1133.99,
+     "y": 282.17
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "governance",
+   "bundle": "bundle:out:aws-cloud/management/scp:E"
+  },
+  {
+   "kind": "edge",
+   "id": "e5",
+   "from": "aws-cloud/management/scp",
+   "to": "aws-cloud/management/ou-policy-staging",
+   "points": [
+    {
+     "x": 1019.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 219.67
+    },
+    {
+     "x": 1255.13,
+     "y": 219.67
+    },
+    {
+     "x": 1255.13,
+     "y": 282.17
+    },
+    {
+     "x": 1277.13,
+     "y": 282.17
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "governance",
+   "bundle": "bundle:out:aws-cloud/management/scp:E"
+  },
+  {
+   "kind": "edge",
+   "id": "e6",
+   "from": "aws-cloud/management/scp",
+   "to": "aws-cloud/management/ou-suspended",
+   "points": [
+    {
+     "x": 1019.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 159.47
+    },
+    {
+     "x": 1043.39,
+     "y": 211.27
+    },
+    {
+     "x": 1403.33,
+     "y": 211.27
+    },
+    {
+     "x": 1403.33,
+     "y": 282.17
+    },
+    {
+     "x": 1425.33,
+     "y": 282.17
+    }
+   ],
+   "style": {
+    "preset": "dashed",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "governance",
+   "bundle": "bundle:out:aws-cloud/management/scp:E"
+  },
+  {
+   "kind": "edge",
+   "id": "e7",
+   "from": "aws-cloud/workloads-ou/dev-team-1/vpc",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 202.99,
+     "y": 565.34
+    },
+    {
+     "x": 825,
+     "y": 565.34
+    },
+    {
+     "x": 825,
+     "y": 795.81
+    },
+    {
+     "x": 849,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "bundle": "tgw-attach",
+   "label": {
+    "text": "VPC Attach",
+    "x": 831,
+    "y": 736.07,
+    "fontSize": 11,
+    "weight": "regular",
+    "align": "start"
+   }
+  },
+  {
+   "kind": "edge",
+   "id": "e8",
+   "from": "aws-cloud/workloads-ou/dev-team-n/vpc",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 403.98,
+     "y": 565.34
+    },
+    {
+     "x": 825,
+     "y": 565.34
+    },
+    {
+     "x": 825,
+     "y": 795.81
+    },
+    {
+     "x": 849,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "bundle": "tgw-attach"
+  },
+  {
+   "kind": "edge",
+   "id": "e9",
+   "from": "aws-cloud/workloads-ou/test-team-1/vpc",
+   "to": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "points": [
+    {
+     "x": 618.47,
+     "y": 565.34
+    },
+    {
+     "x": 825,
+     "y": 565.34
+    },
+    {
+     "x": 825,
+     "y": 795.81
+    },
+    {
+     "x": 849,
+     "y": 795.81
+    }
+   ],
+   "style": {
+    "preset": "default",
+    "color": "#52525b",
+    "arrowhead": "end"
+   },
+   "layer": "network",
+   "bundle": "tgw-attach"
+  }
+ ],
+ "nodes": [
+  {
+   "kind": "node",
+   "path": "aws-cloud/end-users/workdocs",
+   "rect": {
+    "x": 358.9,
+    "y": 116,
+    "width": 63.52,
+    "height": 70.47
+   },
+   "icon": "workdocs",
+   "iconRect": {
+    "x": 366.67,
+    "y": 116,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "WorkDocs",
+    "x": 390.666015625,
+    "y": 181.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "WorkDocs"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/end-users/workspaces",
+   "rect": {
+    "x": 239.12,
+    "y": 116,
+    "width": 75.78,
+    "height": 70.47
+   },
+   "icon": "workspaces",
+   "iconRect": {
+    "x": 253.01,
+    "y": 116,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "WorkSpaces",
+    "x": 277.013671875,
+    "y": 181.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "WorkSpaces"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/devops/build",
+   "rect": {
+    "x": 971.84,
+    "y": 435.41,
+    "width": 63.23,
+    "height": 70.47
+   },
+   "icon": "codebuild",
+   "iconRect": {
+    "x": 979.45,
+    "y": 435.41,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "CodeBuild",
+    "x": 1003.451171875,
+    "y": 500.57976562500005,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "CodeBuild"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/devops/pipeline",
+   "rect": {
+    "x": 849,
+    "y": 435.41,
+    "width": 78.84,
+    "height": 70.47
+   },
+   "icon": "codepipeline",
+   "iconRect": {
+    "x": 864.42,
+    "y": 435.41,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "CodePipeline",
+    "x": 888.416015625,
+    "y": 500.57976562500005,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "CodePipeline"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/operations/cloudwatch",
+   "rect": {
+    "x": 1083.07,
+    "y": 435.41,
+    "width": 74.05,
+    "height": 70.47
+   },
+   "icon": "cw",
+   "iconRect": {
+    "x": 1096.09,
+    "y": 435.41,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "CloudWatch",
+    "x": 1120.08984375,
+    "y": 500.57976562500005,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "CloudWatch"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/operations/config",
+   "rect": {
+    "x": 1201.11,
+    "y": 435.41,
+    "width": 72.44,
+    "height": 70.47
+   },
+   "icon": "config",
+   "iconRect": {
+    "x": 1213.33,
+    "y": 435.41,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "AWS Config",
+    "x": 1237.333984375,
+    "y": 500.57976562500005,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "AWS Config"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/perimeter/inspection-vpc/alb",
+   "rect": {
+    "x": 1466.77,
+    "y": 623.87,
+    "width": 97.55,
+    "height": 86.94
+   },
+   "icon": "alb",
+   "iconRect": {
+    "x": 1491.55,
+    "y": 623.87,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Application Load Balancer",
+    "x": 1515.55078125,
+    "y": 689.048125,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Application Load",
+     "Balancer"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/perimeter/inspection-vpc/igw",
+   "rect": {
+    "x": 1324.81,
+    "y": 754.81,
+    "width": 100.66,
+    "height": 70.47
+   },
+   "icon": "igw",
+   "iconRect": {
+    "x": 1351.14,
+    "y": 754.81,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Internet Gateway",
+    "x": 1375.138671875,
+    "y": 819.9848437500001,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Internet Gateway"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/perimeter/inspection-vpc/natgw",
+   "rect": {
+    "x": 1469.47,
+    "y": 754.81,
+    "width": 82.45,
+    "height": 70.47
+   },
+   "icon": "natgw",
+   "iconRect": {
+    "x": 1486.69,
+    "y": 754.81,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "NAT Gateway",
+    "x": 1510.693359375,
+    "y": 819.9848437500001,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "NAT Gateway"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/perimeter/inspection-vpc/nfw",
+   "rect": {
+    "x": 1324.81,
+    "y": 623.87,
+    "width": 97.96,
+    "height": 70.47
+   },
+   "icon": "nfw",
+   "iconRect": {
+    "x": 1349.79,
+    "y": 623.87,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Network Firewall",
+    "x": 1373.791015625,
+    "y": 689.048125,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Network Firewall"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/shared-network/dx",
+   "rect": {
+    "x": 989.03,
+    "y": 760.58,
+    "width": 88.66,
+    "height": 70.47
+   },
+   "icon": "dx",
+   "iconRect": {
+    "x": 1009.36,
+    "y": 760.58,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Direct Connect",
+    "x": 1033.357421875,
+    "y": 825.7506640625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Direct Connect"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/shared-network/endpoint-vpc/endpoints",
+   "rect": {
+    "x": 1056.55,
+    "y": 632.11,
+    "width": 112.64,
+    "height": 70.47
+   },
+   "icon": "vpc-endpoints",
+   "iconRect": {
+    "x": 1088.87,
+    "y": 632.11,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Interface Endpoints",
+    "x": 1112.87109375,
+    "y": 697.2823046875001,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Interface Endpoints"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/shared-network/tgw",
+   "rect": {
+    "x": 849,
+    "y": 760.58,
+    "width": 96.03,
+    "height": 70.47
+   },
+   "icon": "tgw",
+   "iconRect": {
+    "x": 873.01,
+    "y": 760.58,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Transit Gateway",
+    "x": 897.01171875,
+    "y": 825.7506640625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Transit Gateway"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/infrastructure-ou/shared-network/vpn",
+   "rect": {
+    "x": 1121.69,
+    "y": 760.58,
+    "width": 97.12,
+    "height": 70.47
+   },
+   "icon": "vpn",
+   "iconRect": {
+    "x": 1146.25,
+    "y": 760.58,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Site-to-Site VPN",
+    "x": 1170.248046875,
+    "y": 825.7506640625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Site-to-Site VPN"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/management/control-tower",
+   "rect": {
+    "x": 1063.39,
+    "y": 116,
+    "width": 113.84,
+    "height": 70.47
+   },
+   "icon": "control-tower",
+   "iconRect": {
+    "x": 1096.31,
+    "y": 116,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "AWS Control Tower",
+    "x": 1120.3095703125,
+    "y": 181.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "AWS Control Tower"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/management/ou-deployments",
+   "rect": {
+    "x": 1133.99,
+    "y": 246.94,
+    "width": 99.15,
+    "height": 70.47
+   },
+   "icon": "organizations.organizational-unit",
+   "iconRect": {
+    "x": 1159.56,
+    "y": 246.94,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Deployments OU",
+    "x": 1183.5595703125,
+    "y": 312.11140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Deployments OU"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/management/ou-infrastructure",
+   "rect": {
+    "x": 1337.59,
+    "y": 116,
+    "width": 101.23,
+    "height": 70.47
+   },
+   "icon": "organizations.organizational-unit",
+   "iconRect": {
+    "x": 1364.21,
+    "y": 116,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Infrastructure OU",
+    "x": 1388.2080078125,
+    "y": 181.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Infrastructure OU"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/management/ou-policy-staging",
+   "rect": {
+    "x": 1277.13,
+    "y": 246.94,
+    "width": 104.2,
+    "height": 70.47
+   },
+   "icon": "organizations.organizational-unit",
+   "iconRect": {
+    "x": 1305.23,
+    "y": 246.94,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Policy Staging OU",
+    "x": 1329.2333984375,
+    "y": 312.11140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Policy Staging OU"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/management/ou-sandbox",
+   "rect": {
+    "x": 1014.24,
+    "y": 246.94,
+    "width": 75.75,
+    "height": 70.47
+   },
+   "icon": "organizations.organizational-unit",
+   "iconRect": {
+    "x": 1028.11,
+    "y": 246.94,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Sandbox OU",
+    "x": 1052.1123046875,
+    "y": 312.11140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Sandbox OU"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/management/ou-security",
+   "rect": {
+    "x": 1221.23,
+    "y": 116,
+    "width": 72.36,
+    "height": 70.47
+   },
+   "icon": "organizations.organizational-unit",
+   "iconRect": {
+    "x": 1233.41,
+    "y": 116,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Security OU",
+    "x": 1257.4111328125,
+    "y": 181.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Security OU"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/management/ou-suspended",
+   "rect": {
+    "x": 1425.33,
+    "y": 246.94,
+    "width": 89.16,
+    "height": 70.47
+   },
+   "icon": "organizations.organizational-unit",
+   "iconRect": {
+    "x": 1445.92,
+    "y": 246.94,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Suspended OU",
+    "x": 1469.9150390625,
+    "y": 312.11140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Suspended OU"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/management/ou-workloads",
+   "rect": {
+    "x": 884.95,
+    "y": 246.94,
+    "width": 85.29,
+    "height": 70.47
+   },
+   "icon": "organizations.organizational-unit",
+   "iconRect": {
+    "x": 903.6,
+    "y": 246.94,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Workloads OU",
+    "x": 927.5966796875,
+    "y": 312.11140625,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Workloads OU"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/management/scp",
+   "rect": {
+    "x": 884.95,
+    "y": 116,
+    "width": 134.43,
+    "height": 86.94
+   },
+   "icon": "organizations",
+   "iconRect": {
+    "x": 928.17,
+    "y": 116,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Service Control Policies (SCPs)",
+    "x": 952.1708984375,
+    "y": 181.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Service Control Policies",
+     "(SCPs)"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/sandbox-n/experiments",
+   "rect": {
+    "x": 60,
+    "y": 116,
+    "width": 74.7,
+    "height": 70.47
+   },
+   "icon": "ec2",
+   "iconRect": {
+    "x": 73.35,
+    "y": 116,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Experiments",
+    "x": 97.3515625,
+    "y": 181.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Experiments"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/security-ou/log-archive/audit-logs",
+   "rect": {
+    "x": 484.43,
+    "y": 158,
+    "width": 120.23,
+    "height": 84.19
+   },
+   "icon": "s3",
+   "iconRect": {
+    "x": 520.54,
+    "y": 158,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "S3 Immutable",
+    "x": 544.541015625,
+    "y": 223.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "S3 Immutable"
+    ]
+   },
+   "sublabel": {
+    "text": "Object Lock + Versioning",
+    "x": 544.541015625,
+    "y": 237.447265625,
+    "fontSize": 10,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Object Lock + Versioning"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "aws-cloud/security-ou/security-tooling/delegated-admin",
+   "rect": {
+    "x": 676.65,
+    "y": 158,
+    "width": 100.43,
+    "height": 70.47
+   },
+   "icon": "security-hub",
+   "iconRect": {
+    "x": 702.87,
+    "y": 158,
+    "width": 48,
+    "height": 48
+   },
+   "role": "resource",
+   "label": {
+    "text": "Delegated Admin",
+    "x": 726.8671875,
+    "y": 223.1746875,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Delegated Admin"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "internet",
+   "rect": {
+    "x": 1707.69,
+    "y": 366.17,
+    "width": 52,
+    "height": 66.47
+   },
+   "icon": "internet",
+   "iconRect": {
+    "x": 1711.69,
+    "y": 366.17,
+    "width": 44,
+    "height": 44
+   },
+   "role": "actor",
+   "label": {
+    "text": "Internet",
+    "x": 1733.689453125,
+    "y": 427.3455859375,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "Internet"
+    ]
+   }
+  },
+  {
+   "kind": "node",
+   "path": "on-premises",
+   "rect": {
+    "x": 1676.33,
+    "y": 480.64,
+    "width": 114.72,
+    "height": 66.47
+   },
+   "icon": "on-premises",
+   "iconRect": {
+    "x": 1711.69,
+    "y": 480.64,
+    "width": 44,
+    "height": 44
+   },
+   "role": "actor",
+   "label": {
+    "text": "온프레미스 데이터센터",
+    "x": 1733.689453125,
+    "y": 541.8139453125,
+    "fontSize": 12,
+    "weight": "regular",
+    "align": "middle",
+    "lines": [
+     "온프레미스 데이터센터"
+    ]
+   }
+  }
+ ],
+ "markers": [],
+ "flows": [],
+ "icons": [
+  "alb",
+  "codebuild",
+  "codepipeline",
+  "config",
+  "control-tower",
+  "cw",
+  "dx",
+  "ec2",
+  "group.account",
+  "group.aws-cloud",
+  "group.vpc",
+  "igw",
+  "internet",
+  "natgw",
+  "nfw",
+  "on-premises",
+  "organizations",
+  "organizations.organizational-unit",
+  "s3",
+  "security-hub",
+  "tgw",
+  "vpc-endpoints",
+  "vpn",
+  "workdocs",
+  "workspaces"
+ ],
+ "texts": [
+  "AWS Cloud",
+  "AWS Config",
+  "AWS Control Tower",
+  "Application Load Balancer",
+  "Central VPC",
+  "CloudWatch",
+  "CodeBuild",
+  "CodePipeline",
+  "Delegated Admin",
+  "Deployments OU",
+  "Dev VPC",
+  "Dev-Team-1",
+  "Dev-Team-N",
+  "DevOps",
+  "Direct Connect",
+  "Egress",
+  "End Users / Desktops",
+  "Endpoint VPC",
+  "Experiments",
+  "IPSec VPN",
+  "Infrastructure OU",
+  "Inspection VPC",
+  "Interface Endpoints",
+  "Internet",
+  "Internet Gateway",
+  "Log Archive",
+  "Management Account",
+  "NAT Gateway",
+  "Network Firewall",
+  "Object Lock + Versioning",
+  "Operations",
+  "Perimeter Security",
+  "Policy Staging OU",
+  "Prod VPC",
+  "Prod-Team-1",
+  "Prod-Team-N",
+  "S3 Immutable",
+  "Sandbox OU",
+  "Sandbox-N",
+  "Security OU",
+  "Security Tooling",
+  "Service Control Policies (SCPs)",
+  "Shared Network",
+  "Site-to-Site VPN",
+  "Suspended OU",
+  "Test VPC",
+  "Test-Team-1",
+  "Test-Team-N",
+  "Transit Gateway",
+  "VPC Attach",
+  "WorkDocs",
+  "WorkSpaces",
+  "Workloads OU",
+  "온프레미스 데이터센터"
+ ]
+}
